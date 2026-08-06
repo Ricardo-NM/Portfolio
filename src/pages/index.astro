@@ -1,0 +1,49 @@
+---
+import PreferenceControls from "../components/PreferenceControls";
+import "../styles/global.css";
+
+const name = "Ricardo Nava";
+const nameLetters = Array.from(name);
+---
+
+<!doctype html>
+<html lang="es" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Portafolio web de Ricardo Nava, desarrollador full stack." />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Ricardo Nava | Full Stack Developer</title>
+    <script is:inline>
+      (() => {
+        const storedTheme = localStorage.getItem("rn-theme");
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const theme = storedTheme || (prefersDark ? "dark" : "light");
+        const locale = localStorage.getItem("rn-locale") || "es";
+
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.lang = locale;
+      })();
+    </script>
+  </head>
+  <body>
+    <main class="portfolio-shell" aria-label="Portafolio de Ricardo Nava">
+      <section class="hero-content" aria-labelledby="portfolio-title">
+        <h1 id="portfolio-title" class="name-mark" aria-label={name}>
+          {
+            nameLetters.map((letter, index) => (
+              <span
+                aria-hidden="true"
+                class:list={["name-letter", letter === " " && "name-letter-space"]}
+                style={`--letter-index: ${index};`}
+              >
+                {letter === " " ? "\u00A0" : letter}
+              </span>
+            ))
+          }
+        </h1>
+        <PreferenceControls client:load />
+      </section>
+    </main>
+  </body>
+</html>

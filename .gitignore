@@ -1,0 +1,63 @@
+# Dependencies
+node_modules/
+
+# Astro and production output
+.astro/
+dist/
+
+# Local development logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.codex-dev-server*.log
+
+# Environment variables and local secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.local
+*.pem
+*.key
+*.crt
+.npmrc
+!.npmrc.example
+
+# Test and coverage output
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# Package manager caches
+.npm/
+.pnpm-store/
+.yarn/
+!.yarn/releases/
+!.yarn/plugins/
+!.yarn/sdks/
+!.yarn/versions/
+
+# Framework and hosting caches
+.vite/
+.vercel/
+.netlify/
+
+# TypeScript incremental builds
+*.tsbuildinfo
+
+# Editor and OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+tmp/
+temp/
+.cache/
