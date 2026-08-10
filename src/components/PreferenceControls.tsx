@@ -1,5 +1,4 @@
 import {
-  ArrowLeft,
   BriefcaseBusiness,
   ChevronDown,
   CodeXml,
@@ -10,6 +9,7 @@ import {
   Languages,
   Mail,
   MapPin,
+  MessageSquareText,
   Moon,
   Settings,
   Sun,
@@ -22,13 +22,14 @@ import type {
   MouseEventHandler,
   Ref,
 } from "react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import bannerUrl from "../assets/banner.webp";
+import RouteBreadcrumb from "./RouteBreadcrumb";
 
 type Theme = "light" | "dark";
 type Locale = "es" | "en";
 type ProfileLinkId = "linkedin" | "github" | "resume";
-type RouteLinkId = "experience" | "technologies" | "activity";
+type RouteLinkId = "experience" | "technologies" | "activity" | "contact";
 type FlipAvatar = {
   deltaX: number;
   deltaY: number;
@@ -74,7 +75,8 @@ type PreferenceControlsMode =
   | "home"
   | "preferences"
   | "technologies"
-  | "activity";
+  | "activity"
+  | "contact";
 type PreferenceControlsProps = {
   mode?: PreferenceControlsMode;
 };
@@ -112,16 +114,18 @@ const copy = {
       "Resumen visual de mis contribuciones recientes en GitHub.",
     aboutTitle: "Acerca de mí",
     resumeLabel: "Descargar CV",
-    backLabel: "Volver al inicio",
+    breadcrumbLabel: "Ruta de navegacion",
     homeNavLabel: "Navegación principal",
     homeRouteLabel: "Ir al inicio",
     drawerNavigationTitle: "Navegación",
     experienceRouteTitle: "Experiencia laboral",
     technologiesRouteTitle: "Habilidades y Tecnologías",
     activityRouteTitle: "Actividad de GitHub",
+    contactRouteTitle: "Contacto",
     experienceNavLabel: "Ver experiencia laboral",
     technologiesNavLabel: "Ver habilidades y tecnologías",
     activityNavLabel: "Ver actividad de GitHub",
+    contactNavLabel: "Ver contacto",
     preferencesLabel: "Preferencias del sitio",
     openSettingsLabel: "Abrir preferencias",
     closeSettingsLabel: "Cerrar preferencias",
@@ -157,16 +161,18 @@ const copy = {
       "Visual summary of my recent GitHub contributions.",
     aboutTitle: "About me",
     resumeLabel: "Download resume",
-    backLabel: "Back home",
+    breadcrumbLabel: "Breadcrumb",
     homeNavLabel: "Main navigation",
     homeRouteLabel: "Go home",
     drawerNavigationTitle: "Navigation",
     experienceRouteTitle: "Work experience",
     technologiesRouteTitle: "Skills and Technologies",
     activityRouteTitle: "GitHub activity",
+    contactRouteTitle: "Contact",
     experienceNavLabel: "View work experience",
     technologiesNavLabel: "View skills and technologies",
     activityNavLabel: "View GitHub activity",
+    contactNavLabel: "View contact",
     preferencesLabel: "Site preferences",
     openSettingsLabel: "Open preferences",
     closeSettingsLabel: "Close preferences",
@@ -314,7 +320,6 @@ export default function PreferenceControls({
   const introCopyRef = useRef<HTMLParagraphElement>(null);
   const introToolingRef = useRef<HTMLDivElement>(null);
   const mainGithubActivityRef = useRef<HTMLDivElement>(null);
-  const mainGithubCalendarScrollRef = useRef<HTMLDivElement>(null);
   const drawerAboutRef = useRef<HTMLParagraphElement>(null);
   const drawerAboutMeasureRef = useRef<HTMLParagraphElement>(null);
   const drawerAvatarRef = useRef<HTMLDivElement>(null);
@@ -336,6 +341,7 @@ export default function PreferenceControls({
     experience: null,
     technologies: null,
     activity: null,
+    contact: null,
   });
   const drawerRouteMeasureRefs = useRef<
     Record<RouteLinkId, HTMLSpanElement | null>
@@ -343,6 +349,7 @@ export default function PreferenceControls({
     experience: null,
     technologies: null,
     activity: null,
+    contact: null,
   });
   const mainLinkRefs = useRef<Record<ProfileLinkId, HTMLAnchorElement | null>>({
     linkedin: null,
@@ -504,24 +511,6 @@ export default function PreferenceControls({
     };
   }, [githubContributions, mode]);
 
-  useLayoutEffect(() => {
-    if (mode !== "activity") {
-      return;
-    }
-
-    if (!githubContributions) {
-      return;
-    }
-
-    [
-      mainGithubCalendarScrollRef.current,
-    ].forEach((panel) => {
-      if (panel) {
-        panel.scrollLeft = panel.scrollWidth - panel.clientWidth;
-      }
-    });
-  }, [githubContributions, locale, mode]);
-
   const nextTheme = theme === "light" ? "dark" : "light";
   const nextLocale = locale === "es" ? "en" : "es";
   const labels = copy[locale];
@@ -618,7 +607,13 @@ export default function PreferenceControls({
       return <CodeXml aria-hidden="true" size={size + 1} strokeWidth={2.1} />;
     }
 
-    return <FolderGit2 aria-hidden="true" size={size} strokeWidth={2.1} />;
+    if (id === "activity") {
+      return <FolderGit2 aria-hidden="true" size={size} strokeWidth={2.1} />;
+    }
+
+    return (
+      <MessageSquareText aria-hidden="true" size={size} strokeWidth={2.1} />
+    );
   };
   const routeItems = [
     {
@@ -638,6 +633,12 @@ export default function PreferenceControls({
       id: "activity",
       label: labels.activityNavLabel,
       title: labels.activityRouteTitle,
+    },
+    {
+      href: "/contact",
+      id: "contact",
+      label: labels.contactNavLabel,
+      title: labels.contactRouteTitle,
     },
   ] satisfies Array<{
     href: string;
@@ -827,6 +828,7 @@ export default function PreferenceControls({
       experience: getNavbarRouteElement("experience"),
       technologies: getNavbarRouteElement("technologies"),
       activity: getNavbarRouteElement("activity"),
+      contact: getNavbarRouteElement("contact"),
     };
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
@@ -861,6 +863,7 @@ export default function PreferenceControls({
       experience: getNavbarRouteElement("experience"),
       technologies: getNavbarRouteElement("technologies"),
       activity: getNavbarRouteElement("activity"),
+      contact: getNavbarRouteElement("contact"),
     };
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
@@ -1305,14 +1308,11 @@ export default function PreferenceControls({
       <>
         <main className="experience-shell" aria-labelledby="technologies-title">
           <div className="experience-content">
-            <a className="experience-back-link" href="/">
-              <ArrowLeft
-                aria-hidden="true"
-                size={17}
-                strokeWidth={2}
-              />
-              <span>{labels.backLabel}</span>
-            </a>
+            <RouteBreadcrumb
+              currentLabel={labels.skillsTitle}
+              homeLabel={labels.homeRouteLabel}
+              label={labels.breadcrumbLabel}
+            />
 
             <header className="experience-header">
               <h1 id="technologies-title">{labels.skillsTitle}</h1>
@@ -1334,14 +1334,11 @@ export default function PreferenceControls({
       <>
         <main className="experience-shell" aria-labelledby="activity-title">
           <div className="experience-content">
-            <a className="experience-back-link" href="/">
-              <ArrowLeft
-                aria-hidden="true"
-                size={17}
-                strokeWidth={2}
-              />
-              <span>{labels.backLabel}</span>
-            </a>
+            <RouteBreadcrumb
+              currentLabel={labels.githubActivityTitle}
+              homeLabel={labels.homeRouteLabel}
+              label={labels.breadcrumbLabel}
+            />
 
             <header className="experience-header">
               <h1 id="activity-title">{labels.githubActivityTitle}</h1>
@@ -1351,7 +1348,6 @@ export default function PreferenceControls({
             {renderGitHubActivity({
               activityRef: mainGithubActivityRef,
               className: "route-github-activity route-section",
-              scrollRef: mainGithubCalendarScrollRef,
             })}
           </div>
         </main>
@@ -1370,6 +1366,27 @@ export default function PreferenceControls({
             {githubContributionTooltip.text}
           </div>
         )}
+
+      </>
+    );
+  }
+
+  if (mode === "contact") {
+    return (
+      <>
+        <main className="experience-shell" aria-labelledby="contact-title">
+          <div className="experience-content">
+            <RouteBreadcrumb
+              currentLabel={labels.contactRouteTitle}
+              homeLabel={labels.homeRouteLabel}
+              label={labels.breadcrumbLabel}
+            />
+
+            <header className="experience-header">
+              <h1 id="contact-title">{labels.contactRouteTitle}</h1>
+            </header>
+          </div>
+        </main>
 
       </>
     );

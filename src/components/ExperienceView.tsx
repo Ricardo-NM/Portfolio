@@ -1,6 +1,6 @@
-import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { type Locale, workExperienceItems } from "../data/workExperience";
+import RouteBreadcrumb from "./RouteBreadcrumb";
 
 const STORAGE_KEYS = {
   locale: "rn-locale",
@@ -11,13 +11,15 @@ const copy = {
     title: "Experiencia laboral",
     subtitle:
       "Resumen de empleos, roles y responsabilidades representadas con contenido de ejemplo.",
-    backLabel: "Volver al inicio",
+    breadcrumbLabel: "Ruta de navegacion",
+    homeRouteLabel: "Ir al inicio",
   },
   en: {
     title: "Work experience",
     subtitle:
       "Summary of jobs, roles, and responsibilities represented with sample content.",
-    backLabel: "Back home",
+    breadcrumbLabel: "Breadcrumb",
+    homeRouteLabel: "Go home",
   },
 } as const;
 
@@ -50,10 +52,11 @@ export default function ExperienceView() {
   return (
     <main className="experience-shell" aria-labelledby="experience-title">
       <div className="experience-content">
-        <a className="experience-back-link" href="/">
-          <ArrowLeft aria-hidden="true" size={17} strokeWidth={2} />
-          <span>{labels.backLabel}</span>
-        </a>
+        <RouteBreadcrumb
+          currentLabel={labels.title}
+          homeLabel={labels.homeRouteLabel}
+          label={labels.breadcrumbLabel}
+        />
 
         <header className="experience-header">
           <h1 id="experience-title">{labels.title}</h1>
