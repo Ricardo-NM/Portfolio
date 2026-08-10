@@ -1,8 +1,12 @@
 import {
-  ArrowUpRight,
+  ArrowLeft,
+  BriefcaseBusiness,
   ChevronDown,
+  CodeXml,
   FolderCode,
+  FolderGit2,
   GraduationCap,
+  Home,
   Languages,
   Mail,
   MapPin,
@@ -15,15 +19,16 @@ import type {
   CSSProperties,
   FocusEvent as ReactFocusEvent,
   MouseEvent as ReactMouseEvent,
+  MouseEventHandler,
   Ref,
 } from "react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import bannerUrl from "../assets/banner.webp";
-import { workExperienceItems } from "../data/workExperience";
 
 type Theme = "light" | "dark";
 type Locale = "es" | "en";
 type ProfileLinkId = "linkedin" | "github" | "resume";
+type RouteLinkId = "experience" | "technologies" | "activity";
 type FlipAvatar = {
   deltaX: number;
   deltaY: number;
@@ -38,6 +43,10 @@ type FlipAvatar = {
 };
 type FlipProfileLink = FlipAvatar & {
   id: ProfileLinkId;
+};
+type FlipRouteLink = FlipAvatar & {
+  id: RouteLinkId;
+  iconSize: number;
 };
 type FlipIntroCopy = FlipAvatar & {
   variant: "drawer" | "intro";
@@ -59,6 +68,15 @@ type GitHubContributionTooltip = {
   left: number;
   text: string;
   top: number;
+};
+type PreferenceControlsMode =
+  | "chrome"
+  | "home"
+  | "preferences"
+  | "technologies"
+  | "activity";
+type PreferenceControlsProps = {
+  mode?: PreferenceControlsMode;
 };
 
 const STORAGE_KEYS = {
@@ -88,8 +106,22 @@ const copy = {
     githubActivityLess: "Menos",
     githubActivityMore: "Mas",
     skillsTitle: "Habilidades y Tecnologías",
+    technologiesSubtitle:
+      "Herramientas, lenguajes y plataformas que uso para crear productos digitales completos.",
+    activitySubtitle:
+      "Resumen visual de mis contribuciones recientes en GitHub.",
     aboutTitle: "Acerca de mí",
     resumeLabel: "Descargar CV",
+    backLabel: "Volver al inicio",
+    homeNavLabel: "Navegación principal",
+    homeRouteLabel: "Ir al inicio",
+    drawerNavigationTitle: "Navegación",
+    experienceRouteTitle: "Experiencia laboral",
+    technologiesRouteTitle: "Habilidades y Tecnologías",
+    activityRouteTitle: "Actividad de GitHub",
+    experienceNavLabel: "Ver experiencia laboral",
+    technologiesNavLabel: "Ver habilidades y tecnologías",
+    activityNavLabel: "Ver actividad de GitHub",
     preferencesLabel: "Preferencias del sitio",
     openSettingsLabel: "Abrir preferencias",
     closeSettingsLabel: "Cerrar preferencias",
@@ -119,8 +151,22 @@ const copy = {
     githubActivityLess: "Less",
     githubActivityMore: "More",
     skillsTitle: "Skills and Technologies",
+    technologiesSubtitle:
+      "Tools, languages, and platforms I use to build complete digital products.",
+    activitySubtitle:
+      "Visual summary of my recent GitHub contributions.",
     aboutTitle: "About me",
     resumeLabel: "Download resume",
+    backLabel: "Back home",
+    homeNavLabel: "Main navigation",
+    homeRouteLabel: "Go home",
+    drawerNavigationTitle: "Navigation",
+    experienceRouteTitle: "Work experience",
+    technologiesRouteTitle: "Skills and Technologies",
+    activityRouteTitle: "GitHub activity",
+    experienceNavLabel: "View work experience",
+    technologiesNavLabel: "View skills and technologies",
+    activityNavLabel: "View GitHub activity",
     preferencesLabel: "Site preferences",
     openSettingsLabel: "Open preferences",
     closeSettingsLabel: "Close preferences",
@@ -220,6 +266,14 @@ function getInitialLocale(): Locale {
     : "es";
 }
 
+function getCurrentPath() {
+  if (typeof window === "undefined") {
+    return "/";
+  }
+
+  return window.location.pathname.replace(/\/$/, "") || "/";
+}
+
 function getContributionLevel(count: number, maxCount: number) {
   if (count <= 0 || maxCount <= 0) {
     return 0;
@@ -228,15 +282,20 @@ function getContributionLevel(count: number, maxCount: number) {
   return Math.min(4, Math.max(1, Math.ceil((count / maxCount) * 4)));
 }
 
-export default function PreferenceControls() {
+export default function PreferenceControls({
+  mode = "home",
+}: PreferenceControlsProps) {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const [locale, setLocale] = useState<Locale>(getInitialLocale);
+  const [currentPath, setCurrentPath] = useState(getCurrentPath);
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [hideRouteNavItems, setHideRouteNavItems] = useState(false);
   const [flipAvatar, setFlipAvatar] = useState<FlipAvatar | null>(null);
   const [flipProfileLinks, setFlipProfileLinks] = useState<FlipProfileLink[]>(
     [],
   );
+  const [flipRouteLinks, setFlipRouteLinks] = useState<FlipRouteLink[]>([]);
   const [flipIntroCopy, setFlipIntroCopy] = useState<FlipIntroCopy | null>(
     null,
   );
@@ -249,6 +308,7 @@ export default function PreferenceControls() {
     useState<GitHubContributionTooltip | null>(null);
   const closeTimerRef = useRef<number | undefined>(undefined);
   const flipTimerRef = useRef<number | undefined>(undefined);
+  const routeNavRevealTimerRef = useRef<number | undefined>(undefined);
   const githubRequestInFlightRef = useRef(false);
   const introLayoutRef = useRef<HTMLDivElement>(null);
   const introCopyRef = useRef<HTMLParagraphElement>(null);
@@ -272,6 +332,18 @@ export default function PreferenceControls() {
     github: null,
     resume: null,
   });
+  const drawerRouteRefs = useRef<Record<RouteLinkId, HTMLSpanElement | null>>({
+    experience: null,
+    technologies: null,
+    activity: null,
+  });
+  const drawerRouteMeasureRefs = useRef<
+    Record<RouteLinkId, HTMLSpanElement | null>
+  >({
+    experience: null,
+    technologies: null,
+    activity: null,
+  });
   const mainLinkRefs = useRef<Record<ProfileLinkId, HTMLAnchorElement | null>>({
     linkedin: null,
     github: null,
@@ -283,12 +355,96 @@ export default function PreferenceControls() {
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     window.localStorage.setItem(STORAGE_KEYS.theme, theme);
+    window.dispatchEvent(new Event("rn-preferences-change"));
   }, [theme]);
 
   useEffect(() => {
     document.documentElement.lang = locale;
     window.localStorage.setItem(STORAGE_KEYS.locale, locale);
+    window.dispatchEvent(new Event("rn-preferences-change"));
   }, [locale]);
+
+  useEffect(() => {
+    const syncPreferences = () => {
+      setTheme(getInitialTheme());
+      setLocale(getInitialLocale());
+    };
+
+    window.addEventListener("storage", syncPreferences);
+    window.addEventListener("rn-preferences-change", syncPreferences);
+
+    return () => {
+      window.removeEventListener("storage", syncPreferences);
+      window.removeEventListener("rn-preferences-change", syncPreferences);
+    };
+  }, []);
+
+  useEffect(() => {
+    const syncCurrentPath = () => {
+      setCurrentPath(getCurrentPath());
+    };
+
+    window.addEventListener("popstate", syncCurrentPath);
+    document.addEventListener("astro:page-load", syncCurrentPath);
+
+    return () => {
+      window.removeEventListener("popstate", syncCurrentPath);
+      document.removeEventListener("astro:page-load", syncCurrentPath);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (mode !== "chrome" && mode !== "preferences") {
+      return;
+    }
+
+    const syncProfileDrawerState = (event: Event) => {
+      const detail = (event as CustomEvent<{
+        open?: boolean;
+        routeRevealDelayMs?: number;
+      }>).detail;
+
+      if (routeNavRevealTimerRef.current) {
+        window.clearTimeout(routeNavRevealTimerRef.current);
+        routeNavRevealTimerRef.current = undefined;
+      }
+
+      if (detail?.open) {
+        setIsProfileMenuOpen(true);
+        setHideRouteNavItems(true);
+        return;
+      }
+
+      if (detail?.routeRevealDelayMs) {
+        setIsProfileMenuOpen(false);
+        setHideRouteNavItems(true);
+        routeNavRevealTimerRef.current = window.setTimeout(() => {
+          setHideRouteNavItems(false);
+          routeNavRevealTimerRef.current = undefined;
+        }, detail.routeRevealDelayMs);
+        return;
+      }
+
+      setIsProfileMenuOpen(false);
+      setHideRouteNavItems(false);
+    };
+
+    window.addEventListener(
+      "rn-profile-drawer-toggle",
+      syncProfileDrawerState,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "rn-profile-drawer-toggle",
+        syncProfileDrawerState,
+      );
+
+      if (routeNavRevealTimerRef.current) {
+        window.clearTimeout(routeNavRevealTimerRef.current);
+      }
+    };
+  }, [mode]);
 
   useEffect(() => {
     return () => {
@@ -303,6 +459,10 @@ export default function PreferenceControls() {
   }, []);
 
   useEffect(() => {
+    if (mode !== "activity") {
+      return;
+    }
+
     if (
       githubContributions ||
       githubRequestInFlightRef.current
@@ -342,9 +502,13 @@ export default function PreferenceControls() {
     return () => {
       controller.abort();
     };
-  }, [githubContributions]);
+  }, [githubContributions, mode]);
 
   useLayoutEffect(() => {
+    if (mode !== "activity") {
+      return;
+    }
+
     if (!githubContributions) {
       return;
     }
@@ -356,7 +520,7 @@ export default function PreferenceControls() {
         panel.scrollLeft = panel.scrollWidth - panel.clientWidth;
       }
     });
-  }, [githubContributions, locale]);
+  }, [githubContributions, locale, mode]);
 
   const nextTheme = theme === "light" ? "dark" : "light";
   const nextLocale = locale === "es" ? "en" : "es";
@@ -365,10 +529,6 @@ export default function PreferenceControls() {
     theme === "light" ? labels.lightThemeLabel : labels.darkThemeLabel;
   const themeText =
     theme === "light" ? labels.lightThemeText : labels.darkThemeText;
-  const workExperienceTitle =
-    locale === "es" ? "Experiencia laboral" : "Work experience";
-  const workExperienceLinkLabel =
-    locale === "es" ? "Ver experiencia laboral" : "View work experience";
   const educationText =
     locale === "es"
       ? "Licenciatura en Ciencias Computacionales"
@@ -447,6 +607,55 @@ export default function PreferenceControls() {
   const settingsLabel = isPreferencesOpen
     ? labels.closeSettingsLabel
     : labels.openSettingsLabel;
+  const renderRouteIcon = (id: RouteLinkId, size = 24) => {
+    if (id === "experience") {
+      return (
+        <BriefcaseBusiness aria-hidden="true" size={size} strokeWidth={2.1} />
+      );
+    }
+
+    if (id === "technologies") {
+      return <CodeXml aria-hidden="true" size={size + 1} strokeWidth={2.1} />;
+    }
+
+    return <FolderGit2 aria-hidden="true" size={size} strokeWidth={2.1} />;
+  };
+  const routeItems = [
+    {
+      href: "/experience",
+      id: "experience",
+      label: labels.experienceNavLabel,
+      title: labels.experienceRouteTitle,
+    },
+    {
+      href: "/technologies",
+      id: "technologies",
+      label: labels.technologiesNavLabel,
+      title: labels.technologiesRouteTitle,
+    },
+    {
+      href: "/activity",
+      id: "activity",
+      label: labels.activityNavLabel,
+      title: labels.activityRouteTitle,
+    },
+  ] satisfies Array<{
+    href: string;
+    id: RouteLinkId;
+    label: string;
+    title: string;
+  }>;
+  const navItems = [
+    {
+      href: "/",
+      icon: <Home aria-hidden="true" size={24} strokeWidth={2.1} />,
+      label: labels.homeRouteLabel,
+    },
+    ...routeItems.map((item) => ({
+      ...item,
+      icon: renderRouteIcon(item.id),
+    })),
+  ];
   const openPreferences = () => {
     if (closeTimerRef.current) {
       window.clearTimeout(closeTimerRef.current);
@@ -481,6 +690,7 @@ export default function PreferenceControls() {
     flipTimerRef.current = window.setTimeout(() => {
       setFlipAvatar(null);
       setFlipProfileLinks([]);
+      setFlipRouteLinks([]);
       setFlipIntroCopy(null);
       flipTimerRef.current = undefined;
     }, 620);
@@ -540,6 +750,52 @@ export default function PreferenceControls() {
     setFlipProfileLinks(nextFlips);
     queueFlipCleanup();
   };
+  const getNavbarRouteElement = (id: RouteLinkId) =>
+    document.querySelector<HTMLElement>(
+      `.home-route-link[data-route-id="${id}"]`,
+    );
+  const getRouteFlipIconSize = (targetElement: HTMLElement | null) => {
+    if (targetElement?.classList.contains("home-route-link")) {
+      return 24;
+    }
+
+    return 20;
+  };
+  const playRouteLinkFlips = (
+    sourceRefs: Record<RouteLinkId, HTMLElement | null>,
+    targetRefs: Record<RouteLinkId, HTMLElement | null>,
+  ) => {
+    const nextFlips = (Object.keys(sourceRefs) as RouteLinkId[]).flatMap(
+      (id) => {
+        const sourceRect = sourceRefs[id]?.getBoundingClientRect();
+        const targetRect = targetRefs[id]?.getBoundingClientRect();
+
+        if (!sourceRect || !targetRect) {
+          return [];
+        }
+
+        return [
+          {
+            id,
+            deltaX: sourceRect.left - targetRect.left,
+            deltaY: sourceRect.top - targetRect.top,
+            endRadius: "0.55rem",
+            iconSize: getRouteFlipIconSize(targetRefs[id]),
+            scaleX: sourceRect.width / targetRect.width,
+            scaleY: sourceRect.height / targetRect.height,
+            startRadius: "0.58rem",
+            targetLeft: targetRect.left,
+            targetTop: targetRect.top,
+            targetWidth: targetRect.width,
+            targetHeight: targetRect.height,
+          },
+        ];
+      },
+    );
+
+    setFlipRouteLinks(nextFlips);
+    queueFlipCleanup();
+  };
   const playIntroCopyFlip = (
     sourceRect: DOMRect,
     targetRect: DOMRect,
@@ -567,12 +823,22 @@ export default function PreferenceControls() {
     const introSourceRect = introCopyRef.current?.getBoundingClientRect();
     const introTargetRect =
       drawerAboutMeasureRef.current?.getBoundingClientRect();
+    const navRouteRefs = {
+      experience: getNavbarRouteElement("experience"),
+      technologies: getNavbarRouteElement("technologies"),
+      activity: getNavbarRouteElement("activity"),
+    };
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
 
     setIntroToolingOffset(getIntroToolingOffset());
     setIsProfileMenuOpen(true);
+    window.dispatchEvent(
+      new CustomEvent("rn-profile-drawer-toggle", {
+        detail: { open: true },
+      }),
+    );
 
     if (!sourceRect || !targetRect || prefersReducedMotion) {
       return;
@@ -580,6 +846,7 @@ export default function PreferenceControls() {
 
     playAvatarFlip(sourceRect, targetRect, "0.75rem", "999px");
     playProfileLinkFlips(mainLinkRefs.current, drawerLinkMeasureRefs.current);
+    playRouteLinkFlips(navRouteRefs, drawerRouteMeasureRefs.current);
 
     if (introSourceRect && introTargetRect) {
       playIntroCopyFlip(introSourceRect, introTargetRect, "drawer");
@@ -590,13 +857,22 @@ export default function PreferenceControls() {
     const targetRect = profilePictureRef.current?.getBoundingClientRect();
     const introSourceRect = drawerAboutRef.current?.getBoundingClientRect();
     const introTargetRect = introCopyRef.current?.getBoundingClientRect();
+    const navRouteRefs = {
+      experience: getNavbarRouteElement("experience"),
+      technologies: getNavbarRouteElement("technologies"),
+      activity: getNavbarRouteElement("activity"),
+    };
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
+    const shouldAnimateClose = Boolean(
+      sourceRect && targetRect && !prefersReducedMotion,
+    );
 
-    if (sourceRect && targetRect && !prefersReducedMotion) {
+    if (shouldAnimateClose && sourceRect && targetRect) {
       playAvatarFlip(sourceRect, targetRect, "999px", "0.75rem");
       playProfileLinkFlips(drawerLinkRefs.current, mainLinkRefs.current);
+      playRouteLinkFlips(drawerRouteRefs.current, navRouteRefs);
 
       if (introSourceRect && introTargetRect) {
         playIntroCopyFlip(introSourceRect, introTargetRect, "intro");
@@ -604,10 +880,32 @@ export default function PreferenceControls() {
     } else {
       setFlipAvatar(null);
       setFlipProfileLinks([]);
+      setFlipRouteLinks([]);
       setFlipIntroCopy(null);
     }
 
     setIsProfileMenuOpen(false);
+    window.dispatchEvent(
+      new CustomEvent("rn-profile-drawer-toggle", {
+        detail: {
+          open: false,
+          routeRevealDelayMs: shouldAnimateClose ? 600 : 0,
+        },
+      }),
+    );
+  };
+  const closeProfileMenuForRoute: MouseEventHandler<HTMLAnchorElement> = (
+    _event,
+  ) => {
+    setFlipAvatar(null);
+    setFlipProfileLinks([]);
+    setFlipRouteLinks([]);
+    setFlipIntroCopy(null);
+    window.dispatchEvent(
+      new CustomEvent("rn-profile-drawer-toggle", {
+        detail: { open: false },
+      }),
+    );
   };
   useEffect(() => {
     if (!isProfileMenuOpen) {
@@ -658,6 +956,25 @@ export default function PreferenceControls() {
           "--flip-target-height": `${link.targetHeight}px`,
         } as CSSProperties,
       }) satisfies { id: ProfileLinkId; style: CSSProperties },
+  );
+  const flipRouteLinkStyles = flipRouteLinks.map(
+    (link) =>
+      ({
+        id: link.id,
+        style: {
+          "--flip-delta-x": `${link.deltaX}px`,
+          "--flip-delta-y": `${link.deltaY}px`,
+          "--flip-end-radius": link.endRadius,
+          "--flip-scale-x": link.scaleX,
+          "--flip-scale-y": link.scaleY,
+          "--flip-start-radius": link.startRadius,
+          "--flip-target-left": `${link.targetLeft}px`,
+          "--flip-target-top": `${link.targetTop}px`,
+          "--flip-target-width": `${link.targetWidth}px`,
+          "--flip-target-height": `${link.targetHeight}px`,
+        } as CSSProperties,
+        iconSize: link.iconSize,
+      }) satisfies { id: RouteLinkId; iconSize: number; style: CSSProperties },
   );
   const flipIntroCopyStyle =
     flipIntroCopy &&
@@ -820,6 +1137,243 @@ export default function PreferenceControls() {
       </div>
     </div>
   );
+  const renderTechnologyGrid = () => (
+    <div className="technology-grid" aria-label={labels.skillsTitle}>
+      {TECHNOLOGIES.map((technology) => (
+        <span
+          aria-label={technology.label}
+          className="technology-item"
+          data-label={technology.label}
+          key={technology.label}
+          role="img"
+          tabIndex={0}
+        >
+          <span
+            aria-hidden="true"
+            className="technology-icon"
+            style={
+              {
+                "--technology-icon-url": `url("/assets/icons/Technologies/${technology.icon}")`,
+              } as CSSProperties
+            }
+          />
+        </span>
+      ))}
+    </div>
+  );
+  const renderPreferencesFloat = () => (
+    <div
+      className="preferences-float"
+      onMouseLeave={queueClosePreferences}
+      onFocus={openPreferences}
+      onBlur={(event) => {
+        const nextFocusedElement = event.relatedTarget;
+
+        if (
+          !(nextFocusedElement instanceof Node) ||
+          !event.currentTarget.contains(nextFocusedElement)
+        ) {
+          setIsPreferencesOpen(false);
+        }
+      }}
+    >
+      <button
+        className="settings-button"
+        type="button"
+        onMouseEnter={openPreferences}
+        onClick={togglePreferences}
+        aria-controls="site-preferences"
+        aria-expanded={isPreferencesOpen}
+        aria-label={settingsLabel}
+        data-open={isPreferencesOpen}
+      >
+        <Settings aria-hidden="true" size={26} strokeWidth={1.75} />
+      </button>
+
+      <div
+        className="preference-controls"
+        id="site-preferences"
+        aria-label={labels.preferencesLabel}
+        aria-hidden={!isPreferencesOpen}
+        data-open={isPreferencesOpen}
+        onMouseEnter={openPreferences}
+      >
+        <button
+          className="preference-button"
+          type="button"
+          tabIndex={isPreferencesOpen ? 0 : -1}
+          onClick={() => setLocale(nextLocale)}
+          aria-label={labels.languageLabel}
+        >
+          <Languages aria-hidden="true" size={16} strokeWidth={1.8} />
+          <span>{labels.languageText}</span>
+        </button>
+
+        <button
+          className="preference-button"
+          type="button"
+          tabIndex={isPreferencesOpen ? 0 : -1}
+          onClick={() => setTheme(nextTheme)}
+          aria-label={themeLabel}
+        >
+          {theme === "light" ? (
+            <Sun aria-hidden="true" size={16} strokeWidth={1.8} />
+          ) : (
+            <Moon aria-hidden="true" size={16} strokeWidth={1.8} />
+          )}
+          <span>{themeText}</span>
+        </button>
+      </div>
+    </div>
+  );
+  const renderFloatingNav = (hidden = false) => (
+    <nav
+      className="home-route-links"
+      aria-label={labels.homeNavLabel}
+      data-hidden={hidden || flipRouteLinks.length > 0}
+      data-instant-hidden={hidden}
+    >
+      {navItems.map((item) => {
+        const isActive = currentPath === item.href;
+        const routeId = "id" in item ? item.id : undefined;
+
+        return (
+          <a
+            className="home-route-link"
+            href={item.href}
+            aria-current={isActive ? "page" : undefined}
+            aria-label={item.label}
+            data-active={isActive}
+            data-route-id={routeId}
+            data-route-hidden={Boolean(routeId && hideRouteNavItems)}
+            key={item.href}
+          >
+            {item.icon}
+          </a>
+        );
+      })}
+    </nav>
+  );
+  const renderDrawerRouteLinks = (
+    refs: Record<RouteLinkId, HTMLSpanElement | null>,
+    hidden = false,
+    onClick?: MouseEventHandler<HTMLAnchorElement>,
+  ) => (
+    <div
+      className="profile-route-list"
+      aria-label={locale === "es" ? "Secciones" : "Sections"}
+    >
+      <h4>{labels.drawerNavigationTitle}</h4>
+      {routeItems.map((item) => (
+        <div
+          className="profile-route-link"
+          key={item.id}
+        >
+          <span
+            className="profile-route-icon"
+            data-hidden={hidden}
+            ref={(element) => {
+              refs[item.id] = element;
+            }}
+          >
+            {renderRouteIcon(item.id, 20)}
+          </span>
+          <a
+            className="profile-route-title"
+            href={item.href}
+            aria-label={item.label}
+            onClick={onClick}
+          >
+            {item.title}
+          </a>
+        </div>
+      ))}
+    </div>
+  );
+
+  if (mode === "chrome" || mode === "preferences") {
+    return (
+      <>
+        {renderFloatingNav(isProfileMenuOpen)}
+        {renderPreferencesFloat()}
+      </>
+    );
+  }
+
+  if (mode === "technologies") {
+    return (
+      <>
+        <main className="experience-shell" aria-labelledby="technologies-title">
+          <div className="experience-content">
+            <a className="experience-back-link" href="/">
+              <ArrowLeft
+                aria-hidden="true"
+                size={17}
+                strokeWidth={2}
+              />
+              <span>{labels.backLabel}</span>
+            </a>
+
+            <header className="experience-header">
+              <h1 id="technologies-title">{labels.skillsTitle}</h1>
+              <p>{labels.technologiesSubtitle}</p>
+            </header>
+
+            <section className="profile-skills route-section">
+              {renderTechnologyGrid()}
+            </section>
+          </div>
+        </main>
+
+      </>
+    );
+  }
+
+  if (mode === "activity") {
+    return (
+      <>
+        <main className="experience-shell" aria-labelledby="activity-title">
+          <div className="experience-content">
+            <a className="experience-back-link" href="/">
+              <ArrowLeft
+                aria-hidden="true"
+                size={17}
+                strokeWidth={2}
+              />
+              <span>{labels.backLabel}</span>
+            </a>
+
+            <header className="experience-header">
+              <h1 id="activity-title">{labels.githubActivityTitle}</h1>
+              <p>{labels.activitySubtitle}</p>
+            </header>
+
+            {renderGitHubActivity({
+              activityRef: mainGithubActivityRef,
+              className: "route-github-activity route-section",
+              scrollRef: mainGithubCalendarScrollRef,
+            })}
+          </div>
+        </main>
+
+        {githubContributionTooltip && (
+          <div
+            className="github-calendar-tooltip"
+            role="tooltip"
+            style={
+              {
+                "--tooltip-left": `${githubContributionTooltip.left}px`,
+                "--tooltip-top": `${githubContributionTooltip.top}px`,
+              } as CSSProperties
+            }
+          >
+            {githubContributionTooltip.text}
+          </div>
+        )}
+
+      </>
+    );
+  }
 
   return (
     <>
@@ -905,46 +1459,15 @@ export default function PreferenceControls() {
           </div>
         </div>
 
-        <p
-          className="intro-copy"
-          data-hidden={isProfileMenuOpen || Boolean(flipIntroCopy)}
-          ref={introCopyRef}
-        >
-          {renderIntroCopyContent()}
-        </p>
+        <div className="intro-main">
+          <p
+            className="intro-copy"
+            data-hidden={isProfileMenuOpen || Boolean(flipIntroCopy)}
+            ref={introCopyRef}
+          >
+            {renderIntroCopyContent()}
+          </p>
 
-        <div className="intro-tooling" ref={introToolingRef}>
-          <div className="profile-skills intro-skills">
-            <h4>{labels.skillsTitle}</h4>
-            <div className="technology-grid" aria-label={labels.skillsTitle}>
-              {TECHNOLOGIES.map((technology) => (
-                <span
-                  aria-label={technology.label}
-                  className="technology-item"
-                  data-label={technology.label}
-                  key={technology.label}
-                  role="img"
-                  tabIndex={0}
-                >
-                  <span
-                    aria-hidden="true"
-                    className="technology-icon"
-                    style={
-                      {
-                        "--technology-icon-url": `url("/assets/icons/Technologies/${technology.icon}")`,
-                      } as CSSProperties
-                    }
-                  />
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {renderGitHubActivity({
-            activityRef: mainGithubActivityRef,
-            className: "intro-github-activity",
-            scrollRef: mainGithubCalendarScrollRef,
-          })}
         </div>
       </div>
 
@@ -1026,6 +1549,7 @@ export default function PreferenceControls() {
             {renderIntroCopyContent()}
           </p>
         </div>
+        {renderDrawerRouteLinks(drawerRouteMeasureRefs.current)}
       </div>
 
       {flipAvatarStyle && (
@@ -1046,6 +1570,17 @@ export default function PreferenceControls() {
           key={link.id}
         >
           {renderProfileLinkIcon(link.id)}
+        </span>
+      ))}
+
+      {flipRouteLinkStyles.map((link) => (
+        <span
+          className="flip-route-link"
+          style={link.style}
+          aria-hidden="true"
+          key={link.id}
+        >
+          {renderRouteIcon(link.id, link.iconSize)}
         </span>
       ))}
 
@@ -1196,123 +1731,15 @@ export default function PreferenceControls() {
             </p>
           </div>
 
-          <div className="profile-drawer-section profile-work">
-            <h4>{workExperienceTitle}</h4>
-            <div className="profile-work-list">
-              {workExperienceItems.map((item) => (
-                <article
-                  className="profile-work-item"
-                  key={`${item.company}-${item.date.es}`}
-                >
-                  <span className="profile-work-badge" aria-hidden="true">
-                    <img src={item.logo} alt="" loading="lazy" />
-                  </span>
-                  <div className="profile-work-content">
-                    <div className="profile-work-heading">
-                      <h5>{item.role[locale]}</h5>
-                      <p className="profile-work-company">{item.company}</p>
-                    </div>
-                    <div className="profile-work-date-row">
-                      <p className="profile-work-date">{item.date[locale]}</p>
-                      <a
-                        aria-label={workExperienceLinkLabel}
-                        className="profile-work-link"
-                        href="/experience"
-                      >
-                        <ArrowUpRight
-                          aria-hidden="true"
-                          size={15}
-                          strokeWidth={2}
-                        />
-                      </a>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
+          {renderDrawerRouteLinks(
+            drawerRouteRefs.current,
+            flipRouteLinks.length > 0,
+            closeProfileMenuForRoute,
+          )}
 
         </section>
       </aside>
 
-      {githubContributionTooltip && (
-        <div
-          className="github-calendar-tooltip"
-          role="tooltip"
-          style={
-            {
-              "--tooltip-left": `${githubContributionTooltip.left}px`,
-              "--tooltip-top": `${githubContributionTooltip.top}px`,
-            } as CSSProperties
-          }
-        >
-          {githubContributionTooltip.text}
-        </div>
-      )}
-
-      <div
-        className="preferences-float"
-        onMouseLeave={queueClosePreferences}
-        onFocus={openPreferences}
-        onBlur={(event) => {
-          const nextFocusedElement = event.relatedTarget;
-
-          if (
-            !(nextFocusedElement instanceof Node) ||
-            !event.currentTarget.contains(nextFocusedElement)
-          ) {
-            setIsPreferencesOpen(false);
-          }
-        }}
-      >
-        <button
-          className="settings-button"
-          type="button"
-          onMouseEnter={openPreferences}
-          onClick={togglePreferences}
-          aria-controls="site-preferences"
-          aria-expanded={isPreferencesOpen}
-          aria-label={settingsLabel}
-          data-open={isPreferencesOpen}
-        >
-          <Settings aria-hidden="true" size={26} strokeWidth={1.75} />
-        </button>
-
-        <div
-          className="preference-controls"
-          id="site-preferences"
-          aria-label={labels.preferencesLabel}
-          aria-hidden={!isPreferencesOpen}
-          data-open={isPreferencesOpen}
-          onMouseEnter={openPreferences}
-        >
-          <button
-            className="preference-button"
-            type="button"
-            tabIndex={isPreferencesOpen ? 0 : -1}
-            onClick={() => setLocale(nextLocale)}
-            aria-label={labels.languageLabel}
-          >
-            <Languages aria-hidden="true" size={16} strokeWidth={1.8} />
-            <span>{labels.languageText}</span>
-          </button>
-
-          <button
-            className="preference-button"
-            type="button"
-            tabIndex={isPreferencesOpen ? 0 : -1}
-            onClick={() => setTheme(nextTheme)}
-            aria-label={themeLabel}
-          >
-            {theme === "light" ? (
-              <Sun aria-hidden="true" size={16} strokeWidth={1.8} />
-            ) : (
-              <Moon aria-hidden="true" size={16} strokeWidth={1.8} />
-            )}
-            <span>{themeText}</span>
-          </button>
-        </div>
-      </div>
     </>
   );
 }

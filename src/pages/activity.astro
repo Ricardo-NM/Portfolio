@@ -1,5 +1,4 @@
 ---
-import ExperienceView from "../components/ExperienceView";
 import PreferenceControls from "../components/PreferenceControls";
 import { ClientRouter } from "astro:transitions";
 import "../styles/global.css";
@@ -11,7 +10,7 @@ import "../styles/global.css";
     <meta charset="UTF-8" />
     <meta
       name="description"
-      content="Experiencia laboral de Ricardo Nava, desarrollador full stack."
+      content="Actividad reciente de GitHub de Ricardo Nava."
     />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
@@ -48,7 +47,7 @@ import "../styles/global.css";
     </script>
   </head>
   <body>
-    <ExperienceView client:only="react" />
+    <PreferenceControls mode="activity" client:only="react" />
     <PreferenceControls
       mode="chrome"
       client:only="react"

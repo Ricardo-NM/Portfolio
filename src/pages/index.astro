@@ -1,5 +1,6 @@
 ---
 import PreferenceControls from "../components/PreferenceControls";
+import { ClientRouter } from "astro:transitions";
 import "../styles/global.css";
 
 const name = "Ricardo Nava";
@@ -13,16 +14,35 @@ const nameLetters = Array.from(name);
     <meta name="description" content="Portafolio web de Ricardo Nava, desarrollador full stack." />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <title>Ricardo Nava | Full Stack Developer</title>
+    <title>Ricardo NM | Portafolio</title>
+    <ClientRouter />
     <script is:inline>
       (() => {
-        const storedTheme = localStorage.getItem("rn-theme");
-        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        const theme = storedTheme || (prefersDark ? "dark" : "light");
-        const locale = localStorage.getItem("rn-locale") || "es";
+        const getPreferences = () => {
+          const storedTheme = localStorage.getItem("rn-theme");
+          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-        document.documentElement.dataset.theme = theme;
-        document.documentElement.lang = locale;
+          return {
+            locale: localStorage.getItem("rn-locale") || "es",
+            theme: storedTheme || (prefersDark ? "dark" : "light"),
+          };
+        };
+        const applyPreferences = (root) => {
+          const { locale, theme } = getPreferences();
+
+          root.dataset.theme = theme;
+          root.lang = locale;
+        };
+
+        applyPreferences(document.documentElement);
+
+        document.addEventListener("astro:before-swap", (event) => {
+          applyPreferences(event.newDocument.documentElement);
+        });
+
+        document.addEventListener("astro:after-swap", () => {
+          applyPreferences(document.documentElement);
+        });
       })();
     </script>
   </head>
@@ -45,5 +65,10 @@ const nameLetters = Array.from(name);
         <PreferenceControls client:only="react" />
       </section>
     </main>
+    <PreferenceControls
+      mode="chrome"
+      client:only="react"
+      transition:persist="site-chrome"
+    />
   </body>
 </html>

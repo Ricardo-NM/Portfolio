@@ -39,9 +39,11 @@ export default function ExperienceView() {
     const syncLocale = () => setLocale(getInitialLocale());
 
     window.addEventListener("storage", syncLocale);
+    window.addEventListener("rn-preferences-change", syncLocale);
 
     return () => {
       window.removeEventListener("storage", syncLocale);
+      window.removeEventListener("rn-preferences-change", syncLocale);
     };
   }, []);
 
