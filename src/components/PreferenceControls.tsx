@@ -1,4 +1,5 @@
 import {
+  ArrowUpRight,
   ChevronDown,
   FolderCode,
   GraduationCap,
@@ -10,9 +11,15 @@ import {
   Sun,
   X,
 } from "lucide-react";
-import type { CSSProperties } from "react";
-import { useEffect, useRef, useState } from "react";
+import type {
+  CSSProperties,
+  FocusEvent as ReactFocusEvent,
+  MouseEvent as ReactMouseEvent,
+  Ref,
+} from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import bannerUrl from "../assets/banner.webp";
+import { workExperienceItems } from "../data/workExperience";
 
 type Theme = "light" | "dark";
 type Locale = "es" | "en";
@@ -32,6 +39,27 @@ type FlipAvatar = {
 type FlipProfileLink = FlipAvatar & {
   id: ProfileLinkId;
 };
+type FlipIntroCopy = FlipAvatar & {
+  variant: "drawer" | "intro";
+};
+type ContributionDay = {
+  contributionCount: number;
+  date: string;
+  weekday: number;
+};
+type ContributionWeek = {
+  contributionDays: ContributionDay[];
+};
+type GitHubContributions = {
+  totalContributions: number;
+  weeks: ContributionWeek[];
+};
+type GitHubContributionsStatus = "idle" | "loading" | "error";
+type GitHubContributionTooltip = {
+  left: number;
+  text: string;
+  top: number;
+};
 
 const STORAGE_KEYS = {
   theme: "rn-theme",
@@ -50,13 +78,17 @@ const copy = {
     profileMenuTitle: "Perfil",
     profileEmail: "lic.ricardo.nm@gmail.com",
     profileLocation: "México",
-    profileAboutTitle: "Acerca de",
-    profileAbout:
-      "Construyo sistemas digitales, plataformas administrativas y aplicaciones web y móviles con enfoque en funcionalidad, estructura, escalabilidad y experiencia de usuario.",
     profileFocusTitle: "Áreas de enfoque",
     focusMobile: "Aplicaciones móviles",
     linkedinLabel: "Abrir perfil de LinkedIn",
     githubLabel: "Abrir perfil de GitHub",
+    githubActivityTitle: "Actividad de GitHub",
+    githubActivityLoading: "Cargando actividad...",
+    githubActivityError: "No se pudo cargar la actividad.",
+    githubActivityLess: "Menos",
+    githubActivityMore: "Mas",
+    skillsTitle: "Habilidades y Tecnologías",
+    aboutTitle: "Acerca de mí",
     resumeLabel: "Descargar CV",
     preferencesLabel: "Preferencias del sitio",
     openSettingsLabel: "Abrir preferencias",
@@ -79,11 +111,15 @@ const copy = {
     profileMenuTitle: "Profile",
     profileEmail: "lic.ricardo.nm@gmail.com",
     profileLocation: "Mexico",
-    profileAboutTitle: "About",
-    profileAbout:
-      "I build digital systems, administrative platforms, and web and mobile applications with a focus on functionality, structure, scalability, and user experience.",
     linkedinLabel: "Open LinkedIn profile",
     githubLabel: "Open GitHub profile",
+    githubActivityTitle: "GitHub activity",
+    githubActivityLoading: "Loading activity...",
+    githubActivityError: "Activity could not be loaded.",
+    githubActivityLess: "Less",
+    githubActivityMore: "More",
+    skillsTitle: "Skills and Technologies",
+    aboutTitle: "About me",
     resumeLabel: "Download resume",
     preferencesLabel: "Site preferences",
     openSettingsLabel: "Open preferences",
@@ -96,6 +132,68 @@ const copy = {
     darkThemeText: "Dark",
   },
 } as const;
+
+const MONTH_LABELS = {
+  es: [
+    "Ene",
+    "Feb",
+    "Mar",
+    "Abr",
+    "May",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dic",
+  ],
+  en: [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ],
+} as const;
+
+const TECHNOLOGIES = [
+  { label: "JavaScript", icon: "javascript.svg" },
+  { label: "TypeScript", icon: "typescript.svg" },
+  { label: "HTML5", icon: "html5.svg" },
+  { label: "CSS", icon: "css.svg" },
+  { label: "Tailwind CSS", icon: "tailwindcss.svg" },
+  { label: "React", icon: "react.svg" },
+  { label: "Expo", icon: "expo.svg" },
+  { label: "Prisma ORM", icon: "prisma.svg" },
+  { label: "Flutter", icon: "flutter.svg" },
+  { label: "C#", icon: "csharp.svg" },
+  { label: ".NET", icon: "dotnet.svg" },
+  { label: "Node.js", icon: "nodedotjs.svg" },
+  { label: "Next.js", icon: "nextdotjs.svg" },
+  { label: "NestJS", icon: "nestjs.svg" },
+  { label: "Express.js", icon: "express.svg" },
+  { label: "MongoDB", icon: "mongodb.svg" },
+  { label: "MySQL", icon: "mysql.svg" },
+  { label: "PostgreSQL", icon: "postgresql.svg" },
+  { label: "Redis", icon: "redis.svg" },
+  { label: "Git", icon: "git.svg" },
+  { label: "GitHub", icon: "github.svg" },
+  { label: "VPS Linux", icon: "linux.svg" },
+  { label: "Nginx", icon: "nginx.svg" },
+  { label: "PM2", icon: "pm2.svg" },
+  { label: "IIS", icon: "iis.svg" },
+  { label: "Docker", icon: "docker.svg" },
+  { label: "ESLint", icon: "eslint.svg" },
+  { label: "Figma", icon: "figma.svg" },
+] as const;
 
 function getInitialTheme(): Theme {
   if (typeof window === "undefined") {
@@ -122,6 +220,14 @@ function getInitialLocale(): Locale {
     : "es";
 }
 
+function getContributionLevel(count: number, maxCount: number) {
+  if (count <= 0 || maxCount <= 0) {
+    return 0;
+  }
+
+  return Math.min(4, Math.max(1, Math.ceil((count / maxCount) * 4)));
+}
+
 export default function PreferenceControls() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const [locale, setLocale] = useState<Locale>(getInitialLocale);
@@ -131,8 +237,26 @@ export default function PreferenceControls() {
   const [flipProfileLinks, setFlipProfileLinks] = useState<FlipProfileLink[]>(
     [],
   );
+  const [flipIntroCopy, setFlipIntroCopy] = useState<FlipIntroCopy | null>(
+    null,
+  );
+  const [introToolingOffset, setIntroToolingOffset] = useState(0);
+  const [githubContributions, setGithubContributions] =
+    useState<GitHubContributions | null>(null);
+  const [githubContributionsStatus, setGithubContributionsStatus] =
+    useState<GitHubContributionsStatus>("idle");
+  const [githubContributionTooltip, setGithubContributionTooltip] =
+    useState<GitHubContributionTooltip | null>(null);
   const closeTimerRef = useRef<number | undefined>(undefined);
   const flipTimerRef = useRef<number | undefined>(undefined);
+  const githubRequestInFlightRef = useRef(false);
+  const introLayoutRef = useRef<HTMLDivElement>(null);
+  const introCopyRef = useRef<HTMLParagraphElement>(null);
+  const introToolingRef = useRef<HTMLDivElement>(null);
+  const mainGithubActivityRef = useRef<HTMLDivElement>(null);
+  const mainGithubCalendarScrollRef = useRef<HTMLDivElement>(null);
+  const drawerAboutRef = useRef<HTMLParagraphElement>(null);
+  const drawerAboutMeasureRef = useRef<HTMLParagraphElement>(null);
   const drawerAvatarRef = useRef<HTMLDivElement>(null);
   const drawerLinkRefs = useRef<
     Record<ProfileLinkId, HTMLAnchorElement | null>
@@ -178,6 +302,62 @@ export default function PreferenceControls() {
     };
   }, []);
 
+  useEffect(() => {
+    if (
+      githubContributions ||
+      githubRequestInFlightRef.current
+    ) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    githubRequestInFlightRef.current = true;
+    setGithubContributionsStatus("loading");
+
+    fetch("/api/github-contributions", { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("GitHub contributions request failed.");
+        }
+
+        return response.json() as Promise<GitHubContributions>;
+      })
+      .then((data) => {
+        setGithubContributions(data);
+        setGithubContributionsStatus("idle");
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          setGithubContributionsStatus("idle");
+          return;
+        }
+
+        setGithubContributionsStatus("error");
+      })
+      .finally(() => {
+        githubRequestInFlightRef.current = false;
+      });
+
+    return () => {
+      controller.abort();
+    };
+  }, [githubContributions]);
+
+  useLayoutEffect(() => {
+    if (!githubContributions) {
+      return;
+    }
+
+    [
+      mainGithubCalendarScrollRef.current,
+    ].forEach((panel) => {
+      if (panel) {
+        panel.scrollLeft = panel.scrollWidth - panel.clientWidth;
+      }
+    });
+  }, [githubContributions, locale]);
+
   const nextTheme = theme === "light" ? "dark" : "light";
   const nextLocale = locale === "es" ? "en" : "es";
   const labels = copy[locale];
@@ -185,43 +365,10 @@ export default function PreferenceControls() {
     theme === "light" ? labels.lightThemeLabel : labels.darkThemeLabel;
   const themeText =
     theme === "light" ? labels.lightThemeText : labels.darkThemeText;
-  const profileAbout =
-    locale === "es"
-      ? "Apasionado por la tecnología y el desarrollo de soluciones, con pensamiento lógico y analítico para resolver problemas complejos. Me especializo en integrar diversas herramientas y tecnologías para crear soluciones eficientes, escalables y orientadas a aportar valor."
-      : "Passionate about technology and solution development, with logical and analytical thinking to solve complex problems. I specialize in integrating diverse tools and technologies to create efficient, scalable solutions focused on delivering value.";
-  const databaseBadge = locale === "es" ? "Bases de datos" : "Databases";
   const workExperienceTitle =
     locale === "es" ? "Experiencia laboral" : "Work experience";
-  const workExperienceItems =
-    locale === "es"
-      ? [
-          {
-            logo: "/assets/experience-one.png",
-            role: "Desarrollador Full Stack",
-            company: "ArdabyTec",
-            date: "Mayo 2025 - Diciembre 2025",
-          },
-          {
-            logo: "/assets/experience-second.png",
-            role: "Desarrollador Full Stack",
-            company: "K-PUGA S.A. de C.V",
-            date: "Enero 2026 - Junio 2026",
-          },
-        ]
-      : [
-          {
-            logo: "/assets/experience-one.png",
-            role: "Full Stack Developer",
-            company: "ArdabyTec",
-            date: "May 2025 - December 2025",
-          },
-          {
-            logo: "/assets/experience-second.png",
-            role: "Full Stack Developer",
-            company: "K-PUGA S.A. de C.V",
-            date: "January 2026 - June 2026",
-          },
-        ];
+  const workExperienceLinkLabel =
+    locale === "es" ? "Ver experiencia laboral" : "View work experience";
   const educationText =
     locale === "es"
       ? "Licenciatura en Ciencias Computacionales"
@@ -231,6 +378,72 @@ export default function PreferenceControls() {
   const profileLocation =
     locale === "es" ? "Hidalgo, México" : "Hidalgo, Mexico";
   const profileEmail = "lic.ricardo.nm@gmail.com";
+  const monthLabels = MONTH_LABELS[locale];
+  const githubMonthMarkers =
+    githubContributions?.weeks.flatMap((week, weekIndex, weeks) => {
+      const firstDay = week.contributionDays[0];
+
+      if (!firstDay) {
+        return [];
+      }
+
+      const month = new Date(`${firstDay.date}T00:00:00`).getMonth();
+      const previousFirstDay = weeks[weekIndex - 1]?.contributionDays[0];
+      const previousMonth = previousFirstDay
+        ? new Date(`${previousFirstDay.date}T00:00:00`).getMonth()
+        : undefined;
+
+      if (weekIndex !== 0 && month === previousMonth) {
+        return [];
+      }
+
+      return [{ label: monthLabels[month], weekIndex }];
+    }) ?? [];
+  const githubMaxContributions = Math.max(
+    0,
+    ...(githubContributions?.weeks.flatMap((week) =>
+      week.contributionDays.map((day) => day.contributionCount),
+    ) ?? []),
+  );
+  const githubCalendarStyle = {
+    "--github-week-count": githubContributions?.weeks.length ?? 53,
+  } as CSSProperties;
+  const getGitHubDayTooltip = (day: ContributionDay) =>
+    locale === "es"
+      ? `${day.contributionCount} ${
+          day.contributionCount === 1 ? "contribución" : "contribuciones"
+        } el ${day.date}`
+      : `${day.contributionCount} ${
+          day.contributionCount === 1 ? "contribution" : "contributions"
+        } on ${day.date}`;
+  const showGitHubDayTooltip = (
+    event: ReactMouseEvent<HTMLSpanElement> | ReactFocusEvent<HTMLSpanElement>,
+    text: string,
+  ) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+
+    setGithubContributionTooltip({
+      left: rect.left + rect.width / 2,
+      text,
+      top: rect.top - 7,
+    });
+  };
+  const hideGitHubDayTooltip = () => {
+    setGithubContributionTooltip(null);
+  };
+  const getIntroToolingOffset = () => {
+    const introCopy = introCopyRef.current;
+    const introTooling = introToolingRef.current;
+
+    if (!introCopy || !introTooling) {
+      return 0;
+    }
+
+    const introCopyRect = introCopy.getBoundingClientRect();
+    const introToolingRect = introTooling.getBoundingClientRect();
+
+    return Math.round(Math.max(0, introToolingRect.top - introCopyRect.top));
+  };
   const settingsLabel = isPreferencesOpen
     ? labels.closeSettingsLabel
     : labels.openSettingsLabel;
@@ -268,6 +481,7 @@ export default function PreferenceControls() {
     flipTimerRef.current = window.setTimeout(() => {
       setFlipAvatar(null);
       setFlipProfileLinks([]);
+      setFlipIntroCopy(null);
       flipTimerRef.current = undefined;
     }, 620);
   };
@@ -326,13 +540,38 @@ export default function PreferenceControls() {
     setFlipProfileLinks(nextFlips);
     queueFlipCleanup();
   };
+  const playIntroCopyFlip = (
+    sourceRect: DOMRect,
+    targetRect: DOMRect,
+    variant: FlipIntroCopy["variant"],
+  ) => {
+    setFlipIntroCopy({
+      deltaX: Math.round(sourceRect.left - targetRect.left),
+      deltaY: Math.round(sourceRect.top - targetRect.top),
+      endRadius: "0",
+      scaleX: 1,
+      scaleY: 1,
+      startRadius: "0",
+      targetLeft: Math.round(targetRect.left),
+      targetTop: Math.round(targetRect.top),
+      targetWidth: Math.round(targetRect.width),
+      targetHeight: Math.round(targetRect.height),
+      variant,
+    });
+
+    queueFlipCleanup();
+  };
   const openProfileMenu = () => {
     const sourceRect = profilePictureRef.current?.getBoundingClientRect();
     const targetRect = drawerAvatarMeasureRef.current?.getBoundingClientRect();
+    const introSourceRect = introCopyRef.current?.getBoundingClientRect();
+    const introTargetRect =
+      drawerAboutMeasureRef.current?.getBoundingClientRect();
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
 
+    setIntroToolingOffset(getIntroToolingOffset());
     setIsProfileMenuOpen(true);
 
     if (!sourceRect || !targetRect || prefersReducedMotion) {
@@ -341,10 +580,16 @@ export default function PreferenceControls() {
 
     playAvatarFlip(sourceRect, targetRect, "0.75rem", "999px");
     playProfileLinkFlips(mainLinkRefs.current, drawerLinkMeasureRefs.current);
+
+    if (introSourceRect && introTargetRect) {
+      playIntroCopyFlip(introSourceRect, introTargetRect, "drawer");
+    }
   };
   const closeProfileMenu = () => {
     const sourceRect = drawerAvatarRef.current?.getBoundingClientRect();
     const targetRect = profilePictureRef.current?.getBoundingClientRect();
+    const introSourceRect = drawerAboutRef.current?.getBoundingClientRect();
+    const introTargetRect = introCopyRef.current?.getBoundingClientRect();
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
@@ -352,9 +597,14 @@ export default function PreferenceControls() {
     if (sourceRect && targetRect && !prefersReducedMotion) {
       playAvatarFlip(sourceRect, targetRect, "999px", "0.75rem");
       playProfileLinkFlips(drawerLinkRefs.current, mainLinkRefs.current);
+
+      if (introSourceRect && introTargetRect) {
+        playIntroCopyFlip(introSourceRect, introTargetRect, "intro");
+      }
     } else {
       setFlipAvatar(null);
       setFlipProfileLinks([]);
+      setFlipIntroCopy(null);
     }
 
     setIsProfileMenuOpen(false);
@@ -409,6 +659,20 @@ export default function PreferenceControls() {
         } as CSSProperties,
       }) satisfies { id: ProfileLinkId; style: CSSProperties },
   );
+  const flipIntroCopyStyle =
+    flipIntroCopy &&
+    ({
+      "--flip-delta-x": `${flipIntroCopy.deltaX}px`,
+      "--flip-delta-y": `${flipIntroCopy.deltaY}px`,
+      "--flip-end-radius": flipIntroCopy.endRadius,
+      "--flip-scale-x": flipIntroCopy.scaleX,
+      "--flip-scale-y": flipIntroCopy.scaleY,
+      "--flip-start-radius": flipIntroCopy.startRadius,
+      "--flip-target-left": `${flipIntroCopy.targetLeft}px`,
+      "--flip-target-top": `${flipIntroCopy.targetTop}px`,
+      "--flip-target-width": `${flipIntroCopy.targetWidth}px`,
+      "--flip-target-height": `${flipIntroCopy.targetHeight}px`,
+    } as CSSProperties);
   const renderProfileLinkIcon = (id: ProfileLinkId) => {
     if (id === "resume") {
       return (
@@ -433,10 +697,142 @@ export default function PreferenceControls() {
       />
     );
   };
+  const renderIntroCopyContent = () => (
+    <>
+      <strong>{labels.introHighlight}</strong>
+      {labels.introRest}
+    </>
+  );
+  const renderGitHubActivity = ({
+    activityRef,
+    className = "",
+    hidden = false,
+    scrollRef,
+  }: {
+    activityRef?: Ref<HTMLDivElement>;
+    className?: string;
+    hidden?: boolean;
+    scrollRef?: Ref<HTMLDivElement>;
+  }) => (
+    <div
+      className={`github-activity ${className}`.trim()}
+      aria-hidden={hidden}
+      data-hidden={hidden}
+      ref={activityRef}
+    >
+      <h4>{labels.githubActivityTitle}</h4>
+      <div
+        className="github-calendar-panel"
+        data-state={githubContributionsStatus}
+      >
+        {githubContributionsStatus === "loading" && (
+          <p className="github-calendar-message">
+            {labels.githubActivityLoading}
+          </p>
+        )}
+
+        {githubContributionsStatus === "error" && (
+          <p className="github-calendar-message">{labels.githubActivityError}</p>
+        )}
+
+        {githubContributions && (
+          <>
+            <div
+              className="github-calendar-scroll"
+              ref={scrollRef}
+              onScroll={hideGitHubDayTooltip}
+            >
+              <div className="github-calendar-track" style={githubCalendarStyle}>
+                <div className="github-calendar-months" aria-hidden="true">
+                  {githubMonthMarkers.map((marker) => (
+                    <span
+                      key={`${marker.label}-${marker.weekIndex}`}
+                      style={
+                        {
+                          gridColumn: `${marker.weekIndex + 1}`,
+                        } as CSSProperties
+                      }
+                    >
+                      {marker.label}
+                    </span>
+                  ))}
+                </div>
+
+                <div
+                  className="github-calendar-grid"
+                  aria-label={labels.githubActivityTitle}
+                >
+                  {githubContributions.weeks.map((week, weekIndex) =>
+                    week.contributionDays.map((day) => {
+                      const level = getContributionLevel(
+                        day.contributionCount,
+                        githubMaxContributions,
+                      );
+                      const tooltipText = getGitHubDayTooltip(day);
+
+                      return (
+                        <span
+                          aria-label={tooltipText}
+                          className="github-calendar-day"
+                          data-level={level}
+                          key={day.date}
+                          onBlur={hideGitHubDayTooltip}
+                          onFocus={(event) =>
+                            showGitHubDayTooltip(event, tooltipText)
+                          }
+                          onMouseEnter={(event) =>
+                            showGitHubDayTooltip(event, tooltipText)
+                          }
+                          onMouseLeave={hideGitHubDayTooltip}
+                          onMouseMove={(event) =>
+                            showGitHubDayTooltip(event, tooltipText)
+                          }
+                          style={
+                            {
+                              gridColumn: `${weekIndex + 1}`,
+                              gridRow: `${day.weekday + 1}`,
+                            } as CSSProperties
+                          }
+                        />
+                      );
+                    }),
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="github-calendar-footer">
+              <strong>
+                {locale === "es"
+                  ? `${githubContributions.totalContributions} contribuciones en el último año`
+                  : `${githubContributions.totalContributions} contributions in the last year`}
+              </strong>
+              <span className="github-calendar-legend">
+                {labels.githubActivityLess}
+                {[0, 1, 2, 3, 4].map((level) => (
+                  <i aria-hidden="true" data-level={level} key={level} />
+                ))}
+                {labels.githubActivityMore}
+              </span>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <>
-      <div className="intro-layout">
+      <div
+        className="intro-layout"
+        data-profile-open={isProfileMenuOpen}
+        ref={introLayoutRef}
+        style={
+          {
+            "--intro-tooling-offset": `${introToolingOffset}px`,
+          } as CSSProperties
+        }
+      >
         <div className="profile-media">
           <p
             className="profile-hint"
@@ -509,10 +905,47 @@ export default function PreferenceControls() {
           </div>
         </div>
 
-        <p className="intro-copy">
-          <strong>{labels.introHighlight}</strong>
-          {labels.introRest}
+        <p
+          className="intro-copy"
+          data-hidden={isProfileMenuOpen || Boolean(flipIntroCopy)}
+          ref={introCopyRef}
+        >
+          {renderIntroCopyContent()}
         </p>
+
+        <div className="intro-tooling" ref={introToolingRef}>
+          <div className="profile-skills intro-skills">
+            <h4>{labels.skillsTitle}</h4>
+            <div className="technology-grid" aria-label={labels.skillsTitle}>
+              {TECHNOLOGIES.map((technology) => (
+                <span
+                  aria-label={technology.label}
+                  className="technology-item"
+                  data-label={technology.label}
+                  key={technology.label}
+                  role="img"
+                  tabIndex={0}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="technology-icon"
+                    style={
+                      {
+                        "--technology-icon-url": `url("/assets/icons/Technologies/${technology.icon}")`,
+                      } as CSSProperties
+                    }
+                  />
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {renderGitHubActivity({
+            activityRef: mainGithubActivityRef,
+            className: "intro-github-activity",
+            scrollRef: mainGithubCalendarScrollRef,
+          })}
+        </div>
       </div>
 
       <div className="profile-drawer-measure" aria-hidden="true">
@@ -523,60 +956,75 @@ export default function PreferenceControls() {
         <div className="profile-drawer-cover">
           <img src={bannerUrl.src} alt="" aria-hidden="true" />
         </div>
-        <div className="profile-drawer-identity">
-          <div className="profile-drawer-avatar" ref={drawerAvatarMeasureRef}>
-            <img
-              src="/assets/profilePicture.jpeg"
-              alt=""
-              className="profile-picture"
-            />
+        <div className="profile-drawer-cover-row">
+          <div className="profile-drawer-identity">
+            <div className="profile-drawer-avatar" ref={drawerAvatarMeasureRef}>
+              <img
+                src="/assets/profilePicture.jpeg"
+                alt=""
+                className="profile-picture"
+              />
+            </div>
+          </div>
+          <div className="profile-links profile-drawer-links">
+            <a
+              className="profile-link"
+              href="https://www.linkedin.com/in/ricardo-nava-mayoral/"
+              ref={(element) => {
+                drawerLinkMeasureRefs.current.linkedin = element;
+              }}
+            >
+              {renderProfileLinkIcon("linkedin")}
+            </a>
+
+            <a
+              className="profile-link"
+              href="https://github.com/Ricardo-NM"
+              ref={(element) => {
+                drawerLinkMeasureRefs.current.github = element;
+              }}
+            >
+              {renderProfileLinkIcon("github")}
+            </a>
+
+            <a
+              className="profile-link"
+              href="/assets/CV_Ricardo_Nava_Mayoral.pdf"
+              ref={(element) => {
+                drawerLinkMeasureRefs.current.resume = element;
+              }}
+            >
+              {renderProfileLinkIcon("resume")}
+            </a>
           </div>
         </div>
         <div className="profile-drawer-name-row">
           <h3>Ricardo Nava Mayoral</h3>
           <span />
         </div>
-        <p className="profile-drawer-role">
-          <Mail aria-hidden="true" size={16} strokeWidth={1.8} />
-          <span>{profileEmail}</span>
-        </p>
-        <div className="profile-drawer-tags">
-          <span>Full Stack</span>
-          <span>Web</span>
-          <span>Mobile</span>
-          <span>UI/UX</span>
-          <span>{databaseBadge}</span>
+        <div className="profile-drawer-meta">
+          <span>
+            <Mail aria-hidden="true" size={16} strokeWidth={1.8} />
+            {profileEmail}
+          </span>
+          <span>
+            <GraduationCap aria-hidden="true" size={16} strokeWidth={1.8} />
+            {educationText}
+          </span>
+          <span>
+            <MapPin aria-hidden="true" size={16} strokeWidth={1.8} />
+            {profileLocation}
+          </span>
+          <span>
+            <FolderCode aria-hidden="true" size={16} strokeWidth={1.8} />
+            {projectsText}
+          </span>
         </div>
-        <div className="profile-links profile-drawer-links">
-          <a
-            className="profile-link"
-            href="https://www.linkedin.com/in/ricardo-nava-mayoral/"
-            ref={(element) => {
-              drawerLinkMeasureRefs.current.linkedin = element;
-            }}
-          >
-            {renderProfileLinkIcon("linkedin")}
-          </a>
-
-          <a
-            className="profile-link"
-            href="https://github.com/Ricardo-NM"
-            ref={(element) => {
-              drawerLinkMeasureRefs.current.github = element;
-            }}
-          >
-            {renderProfileLinkIcon("github")}
-          </a>
-
-          <a
-            className="profile-link"
-            href="/assets/CV_Ricardo_Nava_Mayoral.pdf"
-            ref={(element) => {
-              drawerLinkMeasureRefs.current.resume = element;
-            }}
-          >
-            {renderProfileLinkIcon("resume")}
-          </a>
+        <div className="profile-drawer-section profile-about">
+          <h4>{labels.aboutTitle}</h4>
+          <p className="profile-about-text" ref={drawerAboutMeasureRef}>
+            {renderIntroCopyContent()}
+          </p>
         </div>
       </div>
 
@@ -600,6 +1048,17 @@ export default function PreferenceControls() {
           {renderProfileLinkIcon(link.id)}
         </span>
       ))}
+
+      {flipIntroCopyStyle && (
+        <div
+          className="flip-intro-copy"
+          data-variant={flipIntroCopy.variant}
+          style={flipIntroCopyStyle}
+          aria-hidden="true"
+        >
+          <p>{renderIntroCopyContent()}</p>
+        </div>
+      )}
 
       <aside
         className="profile-drawer-shell"
@@ -635,94 +1094,83 @@ export default function PreferenceControls() {
             <img src={bannerUrl.src} alt="" aria-hidden="true" />
           </div>
 
-          <div className="profile-drawer-identity">
+          <div className="profile-drawer-cover-row">
             <div
-              className="profile-drawer-avatar"
-              ref={drawerAvatarRef}
-              data-flip-active={Boolean(flipAvatar)}
+              className="profile-links profile-drawer-links"
+              aria-label={
+                locale === "es" ? "Enlaces de perfil" : "Profile links"
+              }
             >
-              <img
-                src="/assets/profilePicture.jpeg"
-                alt={labels.profileAlt}
-                className="profile-picture"
-              />
+              <a
+                className="profile-link"
+                href="https://www.linkedin.com/in/ricardo-nava-mayoral/"
+                target="_blank"
+                rel="noreferrer"
+                aria-label={labels.linkedinLabel}
+                ref={(element) => {
+                  drawerLinkRefs.current.linkedin = element;
+                }}
+                data-hidden={Boolean(flipProfileLinks.length)}
+              >
+                {renderProfileLinkIcon("linkedin")}
+              </a>
+
+              <a
+                className="profile-link"
+                href="https://github.com/Ricardo-NM"
+                target="_blank"
+                rel="noreferrer"
+                aria-label={labels.githubLabel}
+                ref={(element) => {
+                  drawerLinkRefs.current.github = element;
+                }}
+                data-hidden={Boolean(flipProfileLinks.length)}
+              >
+                {renderProfileLinkIcon("github")}
+              </a>
+
+              <a
+                className="profile-link"
+                href="/assets/CV_Ricardo_Nava_Mayoral.pdf"
+                download
+                aria-label={labels.resumeLabel}
+                ref={(element) => {
+                  drawerLinkRefs.current.resume = element;
+                }}
+                data-hidden={Boolean(flipProfileLinks.length)}
+              >
+                {renderProfileLinkIcon("resume")}
+              </a>
             </div>
-            <span className="profile-drawer-check" aria-hidden="true">
-              ✓
-            </span>
+
+            <div className="profile-drawer-identity">
+              <div
+                className="profile-drawer-avatar"
+                ref={drawerAvatarRef}
+                data-flip-active={Boolean(flipAvatar)}
+              >
+                <img
+                  src="/assets/profilePicture.jpeg"
+                  alt={labels.profileAlt}
+                  className="profile-picture"
+                />
+              </div>
+              <span className="profile-drawer-check" aria-hidden="true">
+                ✓
+              </span>
+            </div>
           </div>
 
           <div className="profile-drawer-name-row">
             <h3>Ricardo Nava Mayoral</h3>
             <span aria-hidden="true" />
           </div>
-          <p className="profile-drawer-role">
-            <Mail aria-hidden="true" size={16} strokeWidth={1.8} />
-            <span>{profileEmail}</span>
-          </p>
-          <div
-            className="profile-drawer-tags"
-            aria-label={locale === "es" ? "Especialidades" : "Specialties"}
-          >
-            <span>Full Stack</span>
-            <span>Web</span>
-            <span>Mobile</span>
-            <span>UI/UX</span>
-            <span>{databaseBadge}</span>
-          </div>
-
-          <div
-            className="profile-links profile-drawer-links"
-            aria-label={locale === "es" ? "Enlaces de perfil" : "Profile links"}
-          >
-            <a
-              className="profile-link"
-              href="https://www.linkedin.com/in/ricardo-nava-mayoral/"
-              target="_blank"
-              rel="noreferrer"
-              aria-label={labels.linkedinLabel}
-              ref={(element) => {
-                drawerLinkRefs.current.linkedin = element;
-              }}
-              data-hidden={Boolean(flipProfileLinks.length)}
-            >
-              {renderProfileLinkIcon("linkedin")}
-            </a>
-
-            <a
-              className="profile-link"
-              href="https://github.com/Ricardo-NM"
-              target="_blank"
-              rel="noreferrer"
-              aria-label={labels.githubLabel}
-              ref={(element) => {
-                drawerLinkRefs.current.github = element;
-              }}
-              data-hidden={Boolean(flipProfileLinks.length)}
-            >
-              {renderProfileLinkIcon("github")}
-            </a>
-
-            <a
-              className="profile-link"
-              href="/assets/CV_Ricardo_Nava_Mayoral.pdf"
-              download
-              aria-label={labels.resumeLabel}
-              ref={(element) => {
-                drawerLinkRefs.current.resume = element;
-              }}
-              data-hidden={Boolean(flipProfileLinks.length)}
-            >
-              {renderProfileLinkIcon("resume")}
-            </a>
-          </div>
-
-          <div className="profile-drawer-section">
-            <h4>{labels.profileAboutTitle}</h4>
-            <p>{profileAbout}</p>
-          </div>
 
           <div className="profile-drawer-meta">
+            <span>
+              <Mail aria-hidden="true" size={16} strokeWidth={1.8} />
+              {profileEmail}
+            </span>
             <span>
               <GraduationCap aria-hidden="true" size={16} strokeWidth={1.8} />
               {educationText}
@@ -737,25 +1185,70 @@ export default function PreferenceControls() {
             </span>
           </div>
 
+          <div className="profile-drawer-section profile-about">
+            <h4>{labels.aboutTitle}</h4>
+            <p
+              className="profile-about-text"
+              data-hidden={Boolean(flipIntroCopy)}
+              ref={drawerAboutRef}
+            >
+              {renderIntroCopyContent()}
+            </p>
+          </div>
+
           <div className="profile-drawer-section profile-work">
             <h4>{workExperienceTitle}</h4>
             <div className="profile-work-list">
               {workExperienceItems.map((item) => (
-                <article className="profile-work-item" key={item.company}>
+                <article
+                  className="profile-work-item"
+                  key={`${item.company}-${item.date.es}`}
+                >
                   <span className="profile-work-badge" aria-hidden="true">
                     <img src={item.logo} alt="" loading="lazy" />
                   </span>
                   <div className="profile-work-content">
-                    <h5>{item.role}</h5>
-                    <p className="profile-work-company">{item.company}</p>
-                    <p className="profile-work-date">{item.date}</p>
+                    <div className="profile-work-heading">
+                      <h5>{item.role[locale]}</h5>
+                      <p className="profile-work-company">{item.company}</p>
+                    </div>
+                    <div className="profile-work-date-row">
+                      <p className="profile-work-date">{item.date[locale]}</p>
+                      <a
+                        aria-label={workExperienceLinkLabel}
+                        className="profile-work-link"
+                        href="/experience"
+                      >
+                        <ArrowUpRight
+                          aria-hidden="true"
+                          size={15}
+                          strokeWidth={2}
+                        />
+                      </a>
+                    </div>
                   </div>
                 </article>
               ))}
             </div>
           </div>
+
         </section>
       </aside>
+
+      {githubContributionTooltip && (
+        <div
+          className="github-calendar-tooltip"
+          role="tooltip"
+          style={
+            {
+              "--tooltip-left": `${githubContributionTooltip.left}px`,
+              "--tooltip-top": `${githubContributionTooltip.top}px`,
+            } as CSSProperties
+          }
+        >
+          {githubContributionTooltip.text}
+        </div>
+      )}
 
       <div
         className="preferences-float"

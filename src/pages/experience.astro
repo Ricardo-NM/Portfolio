@@ -1,0 +1,32 @@
+---
+import ExperienceView from "../components/ExperienceView";
+import "../styles/global.css";
+---
+
+<!doctype html>
+<html lang="es" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="description"
+      content="Experiencia laboral de Ricardo Nava, desarrollador full stack."
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Experiencia laboral | Ricardo Nava</title>
+    <script is:inline>
+      (() => {
+        const storedTheme = localStorage.getItem("rn-theme");
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const theme = storedTheme || (prefersDark ? "dark" : "light");
+        const locale = localStorage.getItem("rn-locale") || "es";
+
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.lang = locale;
+      })();
+    </script>
+  </head>
+  <body>
+    <ExperienceView client:only="react" />
+  </body>
+</html>
