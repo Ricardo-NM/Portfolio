@@ -5,7 +5,7 @@ import {
   ChevronDown,
   CodeXml,
   FolderCode,
-  FolderGit2,
+  CalendarRange,
   GraduationCap,
   Home,
   Languages,
@@ -35,7 +35,8 @@ import RouteBreadcrumb from "./RouteBreadcrumb";
 type Theme = "light" | "dark";
 type Locale = "es" | "en";
 type ProfileLinkId = "linkedin" | "github" | "resume";
-type RouteLinkId = "experience" | "technologies" | "activity" | "contact";
+type RouteLinkId =
+  "experience" | "projects" | "technologies" | "activity" | "contact";
 type FlipAvatar = {
   deltaX: number;
   deltaY: number;
@@ -77,7 +78,13 @@ type GitHubContributionTooltip = {
   top: number;
 };
 type PreferenceControlsMode =
-  "chrome" | "home" | "preferences" | "technologies" | "activity" | "contact";
+  | "chrome"
+  | "home"
+  | "preferences"
+  | "projects"
+  | "technologies"
+  | "activity"
+  | "contact";
 type PreferenceControlsProps = {
   mode?: PreferenceControlsMode;
 };
@@ -120,14 +127,17 @@ const copy = {
     githubViewProfileLabel: "Ver perfil",
     githubProfileSummaryLabel: "Resumen de perfil de GitHub",
     skillsTitle: "Habilidades y Tecnologías",
+    projectsRouteTitle: "Proyectos",
+    projectsSubtitle:
+      "Selección de proyectos destacados, productos digitales y soluciones que he desarrollado.",
     technologiesSubtitle:
       "Tecnologías, lenguajes y herramientas que utilizo para desarrollar soluciones web y aplicaciones completas.",
     activitySubtitle:
       "Resumen visual de mis contribuciones en GitHub durante el último año.",
-    contactSubtitle: "Enviame un mensaje directo",
+    contactSubtitle: "Enviame un mensaje directo.",
     contactFullNameLabel: "Nombre completo",
     contactFullNamePlaceholder: "Ingresa tu nombre",
-    contactEmailLabel: "Correo electronico",
+    contactEmailLabel: "Correo electrónico",
     contactEmailPlaceholder: "correo@ejemplo.com",
     contactMessageLabel: "Mensaje",
     contactMessagePlaceholder: "Escribe tu mensaje...",
@@ -151,6 +161,7 @@ const copy = {
     homeRouteLabel: "Ir al inicio",
     drawerNavigationTitle: "Navegación",
     experienceRouteTitle: "Experiencia laboral",
+    projectsNavLabel: "Ver proyectos",
     technologiesRouteTitle: "Habilidades y Tecnologías",
     activityRouteTitle: "Actividad de GitHub",
     contactRouteTitle: "Contacto",
@@ -192,11 +203,14 @@ const copy = {
     githubViewProfileLabel: "View profile",
     githubProfileSummaryLabel: "GitHub profile summary",
     skillsTitle: "Skills and Technologies",
+    projectsRouteTitle: "Projects",
+    projectsSubtitle:
+      "Selected projects, digital products, and solutions I have developed.",
     technologiesSubtitle:
       "Technologies, languages, and tools I use to develop complete web solutions and applications.",
     activitySubtitle:
       "Visual summary of my GitHub contributions over the past year.",
-    contactSubtitle: "Send me a direct message",
+    contactSubtitle: "Send me a direct message.",
     contactFullNameLabel: "Full name",
     contactFullNamePlaceholder: "Enter your name",
     contactEmailLabel: "Email",
@@ -223,6 +237,7 @@ const copy = {
     homeRouteLabel: "Go home",
     drawerNavigationTitle: "Navigation",
     experienceRouteTitle: "Work experience",
+    projectsNavLabel: "View projects",
     technologiesRouteTitle: "Skills and Technologies",
     activityRouteTitle: "GitHub activity",
     contactRouteTitle: "Contact",
@@ -506,6 +521,7 @@ export default function PreferenceControls({
   });
   const drawerRouteRefs = useRef<Record<RouteLinkId, HTMLSpanElement | null>>({
     experience: null,
+    projects: null,
     technologies: null,
     activity: null,
     contact: null,
@@ -514,6 +530,7 @@ export default function PreferenceControls({
     Record<RouteLinkId, HTMLSpanElement | null>
   >({
     experience: null,
+    projects: null,
     technologies: null,
     activity: null,
     contact: null,
@@ -1139,8 +1156,12 @@ export default function PreferenceControls({
       return <CodeXml aria-hidden="true" size={size + 1} strokeWidth={2.1} />;
     }
 
+    if (id === "projects") {
+      return <FolderCode aria-hidden="true" size={size} strokeWidth={2.1} />;
+    }
+
     if (id === "activity") {
-      return <FolderGit2 aria-hidden="true" size={size} strokeWidth={2.1} />;
+      return <CalendarRange aria-hidden="true" size={size} strokeWidth={2.1} />;
     }
 
     return <Mail aria-hidden="true" size={size} strokeWidth={2.1} />;
@@ -1151,6 +1172,12 @@ export default function PreferenceControls({
       id: "experience",
       label: labels.experienceNavLabel,
       title: labels.experienceRouteTitle,
+    },
+    {
+      href: "/projects",
+      id: "projects",
+      label: labels.projectsNavLabel,
+      title: labels.projectsRouteTitle,
     },
     {
       href: "/technologies",
@@ -1356,6 +1383,7 @@ export default function PreferenceControls({
       drawerAboutMeasureRef.current?.getBoundingClientRect();
     const navRouteRefs = {
       experience: getNavbarRouteElement("experience"),
+      projects: getNavbarRouteElement("projects"),
       technologies: getNavbarRouteElement("technologies"),
       activity: getNavbarRouteElement("activity"),
       contact: getNavbarRouteElement("contact"),
@@ -1403,6 +1431,7 @@ export default function PreferenceControls({
     const introTargetRect = introCopyRef.current?.getBoundingClientRect();
     const navRouteRefs = {
       experience: getNavbarRouteElement("experience"),
+      projects: getNavbarRouteElement("projects"),
       technologies: getNavbarRouteElement("technologies"),
       activity: getNavbarRouteElement("activity"),
       contact: getNavbarRouteElement("contact"),
@@ -2116,6 +2145,28 @@ export default function PreferenceControls({
             >
               {renderTechnologyCategories()}
             </section>
+          </div>
+        </main>
+        {renderContactLeaveModal()}
+      </>
+    );
+  }
+
+  if (mode === "projects") {
+    return (
+      <>
+        <main className="experience-shell" aria-labelledby="projects-title">
+          <div className="experience-content">
+            <RouteBreadcrumb
+              currentLabel={labels.projectsRouteTitle}
+              homeLabel={labels.homeRouteLabel}
+              label={labels.breadcrumbLabel}
+            />
+
+            <header className="experience-header">
+              <h1 id="projects-title">{labels.projectsRouteTitle}</h1>
+              <p>{labels.projectsSubtitle}</p>
+            </header>
           </div>
         </main>
         {renderContactLeaveModal()}
