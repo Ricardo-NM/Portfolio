@@ -1,4 +1,5 @@
 import {
+  AlertTriangle,
   BookMarked,
   BriefcaseBusiness,
   ChevronDown,
@@ -9,9 +10,10 @@ import {
   Home,
   Languages,
   Mail,
+  MailCheck,
   MapPin,
-  MessageSquareText,
   Moon,
+  Send,
   Settings,
   Star,
   Sun,
@@ -26,6 +28,7 @@ import type {
   Ref,
 } from "react";
 import { useEffect, useRef, useState } from "react";
+import { navigate } from "astro:transitions/client";
 import bannerUrl from "../assets/banner.webp";
 import RouteBreadcrumb from "./RouteBreadcrumb";
 
@@ -78,11 +81,17 @@ type PreferenceControlsMode =
 type PreferenceControlsProps = {
   mode?: PreferenceControlsMode;
 };
+type ContactSubmitStatus = "idle" | "sending" | "success" | "error";
 
 const STORAGE_KEYS = {
   theme: "rn-theme",
   locale: "rn-locale",
 } as const;
+const CONTACT_LEAVE_FADE_DURATION_MS = 180;
+const CONTACT_SUCCESS_AUTO_CLOSE_MS = 3000;
+const CONTACT_MESSAGE_MAX_LENGTH = 1200;
+const UNSAFE_CONTACT_MESSAGE_PATTERN =
+  /<\s*\/?\s*(script|iframe|object|embed|link|meta|style|form|input|button|textarea|svg|math|img|video|audio|source|base)\b|javascript\s*:|data\s*:\s*(text\/html|application\/javascript)|on[a-z]+\s*=/i;
 
 const copy = {
   es: {
@@ -115,6 +124,26 @@ const copy = {
       "Tecnologías, lenguajes y herramientas que utilizo para desarrollar soluciones web y aplicaciones completas.",
     activitySubtitle:
       "Resumen visual de mis contribuciones en GitHub durante el último año.",
+    contactSubtitle: "Enviame un mensaje directo",
+    contactFullNameLabel: "Nombre completo",
+    contactFullNamePlaceholder: "Ingresa tu nombre",
+    contactEmailLabel: "Correo electronico",
+    contactEmailPlaceholder: "correo@ejemplo.com",
+    contactMessageLabel: "Mensaje",
+    contactMessagePlaceholder: "Escribe tu mensaje...",
+    contactMessageCounterLabel: "caracteres",
+    contactUnsafeMessage:
+      "El mensaje contiene contenido no permitido. Retiralo para continuar.",
+    contactSendLabel: "Enviar",
+    contactSendingLabel: "Enviando...",
+    contactSuccessTitle: "Mensaje enviado",
+    contactSuccessDescription: "Tu mensaje se ha enviado con exito.",
+    contactErrorMessage: "No se pudo enviar el mensaje. Intentalo de nuevo.",
+    contactLeaveTitle: "¿Deseas salir y borrar el contenido?",
+    contactLeaveDescription:
+      "Tienes información escrita en el formulario. Si sales ahora, se perderá.",
+    contactStayLabel: "No salir",
+    contactLeaveLabel: "Salir",
     aboutTitle: "Acerca de mí",
     resumeLabel: "Descargar CV",
     breadcrumbLabel: "Ruta de navegacion",
@@ -167,6 +196,26 @@ const copy = {
       "Technologies, languages, and tools I use to develop complete web solutions and applications.",
     activitySubtitle:
       "Visual summary of my GitHub contributions over the past year.",
+    contactSubtitle: "Send me a direct message",
+    contactFullNameLabel: "Full name",
+    contactFullNamePlaceholder: "Enter your name",
+    contactEmailLabel: "Email",
+    contactEmailPlaceholder: "email@example.com",
+    contactMessageLabel: "Message",
+    contactMessagePlaceholder: "Write your message...",
+    contactMessageCounterLabel: "characters",
+    contactUnsafeMessage:
+      "The message contains unsupported content. Remove it to continue.",
+    contactSendLabel: "Send",
+    contactSendingLabel: "Sending...",
+    contactSuccessTitle: "Message sent",
+    contactSuccessDescription: "Your message has been sent successfully.",
+    contactErrorMessage: "The message could not be sent. Please try again.",
+    contactLeaveTitle: "Leave and discard this content?",
+    contactLeaveDescription:
+      "You have information written in the form. If you leave now, it will be lost.",
+    contactStayLabel: "Stay",
+    contactLeaveLabel: "Leave",
     aboutTitle: "About me",
     resumeLabel: "Download resume",
     breadcrumbLabel: "Breadcrumb",
@@ -407,10 +456,32 @@ export default function PreferenceControls({
     useState<GitHubContributionsStatus>("idle");
   const [githubContributionTooltip, setGithubContributionTooltip] =
     useState<GitHubContributionTooltip | null>(null);
+  const [contactForm, setContactForm] = useState({
+    email: "",
+    message: "",
+    name: "",
+  });
+  const [contactSubmitStatus, setContactSubmitStatus] =
+    useState<ContactSubmitStatus>("idle");
+  const [isContactSuccessModalOpen, setIsContactSuccessModalOpen] =
+    useState(false);
+  const [pendingContactNavigation, setPendingContactNavigation] = useState<
+    string | null
+  >(null);
+  const [isContactLeaveClosing, setIsContactLeaveClosing] = useState(false);
+  const [isContactNavigationConfirming, setIsContactNavigationConfirming] =
+    useState(false);
   const closeTimerRef = useRef<number | undefined>(undefined);
   const flipTimerRef = useRef<number | undefined>(undefined);
   const routeNavRevealTimerRef = useRef<number | undefined>(undefined);
   const githubRequestInFlightRef = useRef(false);
+  const allowContactNavigationRef = useRef(false);
+  const contactFormDirtyRef = useRef(false);
+  const contactLeaveCloseTimerRef = useRef<number | undefined>(undefined);
+  const contactSuccessCloseTimerRef = useRef<number | undefined>(undefined);
+  const contactLeaveCancelRef = useRef<HTMLButtonElement>(null);
+  const contactSuccessModalRef = useRef<HTMLElement>(null);
+  const contactLeaveSourceRef = useRef<Element | null>(null);
   const introLayoutRef = useRef<HTMLDivElement>(null);
   const introCopyRef = useRef<HTMLParagraphElement>(null);
   const introToolingRef = useRef<HTMLDivElement>(null);
@@ -557,6 +628,14 @@ export default function PreferenceControls({
       if (flipTimerRef.current) {
         window.clearTimeout(flipTimerRef.current);
       }
+
+      if (contactLeaveCloseTimerRef.current) {
+        window.clearTimeout(contactLeaveCloseTimerRef.current);
+      }
+
+      if (contactSuccessCloseTimerRef.current) {
+        window.clearTimeout(contactSuccessCloseTimerRef.current);
+      }
     };
   }, []);
 
@@ -647,6 +726,109 @@ export default function PreferenceControls({
   const profileLocation =
     locale === "es" ? "Hidalgo, México" : "Hidalgo, Mexico";
   const profileEmail = "lic.ricardo.nm@gmail.com";
+  const isContactFormDirty =
+    contactForm.name.trim().length > 0 ||
+    contactForm.email.trim().length > 0 ||
+    contactForm.message.trim().length > 0;
+  const contactMessageLength = contactForm.message.length;
+  const isContactMessageUnsafe = UNSAFE_CONTACT_MESSAGE_PATTERN.test(
+    contactForm.message,
+  );
+  const isContactFormValid =
+    contactForm.name.trim().length > 0 &&
+    contactForm.message.trim().length > 0 &&
+    contactMessageLength <= CONTACT_MESSAGE_MAX_LENGTH &&
+    !isContactMessageUnsafe &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactForm.email.trim());
+  const isContactSubmitting = contactSubmitStatus === "sending";
+  const isContactLeaveModalOpen = pendingContactNavigation !== null;
+  const updateContactFormValue = (
+    field: keyof typeof contactForm,
+    value: string,
+  ) => {
+    const nextValue =
+      field === "message" ? value.slice(0, CONTACT_MESSAGE_MAX_LENGTH) : value;
+    const nextContactForm = {
+      ...contactForm,
+      [field]: nextValue,
+    };
+
+    contactFormDirtyRef.current =
+      nextContactForm.name.trim().length > 0 ||
+      nextContactForm.email.trim().length > 0 ||
+      nextContactForm.message.trim().length > 0;
+    if (contactSubmitStatus === "error") {
+      setContactSubmitStatus("idle");
+    }
+    setContactForm(nextContactForm);
+  };
+  const handleContactSubmit = async (event: { preventDefault: () => void }) => {
+    event.preventDefault();
+
+    if (!isContactFormValid || isContactSubmitting) {
+      return;
+    }
+
+    setContactSubmitStatus("sending");
+
+    try {
+      const response = await fetch("/api/contact", {
+        body: JSON.stringify({
+          email: contactForm.email.trim(),
+          locale,
+          message: contactForm.message.trim(),
+          name: contactForm.name.trim(),
+          theme,
+        }),
+        headers: {
+          "content-type": "application/json",
+        },
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("Contact request failed.");
+      }
+
+      setContactForm({
+        email: "",
+        message: "",
+        name: "",
+      });
+      contactFormDirtyRef.current = false;
+      setContactSubmitStatus("success");
+      setIsContactSuccessModalOpen(true);
+
+      if (contactSuccessCloseTimerRef.current) {
+        window.clearTimeout(contactSuccessCloseTimerRef.current);
+      }
+
+      contactSuccessCloseTimerRef.current = window.setTimeout(() => {
+        setIsContactSuccessModalOpen(false);
+        contactSuccessCloseTimerRef.current = undefined;
+      }, CONTACT_SUCCESS_AUTO_CLOSE_MS);
+    } catch {
+      setContactSubmitStatus("error");
+    }
+  };
+  const closeContactLeaveModal = () => {
+    if (isContactNavigationConfirming || isContactLeaveClosing) {
+      return;
+    }
+
+    setIsContactLeaveClosing(true);
+
+    if (contactLeaveCloseTimerRef.current) {
+      window.clearTimeout(contactLeaveCloseTimerRef.current);
+    }
+
+    contactLeaveCloseTimerRef.current = window.setTimeout(() => {
+      setPendingContactNavigation(null);
+      setIsContactLeaveClosing(false);
+      contactLeaveSourceRef.current = null;
+      contactLeaveCloseTimerRef.current = undefined;
+    }, CONTACT_LEAVE_FADE_DURATION_MS);
+  };
   const monthLabels = MONTH_LABELS[locale];
   const githubMonthMarkers =
     githubContributions?.weeks.flatMap((week, weekIndex, weeks) => {
@@ -674,6 +856,222 @@ export default function PreferenceControls({
       week.contributionDays.map((day) => day.contributionCount),
     ) ?? []),
   );
+
+  useEffect(() => {
+    contactFormDirtyRef.current = isContactFormDirty;
+  }, [isContactFormDirty]);
+
+  useEffect(() => {
+    if (mode !== "contact" && mode !== "chrome") {
+      return;
+    }
+
+    const getInternalNavigationHref = (event: MouseEvent) => {
+      if (
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey ||
+        event.shiftKey
+      ) {
+        return null;
+      }
+
+      const eventTarget = event.composed
+        ? event.composedPath()[0]
+        : event.target;
+
+      if (!(eventTarget instanceof Element)) {
+        return null;
+      }
+
+      const link = eventTarget.closest("a, area");
+
+      if (!(link instanceof HTMLAnchorElement)) {
+        return null;
+      }
+
+      const href = link.getAttribute("href");
+
+      if (
+        !href ||
+        link.hasAttribute("download") ||
+        (link.target && link.target !== "_self")
+      ) {
+        return null;
+      }
+
+      const nextUrl = new URL(href, window.location.href);
+
+      if (nextUrl.origin !== window.location.origin) {
+        return null;
+      }
+
+      const nextPath = nextUrl.pathname.replace(/\/$/, "") || "/";
+
+      if (nextPath === "/contact") {
+        return null;
+      }
+
+      contactLeaveSourceRef.current = link;
+
+      return `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
+    };
+    const hasContactFormContent = () => {
+      const form = document.querySelector<HTMLFormElement>(".contact-form");
+
+      if (!form) {
+        return contactFormDirtyRef.current;
+      }
+
+      const formData = new FormData(form);
+
+      return ["name", "email", "message"].some((field) => {
+        const value = formData.get(field);
+
+        return typeof value === "string" && value.trim().length > 0;
+      });
+    };
+
+    const handleDocumentClick = (event: MouseEvent) => {
+      if (
+        !hasContactFormContent() ||
+        allowContactNavigationRef.current ||
+        event.defaultPrevented
+      ) {
+        return;
+      }
+
+      const href = getInternalNavigationHref(event);
+
+      if (!href) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      setIsContactLeaveClosing(false);
+
+      if (contactLeaveCloseTimerRef.current) {
+        window.clearTimeout(contactLeaveCloseTimerRef.current);
+        contactLeaveCloseTimerRef.current = undefined;
+      }
+
+      setPendingContactNavigation(href);
+    };
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!hasContactFormContent() || allowContactNavigationRef.current) {
+        return;
+      }
+
+      event.preventDefault();
+      Reflect.set(event, "returnValue", "");
+    };
+
+    document.addEventListener("click", handleDocumentClick, true);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      document.removeEventListener("click", handleDocumentClick, true);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [mode]);
+
+  useEffect(() => {
+    if (!isContactLeaveModalOpen) {
+      return;
+    }
+
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    contactLeaveCancelRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeContactLeaveModal();
+        return;
+      }
+
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      const focusableElements = Array.from(
+        document.querySelectorAll<HTMLElement>(
+          ".contact-leave-modal button:not(:disabled)",
+        ),
+      );
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (!firstElement || !lastElement) {
+        return;
+      }
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [
+    closeContactLeaveModal,
+    isContactLeaveModalOpen,
+    isContactLeaveClosing,
+    isContactNavigationConfirming,
+  ]);
+
+  useEffect(() => {
+    if (!isContactSuccessModalOpen) {
+      return;
+    }
+
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const focusTimer = window.setTimeout(() => {
+      contactSuccessModalRef.current?.focus();
+    }, 0);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      if (contactSuccessCloseTimerRef.current) {
+        window.clearTimeout(contactSuccessCloseTimerRef.current);
+        contactSuccessCloseTimerRef.current = undefined;
+      }
+
+      setIsContactSuccessModalOpen(false);
+    };
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+      window.clearTimeout(focusTimer);
+    };
+  }, [isContactSuccessModalOpen]);
   const githubCalendarStyle = {
     "--github-week-count": githubContributions?.weeks.length ?? 53,
   } as CSSProperties;
@@ -743,9 +1141,7 @@ export default function PreferenceControls({
       return <FolderGit2 aria-hidden="true" size={size} strokeWidth={2.1} />;
     }
 
-    return (
-      <MessageSquareText aria-hidden="true" size={size} strokeWidth={2.1} />
-    );
+    return <Mail aria-hidden="true" size={size} strokeWidth={2.1} />;
   };
   const routeItems = [
     {
@@ -1524,12 +1920,147 @@ export default function PreferenceControls({
       ))}
     </div>
   );
+  const cancelContactNavigation = () => {
+    closeContactLeaveModal();
+  };
+  const confirmContactNavigation = () => {
+    if (
+      !pendingContactNavigation ||
+      isContactNavigationConfirming ||
+      isContactLeaveClosing
+    ) {
+      return;
+    }
+
+    allowContactNavigationRef.current = true;
+    setIsContactLeaveClosing(true);
+    setIsContactNavigationConfirming(true);
+    const sourceElement = contactLeaveSourceRef.current ?? undefined;
+
+    if (contactLeaveCloseTimerRef.current) {
+      window.clearTimeout(contactLeaveCloseTimerRef.current);
+      contactLeaveCloseTimerRef.current = undefined;
+    }
+
+    void navigate(pendingContactNavigation, {
+      sourceElement,
+    }).finally(() => {
+      allowContactNavigationRef.current = false;
+      setIsContactNavigationConfirming(false);
+      setIsContactLeaveClosing(false);
+      contactLeaveSourceRef.current = null;
+      setPendingContactNavigation(null);
+    });
+  };
+  const renderContactLeaveModal = () => {
+    if (!isContactLeaveModalOpen) {
+      return null;
+    }
+
+    return (
+      <div
+        className="contact-leave-backdrop"
+        data-state={
+          isContactNavigationConfirming
+            ? "leaving"
+            : isContactLeaveClosing
+              ? "closing"
+              : "open"
+        }
+        role="presentation"
+      >
+        <section
+          aria-describedby="contact-leave-description"
+          aria-labelledby="contact-leave-title"
+          aria-modal="true"
+          className="contact-leave-modal"
+          role="dialog"
+        >
+          <div className="contact-leave-message">
+            <span
+              className="contact-leave-icon contact-warning-icon"
+              aria-hidden="true"
+            >
+              <AlertTriangle size={22} strokeWidth={1.9} />
+            </span>
+
+            <div>
+              <h2 id="contact-leave-title">{labels.contactLeaveTitle}</h2>
+              <p id="contact-leave-description">
+                {labels.contactLeaveDescription}
+              </p>
+            </div>
+          </div>
+
+          <div className="contact-leave-actions">
+            <button
+              className="contact-leave-button contact-leave-button-secondary"
+              disabled={isContactNavigationConfirming || isContactLeaveClosing}
+              onClick={cancelContactNavigation}
+              ref={contactLeaveCancelRef}
+              type="button"
+            >
+              {labels.contactStayLabel}
+            </button>
+
+            <button
+              className="contact-leave-button contact-leave-button-primary"
+              disabled={isContactNavigationConfirming || isContactLeaveClosing}
+              onClick={confirmContactNavigation}
+              type="button"
+            >
+              {labels.contactLeaveLabel}
+            </button>
+          </div>
+        </section>
+      </div>
+    );
+  };
+  const renderContactSuccessModal = () => {
+    if (!isContactSuccessModalOpen) {
+      return null;
+    }
+
+    return (
+      <div
+        className="contact-leave-backdrop contact-success-backdrop"
+        role="presentation"
+      >
+        <section
+          aria-describedby="contact-success-description"
+          aria-labelledby="contact-success-title"
+          aria-modal="true"
+          className="contact-leave-modal contact-success-modal"
+          ref={contactSuccessModalRef}
+          role="dialog"
+          tabIndex={-1}
+        >
+          <div className="contact-leave-message">
+            <span
+              className="contact-leave-icon contact-success-icon"
+              aria-hidden="true"
+            >
+              <MailCheck size={24} strokeWidth={1.9} />
+            </span>
+
+            <div>
+              <h2 id="contact-success-title">{labels.contactSuccessTitle}</h2>
+              <p id="contact-success-description">
+                {labels.contactSuccessDescription}
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  };
 
   if (mode === "chrome" || mode === "preferences") {
     return (
       <>
         {renderFloatingNav(isProfileMenuOpen)}
         {renderPreferencesFloat()}
+        {renderContactLeaveModal()}
       </>
     );
   }
@@ -1558,6 +2089,7 @@ export default function PreferenceControls({
             </section>
           </div>
         </main>
+        {renderContactLeaveModal()}
       </>
     );
   }
@@ -1619,9 +2151,126 @@ export default function PreferenceControls({
 
             <header className="experience-header">
               <h1 id="contact-title">{labels.contactRouteTitle}</h1>
+              <p>{labels.contactSubtitle}</p>
             </header>
+
+            <form
+              className="contact-form route-section"
+              onSubmit={handleContactSubmit}
+            >
+              <div className="contact-field-row">
+                <div className="contact-field">
+                  <label htmlFor="contact-name">
+                    {labels.contactFullNameLabel}{" "}
+                    <span aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    autoComplete="name"
+                    id="contact-name"
+                    name="name"
+                    onChange={(event) => {
+                      const { value } = event.currentTarget;
+
+                      updateContactFormValue("name", value);
+                    }}
+                    placeholder={labels.contactFullNamePlaceholder}
+                    required
+                    type="text"
+                    value={contactForm.name}
+                  />
+                </div>
+
+                <div className="contact-field">
+                  <label htmlFor="contact-email">
+                    {labels.contactEmailLabel} <span aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    autoComplete="email"
+                    id="contact-email"
+                    inputMode="email"
+                    name="email"
+                    onChange={(event) => {
+                      const { value } = event.currentTarget;
+
+                      updateContactFormValue("email", value);
+                    }}
+                    placeholder={labels.contactEmailPlaceholder}
+                    required
+                    type="email"
+                    value={contactForm.email}
+                  />
+                </div>
+              </div>
+
+              <div className="contact-field">
+                <label htmlFor="contact-message">
+                  {labels.contactMessageLabel} <span aria-hidden="true">*</span>
+                </label>
+                <textarea
+                  aria-describedby={
+                    isContactMessageUnsafe
+                      ? "contact-message-counter contact-message-safety"
+                      : "contact-message-counter"
+                  }
+                  id="contact-message"
+                  maxLength={CONTACT_MESSAGE_MAX_LENGTH}
+                  name="message"
+                  onChange={(event) => {
+                    const { value } = event.currentTarget;
+
+                    updateContactFormValue("message", value);
+                  }}
+                  placeholder={labels.contactMessagePlaceholder}
+                  required
+                  rows={6}
+                  value={contactForm.message}
+                />
+                <div className="contact-message-meta">
+                  <span
+                    className="contact-message-counter"
+                    id="contact-message-counter"
+                  >
+                    {contactMessageLength}/{CONTACT_MESSAGE_MAX_LENGTH}{" "}
+                    {labels.contactMessageCounterLabel}
+                  </span>
+
+                  {isContactMessageUnsafe && (
+                    <span
+                      className="contact-message-safety"
+                      id="contact-message-safety"
+                      role="alert"
+                    >
+                      {labels.contactUnsafeMessage}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="contact-actions">
+                <button
+                  className="contact-submit"
+                  aria-busy={isContactSubmitting}
+                  disabled={!isContactFormValid || isContactSubmitting}
+                  type="submit"
+                >
+                  <Send aria-hidden="true" size={17} strokeWidth={2} />
+                  <span>
+                    {isContactSubmitting
+                      ? labels.contactSendingLabel
+                      : labels.contactSendLabel}
+                  </span>
+                </button>
+              </div>
+
+              {contactSubmitStatus === "error" && (
+                <p className="contact-error" role="alert">
+                  {labels.contactErrorMessage}
+                </p>
+              )}
+            </form>
           </div>
         </main>
+        {renderContactSuccessModal()}
       </>
     );
   }
