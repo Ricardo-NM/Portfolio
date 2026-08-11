@@ -10,6 +10,8 @@ import {
 import { useState } from "react";
 import { type Locale } from "../data/workExperience";
 import { useSyncedLocale } from "../hooks/useSyncedLocale";
+import AnimatedDescription from "./AnimatedDescription";
+import AnimatedTitle from "./AnimatedTitle";
 import RouteBreadcrumb from "./RouteBreadcrumb";
 
 const copy = {
@@ -210,8 +212,8 @@ export default function ExperienceAchievementsView() {
         />
 
         <header className="experience-header">
-          <h1 id="achievements-title">{labels.title}</h1>
-          <p>{labels.subtitle}</p>
+          <AnimatedTitle id="achievements-title" text={labels.title} />
+          <AnimatedDescription text={labels.subtitle} title={labels.title} />
         </header>
 
         <section
@@ -243,7 +245,9 @@ export default function ExperienceAchievementsView() {
                           strokeWidth={2.4}
                           aria-hidden="true"
                         />
-                        {labels.priorityLabels[index]}
+                        <span className="achievement-priority-label">
+                          {labels.priorityLabels[index]}
+                        </span>
                       </span>
                     </div>
 

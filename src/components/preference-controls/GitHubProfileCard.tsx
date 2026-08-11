@@ -1,4 +1,6 @@
 import { BookMarked, MapPin, Star, Users } from "lucide-react";
+import { useRef } from "react";
+import { useLocaleFlip } from "../../hooks/useLocaleFlip";
 import type { PreferenceLabels } from "./copy";
 
 type GitHubProfileCardProps = {
@@ -6,10 +8,15 @@ type GitHubProfileCardProps = {
 };
 
 export default function GitHubProfileCard({ labels }: GitHubProfileCardProps) {
+  const cardRef = useRef<HTMLElement>(null);
+
+  useLocaleFlip(cardRef, [labels.githubAchievementsLabel]);
+
   return (
     <article
       className="github-profile-card"
       aria-label={labels.githubProfileSummaryLabel}
+      ref={cardRef}
     >
       <div className="github-profile-card-head">
         <img
@@ -26,11 +33,14 @@ export default function GitHubProfileCard({ labels }: GitHubProfileCardProps) {
           </div>
 
           <div className="github-profile-achievements">
-            <span>{labels.githubAchievementsLabel}</span>
+            <span className="github-profile-achievements-label">
+              {labels.githubAchievementsLabel}
+            </span>
             <img
               src="/assets/quickdraw-default-39c6aec8ff89.png"
               alt={labels.githubAchievementsLabel}
               className="github-profile-achievement"
+              data-locale-flip-key="github-quickdraw-achievement"
               loading="lazy"
             />
           </div>
@@ -63,12 +73,18 @@ export default function GitHubProfileCard({ labels }: GitHubProfileCardProps) {
         <div className="github-profile-stats">
           <p>
             <Users aria-hidden="true" size={15} strokeWidth={1.8} />
-            <strong>1</strong> {labels.githubFollowerLabel}
+            <strong>1</strong>{" "}
+            <span className="github-profile-stats-label">
+              {labels.githubFollowerLabel}
+            </span>
           </p>
 
           <p>
             <BookMarked aria-hidden="true" size={15} strokeWidth={1.8} />
-            <strong>17</strong> {labels.githubRepositoriesLabel}
+            <strong>17</strong>{" "}
+            <span className="github-profile-stats-label">
+              {labels.githubRepositoriesLabel}
+            </span>
           </p>
         </div>
 

@@ -87,8 +87,24 @@ body {
     color var(--theme-transition);
 }
 
+@media (min-width: 900px) and (min-height: 880px) {
+  body:has(.experience-shell-work) {
+    overflow-y: hidden;
+  }
+}
+
 button {
   font: inherit;
+}
+
+.screen-reader-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .portfolio-shell {
@@ -1146,6 +1162,27 @@ button {
   line-height: 1;
   overflow-wrap: anywhere;
   transition: color var(--theme-transition);
+  view-transition-name: route-breadcrumb-current;
+  contain: layout paint;
+}
+
+::view-transition-group(route-breadcrumb-current) {
+  animation-duration: 360ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+::view-transition-old(route-breadcrumb-current),
+::view-transition-new(route-breadcrumb-current) {
+  height: 100%;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(route-breadcrumb-current) {
+  animation: breadcrumb-current-fade-out 240ms ease-out both;
+}
+
+::view-transition-new(route-breadcrumb-current) {
+  animation: breadcrumb-current-fade-in 300ms ease-out 80ms both;
 }
 
 .experience-header {
@@ -1155,10 +1192,47 @@ button {
 .experience-header h1 {
   margin: 0;
   color: var(--color-primary);
-  font-size: clamp(2.25rem, 7vw, 5.5rem);
+  font-size: clamp(2.08rem, 6.3vw, 5rem);
   font-weight: 800;
   line-height: 0.95;
   transition: color var(--theme-transition);
+}
+
+.animated-title-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.animated-title-letter {
+  display: inline-block;
+  color: currentColor;
+  opacity: 0;
+  transform: translateY(0.38em);
+  animation: letter-rise 560ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(var(--letter-index) * 45ms);
+  transition:
+    opacity var(--motion-standard),
+    transform var(--motion-standard);
+  will-change: opacity, transform;
+}
+
+.animated-description-word {
+  display: inline-block;
+}
+
+.animated-description-letter {
+  display: inline-block;
+  color: currentColor;
+  opacity: 0;
+  transform: translateY(0.38em);
+  animation: letter-rise 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(
+    var(--description-start-delay) + (var(--letter-index) * 12ms)
+  );
+  transition:
+    opacity var(--motion-standard),
+    transform var(--motion-standard);
+  will-change: opacity, transform;
 }
 
 .experience-header p {
@@ -1174,20 +1248,32 @@ button {
 }
 
 .experience-list {
+  --experience-card-stagger: 120ms;
   display: grid;
   gap: 1rem;
-  margin-top: clamp(1rem, 2.4vw, 1.8rem);
+  margin-top: clamp(0.85rem, 1.8vw, 1.15rem);
 }
 
 .experience-card {
   border: 1px solid var(--color-tech-card-border);
   border-radius: 0.5rem;
   background: var(--color-tech-card-bg);
+  opacity: 0;
   padding: clamp(0.54rem, 1.1vw, 0.66rem) clamp(0.72rem, 1.8vw, 1rem);
+  animation: experience-card-fade-in 360ms ease-out forwards;
+  animation-delay: calc(
+    var(--experience-content-delay) +
+      (var(--experience-card-index) * var(--experience-card-stagger))
+  );
   transition:
     background-color var(--theme-transition),
     border-color var(--theme-transition),
     color var(--theme-transition);
+  will-change: opacity;
+}
+
+.experience-card[data-intro-open="true"] {
+  overflow: clip;
 }
 
 .experience-card-toggle {
@@ -1228,6 +1314,16 @@ button {
   border: 0;
   border-radius: 0;
   background: transparent;
+  opacity: 0;
+  transform: translateX(-0.85rem);
+  animation: experience-logo-slide-in 420ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(
+    var(--experience-content-delay) +
+      (var(--experience-card-index) * var(--experience-card-stagger)) +
+      150ms
+  );
+  will-change: opacity, transform;
 }
 
 .experience-logo img {
@@ -1249,7 +1345,17 @@ button {
   font-size: clamp(0.88rem, 1.45vw, 1.08rem);
   font-weight: 900;
   line-height: 1.15;
+  opacity: 0;
+  transform: translateY(-0.48rem);
+  animation: experience-content-slide-down 360ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(
+    var(--experience-content-delay) +
+      (var(--experience-card-index) * var(--experience-card-stagger)) +
+      210ms
+  );
   transition: color var(--theme-transition);
+  will-change: opacity, transform;
 }
 
 .experience-company,
@@ -1264,12 +1370,32 @@ button {
 .experience-company {
   margin: 0.08rem 0 0;
   font-weight: 400;
+  opacity: 0;
+  transform: translateY(0.48rem);
+  animation: experience-content-slide-up 360ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(
+    var(--experience-content-delay) +
+      (var(--experience-card-index) * var(--experience-card-stagger)) +
+      270ms
+  );
+  will-change: opacity, transform;
 }
 
 .experience-card-meta time {
   font-weight: 300;
+  opacity: 0;
   text-align: right;
+  transform: translateY(-0.48rem);
   white-space: nowrap;
+  animation: experience-content-slide-down 360ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(
+    var(--experience-content-delay) +
+      (var(--experience-card-index) * var(--experience-card-stagger)) +
+      210ms
+  );
+  will-change: opacity, transform;
 }
 
 .experience-chevron-stack {
@@ -1278,6 +1404,16 @@ button {
   height: 1.32rem;
   place-items: center;
   color: var(--color-primary);
+  opacity: 0;
+  transform: translateY(0.48rem);
+  animation: experience-content-slide-up 360ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(
+    var(--experience-content-delay) +
+      (var(--experience-card-index) * var(--experience-card-stagger)) +
+      270ms
+  );
+  will-change: opacity, transform;
 }
 
 .experience-chevron {
@@ -1327,8 +1463,9 @@ button {
 .experience-bullets {
   display: grid;
   gap: 0.4rem;
+  list-style: none;
   margin: 0.95rem 0 0;
-  padding: 0.85rem 0 0 1.05rem;
+  padding: 0.85rem 0 0;
   border-top: 1px solid
     color-mix(in srgb, var(--color-tech-card-border) 78%, transparent);
   color: var(--color-text);
@@ -1340,8 +1477,69 @@ button {
   transition: color var(--theme-transition);
 }
 
-.experience-bullets li::marker {
-  color: var(--color-primary);
+.experience-bullet {
+  display: grid;
+  grid-template-columns: 0.42rem minmax(0, 1fr);
+  gap: 0.62rem;
+  align-items: start;
+}
+
+.experience-bullet-marker {
+  width: 0.28rem;
+  height: 0.28rem;
+  border-radius: 999px;
+  background: var(--color-primary);
+  margin-top: 0.66em;
+  opacity: 1;
+  transform: none;
+  transition: background-color var(--theme-transition);
+}
+
+.experience-bullet-copy {
+  min-width: 0;
+}
+
+.experience-bullet-word {
+  display: inline-block;
+}
+
+.experience-bullet-letter {
+  display: inline-block;
+  opacity: 1;
+  transform: none;
+}
+
+.experience-card[data-intro-open="true"]
+  .experience-card-panel[data-open="true"]
+  .experience-bullet-marker,
+.experience-card[data-intro-open="true"]
+  .experience-card-panel[data-open="true"]
+  .experience-bullet-letter {
+  opacity: 0;
+  transform: translateY(0.34em);
+  animation: letter-rise 260ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.experience-card[data-intro-open="true"]
+  .experience-card-panel[data-open="true"]
+  .experience-bullet-marker {
+  animation-delay: calc(
+    var(--experience-content-delay) +
+      (var(--experience-card-index) * var(--experience-card-stagger)) +
+      560ms + var(--experience-bullet-delay)
+  );
+  will-change: opacity, transform;
+}
+
+.experience-card[data-intro-open="true"]
+  .experience-card-panel[data-open="true"]
+  .experience-bullet-letter {
+  animation-delay: calc(
+    var(--experience-content-delay) +
+      (var(--experience-card-index) * var(--experience-card-stagger)) +
+      560ms + var(--experience-bullet-delay) + (var(--letter-index) * 4ms)
+  );
+  will-change: opacity, transform;
 }
 
 .achievements-deck {
@@ -2020,14 +2218,21 @@ button {
   border-radius: 0.65rem;
   background: var(--color-tech-card-bg);
   color: var(--color-text);
+  opacity: 0;
   padding: clamp(0.72rem, 1.6vw, 1rem) clamp(1rem, 3vw, 1.8rem);
+  animation: technology-card-fade-in 360ms ease-out forwards;
+  animation-delay: calc(
+    var(--route-description-start-delay, 340ms) +
+      (var(--technology-card-index) * 120ms)
+  );
   transition:
     background-color var(--theme-transition),
     border-color var(--theme-transition),
     color var(--theme-transition);
+  will-change: opacity;
 }
 
-.technology-category-card h2 {
+.technology-category-title {
   margin: 0;
   color: var(--color-tech-card-title);
   font-size: clamp(0.88rem, 1.45vw, 1.08rem);
@@ -2037,13 +2242,40 @@ button {
   transition: color var(--theme-transition);
 }
 
+.technology-category-title-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.technology-category-title-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.38em);
+  animation: letter-rise 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(
+    var(--route-description-start-delay, 340ms) +
+      (var(--technology-card-index) * 120ms) +
+      (var(--letter-index) * 10ms)
+  );
+  will-change: opacity, transform;
+}
+
 .technology-category-divider {
   display: block;
   width: 2px;
   min-height: 3.3rem;
   border-radius: 999px;
   background: var(--color-tech-card-divider);
+  transform: scaleY(0);
+  transform-origin: center;
+  animation: technology-divider-expand-y 360ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(
+    var(--route-description-start-delay, 340ms) +
+      (var(--technology-card-index) * 120ms) + 240ms
+  );
   transition: background-color var(--theme-transition);
+  will-change: transform;
 }
 
 .technology-category-icons {
@@ -2056,6 +2288,7 @@ button {
 
 .technology-category-item {
   --technology-icon-color: var(--technology-brand-color-light);
+  --technology-icon-shift-y: 0.62rem;
   position: relative;
   display: inline-flex;
   width: clamp(2rem, 3.25vw, 2.35rem);
@@ -2065,10 +2298,17 @@ button {
   justify-content: center;
   color: var(--technology-icon-color);
   outline: none;
-  transform: scale(1);
+  transform: translateY(var(--technology-icon-shift-y)) scale(1);
+  animation: technology-icon-rise 340ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(
+    var(--route-description-start-delay, 340ms) +
+      (var(--technology-card-index) * 120ms) + 420ms +
+      (var(--technology-icon-index) * 42ms)
+  );
   transition:
     color var(--theme-transition),
     transform var(--motion-standard);
+  will-change: transform;
 }
 
 :root[data-theme="dark"] .technology-category-item {
@@ -2082,11 +2322,22 @@ button {
   background: currentColor;
   mask: var(--technology-icon-url) center / contain no-repeat;
   -webkit-mask: var(--technology-icon-url) center / contain no-repeat;
-  transition: background-color var(--theme-transition);
+  opacity: 0;
+  transform: scale(1);
+  animation: technology-icon-fade-in 300ms ease-out forwards;
+  animation-delay: calc(
+    var(--route-description-start-delay, 340ms) +
+      (var(--technology-card-index) * 120ms) + 420ms +
+      (var(--technology-icon-index) * 42ms)
+  );
+  transition:
+    background-color var(--theme-transition),
+    transform var(--motion-standard);
+  will-change: opacity, transform;
 }
 
-.technology-category-item:hover,
-.technology-category-item:focus-visible {
+.technology-category-item:hover .technology-category-icon,
+.technology-category-item:focus-visible .technology-category-icon {
   transform: scale(1.12);
 }
 
@@ -2486,6 +2737,11 @@ button {
   transition: color var(--theme-transition);
 }
 
+.profile-drawer-meta .profile-drawer-meta-text,
+.github-profile-stats-label {
+  display: inline;
+}
+
 .profile-drawer-meta svg {
   color: var(--color-primary);
 }
@@ -2731,6 +2987,83 @@ button {
   }
 }
 
+@keyframes breadcrumb-current-fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes breadcrumb-current-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes experience-card-fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes experience-logo-slide-in {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes experience-content-slide-down {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes experience-content-slide-up {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes technology-card-fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes technology-divider-expand-y {
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes technology-divider-expand-x {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes technology-icon-rise {
+  to {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes technology-icon-fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes profile-hint-pulse {
   0%,
   100% {
@@ -2778,6 +3111,105 @@ button {
   }
 }
 
+:root[data-suppress-entry-animations="locale"] .animated-title-letter,
+:root[data-suppress-entry-animations="locale"] .animated-description-letter,
+:root[data-suppress-entry-animations="locale"] .experience-card,
+:root[data-suppress-entry-animations="locale"] .experience-logo,
+:root[data-suppress-entry-animations="locale"] .experience-role,
+:root[data-suppress-entry-animations="locale"] .experience-company,
+:root[data-suppress-entry-animations="locale"] .experience-card-meta time,
+:root[data-suppress-entry-animations="locale"] .experience-chevron-stack,
+:root[data-suppress-entry-animations="locale"] .experience-bullet-marker,
+:root[data-suppress-entry-animations="locale"] .experience-bullet-letter,
+:root[data-suppress-entry-animations="locale"] .technology-category-card,
+:root[data-suppress-entry-animations="locale"] .technology-category-title-letter,
+:root[data-suppress-entry-animations="locale"] .technology-category-divider,
+:root[data-suppress-entry-animations="locale"] .technology-category-item,
+:root[data-suppress-entry-animations="locale"] .technology-category-icon {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+:root[data-suppress-entry-animations="locale"] .route-breadcrumb-current {
+  view-transition-name: none !important;
+}
+
+:root[data-locale-transition] .animated-title,
+:root[data-locale-transition] .animated-description,
+:root[data-locale-transition] .route-breadcrumb-current,
+:root[data-locale-transition] .experience-role,
+:root[data-locale-transition] .experience-company,
+:root[data-locale-transition] .experience-card-meta time,
+:root[data-locale-transition] .experience-bullet-copy,
+:root[data-locale-transition] .technology-category-title,
+:root[data-locale-transition] .profile-route-title,
+:root[data-locale-transition] .preference-button span,
+:root[data-locale-transition] .profile-hint span,
+:root[data-locale-transition] .profile-drawer-section h4,
+:root[data-locale-transition] .profile-drawer-section p,
+:root[data-locale-transition] .profile-drawer-meta-text,
+:root[data-locale-transition] .intro-copy,
+:root[data-locale-transition] .achievement-priority-label,
+:root[data-locale-transition] .achievement-card-copy,
+:root[data-locale-transition] .achievement-tag,
+:root[data-locale-transition] .github-activity h4,
+:root[data-locale-transition] .github-calendar-message,
+:root[data-locale-transition] .github-calendar-footer strong,
+:root[data-locale-transition] .github-calendar-legend-label,
+:root[data-locale-transition] .github-profile-achievements-label,
+:root[data-locale-transition] .github-profile-link-badge strong,
+:root[data-locale-transition] .github-profile-stats-label,
+:root[data-locale-transition] .contact-form label,
+:root[data-locale-transition] .contact-message-counter,
+:root[data-locale-transition] .contact-message-safety,
+:root[data-locale-transition] .contact-submit span,
+:root[data-locale-transition] .contact-error,
+:root[data-locale-transition] .contact-leave-message h2,
+:root[data-locale-transition] .contact-leave-message p,
+:root[data-locale-transition] .contact-leave-button-label {
+  opacity: 1;
+  transition: opacity 120ms ease-out;
+}
+
+:root[data-locale-transition="out"] .animated-title,
+:root[data-locale-transition="out"] .animated-description,
+:root[data-locale-transition="out"] .route-breadcrumb-current,
+:root[data-locale-transition="out"] .experience-role,
+:root[data-locale-transition="out"] .experience-company,
+:root[data-locale-transition="out"] .experience-card-meta time,
+:root[data-locale-transition="out"] .experience-bullet-copy,
+:root[data-locale-transition="out"] .technology-category-title,
+:root[data-locale-transition="out"] .profile-route-title,
+:root[data-locale-transition="out"] .preference-button span,
+:root[data-locale-transition="out"] .profile-hint span,
+:root[data-locale-transition="out"] .profile-drawer-section h4,
+:root[data-locale-transition="out"] .profile-drawer-section p,
+:root[data-locale-transition="out"] .profile-drawer-meta-text,
+:root[data-locale-transition="out"] .intro-copy,
+:root[data-locale-transition="out"] .achievement-priority-label,
+:root[data-locale-transition="out"] .achievement-card-copy,
+:root[data-locale-transition="out"] .achievement-tag,
+:root[data-locale-transition="out"] .github-activity h4,
+:root[data-locale-transition="out"] .github-calendar-message,
+:root[data-locale-transition="out"] .github-calendar-footer strong,
+:root[data-locale-transition="out"] .github-calendar-legend-label,
+:root[data-locale-transition="out"] .github-profile-achievements-label,
+:root[data-locale-transition="out"] .github-profile-link-badge strong,
+:root[data-locale-transition="out"] .github-profile-stats-label,
+:root[data-locale-transition="out"] .contact-form label,
+:root[data-locale-transition="out"] .contact-message-counter,
+:root[data-locale-transition="out"] .contact-message-safety,
+:root[data-locale-transition="out"] .contact-submit span,
+:root[data-locale-transition="out"] .contact-error,
+:root[data-locale-transition="out"] .contact-leave-message h2,
+:root[data-locale-transition="out"] .contact-leave-message p,
+:root[data-locale-transition="out"] .contact-leave-button-label {
+  opacity: 0.82;
+  transition-duration: 55ms;
+  transition-timing-function: ease-in;
+}
+
 @media (max-width: 820px) {
   .intro-tooling {
     grid-template-columns: minmax(0, 1fr);
@@ -2814,6 +3246,8 @@ button {
   .technology-category-divider {
     width: 100%;
     min-height: 2px;
+    transform: scaleX(0);
+    animation-name: technology-divider-expand-x;
   }
 
   .technology-category-icons {
@@ -3041,6 +3475,37 @@ button {
   }
 
   .name-letter {
+    opacity: 1;
+    transform: none;
+  }
+
+  .animated-title-letter {
+    opacity: 1;
+    transform: none;
+  }
+
+  .animated-description-letter {
+    opacity: 1;
+    transform: none;
+  }
+
+  .route-breadcrumb-current {
+    view-transition-name: none;
+  }
+
+  .experience-card,
+  .experience-logo,
+  .experience-role,
+  .experience-company,
+  .experience-card-meta time,
+  .experience-chevron-stack,
+  .experience-bullet-marker,
+  .experience-bullet-letter,
+  .technology-category-card,
+  .technology-category-title-letter,
+  .technology-category-divider,
+  .technology-category-item,
+  .technology-category-icon {
     opacity: 1;
     transform: none;
   }

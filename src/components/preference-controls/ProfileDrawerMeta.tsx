@@ -21,15 +21,15 @@ export default function ProfileDrawerMeta({
       </span>
       <span>
         <GraduationCap aria-hidden="true" size={16} strokeWidth={1.8} />
-        {educationText}
+        <span className="profile-drawer-meta-text">{educationText}</span>
       </span>
       <span>
         <MapPin aria-hidden="true" size={16} strokeWidth={1.8} />
-        {profileLocation}
+        <span className="profile-drawer-meta-text">{profileLocation}</span>
       </span>
       <span>
         <FolderCode aria-hidden="true" size={16} strokeWidth={1.8} />
-        {projectsText}
+        <span className="profile-drawer-meta-text">{projectsText}</span>
       </span>
     </div>
   );

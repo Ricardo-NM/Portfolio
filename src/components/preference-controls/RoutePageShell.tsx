@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import AnimatedDescription, { getDescriptionStartDelay } from "../AnimatedDescription";
+import AnimatedTitle from "../AnimatedTitle";
 import RouteBreadcrumb from "../RouteBreadcrumb";
 
 type RoutePageShellProps = {
@@ -19,7 +21,15 @@ export default function RoutePageShell({
   titleId,
 }: RoutePageShellProps) {
   return (
-    <main className="experience-shell" aria-labelledby={titleId}>
+    <main
+      className="experience-shell"
+      aria-labelledby={titleId}
+      style={
+        {
+          "--route-description-start-delay": `${getDescriptionStartDelay(title)}ms`,
+        } as CSSProperties
+      }
+    >
       <div className="experience-content">
         <RouteBreadcrumb
           currentLabel={title}
@@ -28,8 +38,8 @@ export default function RoutePageShell({
         />
 
         <header className="experience-header">
-          <h1 id={titleId}>{title}</h1>
-          <p>{subtitle}</p>
+          <AnimatedTitle id={titleId} text={title} />
+          <AnimatedDescription text={subtitle} title={title} />
         </header>
 
         {children}

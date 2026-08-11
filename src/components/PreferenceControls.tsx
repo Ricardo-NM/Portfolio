@@ -8,6 +8,7 @@ import type {
 import { useEffect, useRef, useState } from "react";
 import { navigate } from "astro:transitions/client";
 import bannerUrl from "../assets/banner.webp";
+import { LOCALE_FLIP_CAPTURE_EVENT } from "../hooks/useLocaleFlip";
 import ContactForm from "./preference-controls/ContactForm";
 import ContactLeaveModal from "./preference-controls/ContactLeaveModal";
 import ContactSuccessModal from "./preference-controls/ContactSuccessModal";
@@ -54,6 +55,9 @@ import {
   getInitialLocale,
   getInitialTheme,
 } from "./preference-controls/utils";
+
+const LOCALE_TEXT_FADE_IN_MS = 120;
+const LOCALE_TEXT_FADE_OUT_MS = 55;
 
 export default function PreferenceControls({
   mode = "home",
@@ -147,6 +151,8 @@ export default function PreferenceControls({
   });
   const profileDrawerShellRef = useRef<HTMLElement>(null);
   const drawerCloseRef = useRef<HTMLButtonElement>(null);
+  const localeFadeInTimerRef = useRef<number | null>(null);
+  const localeSwitchTimerRef = useRef<number | null>(null);
   const mainLinkRefs = useRef<Record<ProfileLinkId, HTMLAnchorElement | null>>({
     linkedin: null,
     github: null,
@@ -179,6 +185,18 @@ export default function PreferenceControls({
     return () => {
       window.removeEventListener("storage", syncPreferences);
       window.removeEventListener("rn-preferences-change", syncPreferences);
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (localeFadeInTimerRef.current !== null) {
+        window.clearTimeout(localeFadeInTimerRef.current);
+      }
+
+      if (localeSwitchTimerRef.current !== null) {
+        window.clearTimeout(localeSwitchTimerRef.current);
+      }
     };
   }, []);
 
@@ -755,6 +773,46 @@ export default function PreferenceControls({
   const settingsLabel = isPreferencesOpen
     ? labels.closeSettingsLabel
     : labels.openSettingsLabel;
+  const updateLocaleWithoutEntryAnimations = (nextLocaleValue: Locale) => {
+    if (nextLocaleValue === locale) {
+      return;
+    }
+
+    if (localeFadeInTimerRef.current !== null) {
+      window.clearTimeout(localeFadeInTimerRef.current);
+    }
+
+    if (localeSwitchTimerRef.current !== null) {
+      window.clearTimeout(localeSwitchTimerRef.current);
+    }
+
+    const root = document.documentElement;
+
+    root.dataset.suppressEntryAnimations = "locale";
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setLocale(nextLocaleValue);
+      return;
+    }
+
+    window.dispatchEvent(new Event(LOCALE_FLIP_CAPTURE_EVENT));
+    root.dataset.localeTransition = "out";
+
+    localeSwitchTimerRef.current = window.setTimeout(() => {
+      setLocale(nextLocaleValue);
+
+      window.requestAnimationFrame(() => {
+        root.dataset.localeTransition = "in";
+
+        localeFadeInTimerRef.current = window.setTimeout(() => {
+          delete root.dataset.localeTransition;
+          localeFadeInTimerRef.current = null;
+        }, LOCALE_TEXT_FADE_IN_MS);
+      });
+
+      localeSwitchTimerRef.current = null;
+    }, LOCALE_TEXT_FADE_OUT_MS);
+  };
   const routeItems = [
     {
       href: "/experience",
@@ -1223,7 +1281,7 @@ export default function PreferenceControls({
       onClose={() => setIsPreferencesOpen(false)}
       onMouseLeave={queueClosePreferences}
       onOpen={openPreferences}
-      onSetLocale={setLocale}
+      onSetLocale={updateLocaleWithoutEntryAnimations}
       onSetTheme={setTheme}
       onToggle={togglePreferences}
       settingsLabel={settingsLabel}

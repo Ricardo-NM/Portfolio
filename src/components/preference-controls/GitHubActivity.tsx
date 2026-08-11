@@ -141,11 +141,15 @@ export default function GitHubActivity({
                   : `${contributions.totalContributions} contributions in the last year`}
               </strong>
               <span className="github-calendar-legend">
-                {labels.githubActivityLess}
+                <span className="github-calendar-legend-label">
+                  {labels.githubActivityLess}
+                </span>
                 {[0, 1, 2, 3, 4].map((level) => (
                   <i aria-hidden="true" data-level={level} key={level} />
                 ))}
-                {labels.githubActivityMore}
+                <span className="github-calendar-legend-label">
+                  {labels.githubActivityMore}
+                </span>
               </span>
             </div>
           </>

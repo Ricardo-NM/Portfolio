@@ -62,7 +62,9 @@ export default function ContactLeaveModal({
             ref={cancelRef}
             type="button"
           >
-            {labels.contactStayLabel}
+            <span className="contact-leave-button-label">
+              {labels.contactStayLabel}
+            </span>
           </button>
 
           <button
@@ -71,7 +73,9 @@ export default function ContactLeaveModal({
             onClick={onConfirm}
             type="button"
           >
-            {labels.contactLeaveLabel}
+            <span className="contact-leave-button-label">
+              {labels.contactLeaveLabel}
+            </span>
           </button>
         </div>
       </section>
