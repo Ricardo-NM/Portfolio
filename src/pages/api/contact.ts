@@ -30,15 +30,15 @@ const SUSPICIOUS_MESSAGE_PATTERN =
 const EMAIL_COPY = {
   es: {
     title: "Nuevo mensaje de contacto",
-    subtitle: "Alguien escribi&oacute; a trav&eacute;s del formulario de tu portafolio.",
+    subtitle: "Alguien escribió a través del formulario de tu portafolio.",
     fullNameLabel: "Nombre completo",
-    emailLabel: "Correo electr&oacute;nico",
+    emailLabel: "Correo electrónico",
     messageLabel: "Mensaje",
     replyLabel: "Responder a",
     footerPrefix:
-      "Enviado autom&aacute;ticamente desde el formulario de contacto de tu",
+      "Enviado automáticamente desde el formulario de contacto de tu",
     footerLink: "portafolio.",
-    preview: "te escribi&oacute; a trav&eacute;s de tu portafolio",
+    preview: "te escribió a través de tu portafolio",
     role: "Desarrollador Full Stack",
     textTitle: "Nuevo mensaje de contacto",
     textNameLabel: "Nombre",
@@ -115,9 +115,7 @@ function getStringValue(value: unknown) {
 }
 
 function getMessageValue(value: unknown) {
-  return typeof value === "string"
-    ? value.replace(/\r\n?/g, "\n").trim()
-    : "";
+  return typeof value === "string" ? value.replace(/\r\n?/g, "\n").trim() : "";
 }
 
 function getFirstStringValue(...values: unknown[]) {

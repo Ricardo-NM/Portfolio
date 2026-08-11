@@ -1,451 +1,59 @@
-import {
-  AlertTriangle,
-  BookMarked,
-  BriefcaseBusiness,
-  ChevronDown,
-  CodeXml,
-  FolderCode,
-  CalendarRange,
-  GraduationCap,
-  Home,
-  Languages,
-  Mail,
-  MailCheck,
-  MapPin,
-  Moon,
-  Send,
-  Settings,
-  Star,
-  Sun,
-  Users,
-  X,
-} from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 import type {
   CSSProperties,
   FocusEvent as ReactFocusEvent,
   MouseEvent as ReactMouseEvent,
   MouseEventHandler,
-  Ref,
 } from "react";
 import { useEffect, useRef, useState } from "react";
 import { navigate } from "astro:transitions/client";
 import bannerUrl from "../assets/banner.webp";
-import RouteBreadcrumb from "./RouteBreadcrumb";
-
-type Theme = "light" | "dark";
-type Locale = "es" | "en";
-type ProfileLinkId = "linkedin" | "github" | "resume";
-type RouteLinkId =
-  "experience" | "projects" | "technologies" | "activity" | "contact";
-type FlipAvatar = {
-  deltaX: number;
-  deltaY: number;
-  endRadius: string;
-  scaleX: number;
-  scaleY: number;
-  startRadius: string;
-  targetLeft: number;
-  targetTop: number;
-  targetWidth: number;
-  targetHeight: number;
-};
-type FlipProfileLink = FlipAvatar & {
-  id: ProfileLinkId;
-};
-type FlipRouteLink = FlipAvatar & {
-  id: RouteLinkId;
-  iconSize: number;
-};
-type FlipIntroCopy = FlipAvatar & {
-  variant: "drawer" | "intro";
-};
-type ContributionDay = {
-  contributionCount: number;
-  date: string;
-  weekday: number;
-};
-type ContributionWeek = {
-  contributionDays: ContributionDay[];
-};
-type GitHubContributions = {
-  totalContributions: number;
-  weeks: ContributionWeek[];
-};
-type GitHubContributionsStatus = "idle" | "loading" | "error";
-type GitHubContributionTooltip = {
-  left: number;
-  text: string;
-  top: number;
-};
-type PreferenceControlsMode =
-  | "chrome"
-  | "home"
-  | "preferences"
-  | "projects"
-  | "technologies"
-  | "activity"
-  | "contact";
-type PreferenceControlsProps = {
-  mode?: PreferenceControlsMode;
-};
-type ContactSubmitStatus = "idle" | "sending" | "success" | "error";
-
-const STORAGE_KEYS = {
-  theme: "rn-theme",
-  locale: "rn-locale",
-} as const;
-const CONTACT_LEAVE_FADE_DURATION_MS = 180;
-const CONTACT_SUCCESS_AUTO_CLOSE_MS = 3000;
-const CONTACT_MESSAGE_MAX_LENGTH = 1200;
-const UNSAFE_CONTACT_MESSAGE_PATTERN =
-  /<\s*\/?\s*(script|iframe|object|embed|link|meta|style|form|input|button|textarea|svg|math|img|video|audio|source|base)\b|javascript\s*:|data\s*:\s*(text\/html|application\/javascript)|on[a-z]+\s*=/i;
-
-const copy = {
-  es: {
-    introHighlight: "Desarrollador Full Stack",
-    introRest:
-      " especializado en la creación de sistemas digitales, plataformas administrativas y aplicaciones web y móviles. Cuento con experiencia en el análisis, diseño, desarrollo, despliegue y optimización de soluciones funcionales, escalables y bien estructuradas, utilizando distintas herramientas y tecnologías para resolver problemas técnicos y participar en todo el ciclo de desarrollo de software.",
-    profileAlt: "Foto de perfil de Ricardo Nava",
-    profileHint: "Presiona aqui",
-    openProfileLabel: "Abrir panel de perfil",
-    closeProfileLabel: "Cerrar panel de perfil",
-    profileMenuTitle: "Perfil",
-    profileEmail: "lic.ricardo.nm@gmail.com",
-    profileLocation: "México",
-    profileFocusTitle: "Áreas de enfoque",
-    focusMobile: "Aplicaciones móviles",
-    linkedinLabel: "Abrir perfil de LinkedIn",
-    githubLabel: "Abrir perfil de GitHub",
-    githubActivityTitle: "Actividad de GitHub",
-    githubActivityLoading: "Cargando actividad...",
-    githubActivityError: "No se pudo cargar la actividad.",
-    githubActivityLess: "Menos",
-    githubActivityMore: "Más",
-    githubAchievementsLabel: "Logros",
-    githubFollowerLabel: "Seguidor",
-    githubRepositoriesLabel: "Repositorios",
-    githubViewProfileLabel: "Ver perfil",
-    githubProfileSummaryLabel: "Resumen de perfil de GitHub",
-    skillsTitle: "Habilidades y Tecnologías",
-    projectsRouteTitle: "Proyectos",
-    projectsSubtitle:
-      "Selección de proyectos destacados, productos digitales y soluciones que he desarrollado.",
-    technologiesSubtitle:
-      "Tecnologías, lenguajes y herramientas que utilizo para desarrollar soluciones web y aplicaciones completas.",
-    activitySubtitle:
-      "Resumen visual de mis contribuciones en GitHub durante el último año.",
-    contactSubtitle: "Enviame un mensaje directo.",
-    contactFullNameLabel: "Nombre completo",
-    contactFullNamePlaceholder: "Ingresa tu nombre",
-    contactEmailLabel: "Correo electrónico",
-    contactEmailPlaceholder: "correo@ejemplo.com",
-    contactMessageLabel: "Mensaje",
-    contactMessagePlaceholder: "Escribe tu mensaje...",
-    contactMessageCounterLabel: "caracteres",
-    contactUnsafeMessage:
-      "El mensaje contiene contenido no permitido. Retiralo para continuar.",
-    contactSendLabel: "Enviar",
-    contactSendingLabel: "Enviando...",
-    contactSuccessTitle: "Mensaje enviado",
-    contactSuccessDescription: "Tu mensaje se ha enviado con exito.",
-    contactErrorMessage: "No se pudo enviar el mensaje. Intentalo de nuevo.",
-    contactLeaveTitle: "¿Deseas salir y borrar el contenido?",
-    contactLeaveDescription:
-      "Tienes información escrita en el formulario. Si sales ahora, se perderá.",
-    contactStayLabel: "No salir",
-    contactLeaveLabel: "Salir",
-    aboutTitle: "Acerca de mí",
-    resumeLabel: "Descargar CV",
-    breadcrumbLabel: "Ruta de navegacion",
-    homeNavLabel: "Navegación principal",
-    homeRouteLabel: "Ir al inicio",
-    drawerNavigationTitle: "Navegación",
-    experienceRouteTitle: "Experiencia laboral",
-    projectsNavLabel: "Ver proyectos",
-    technologiesRouteTitle: "Habilidades y Tecnologías",
-    activityRouteTitle: "Actividad de GitHub",
-    contactRouteTitle: "Contacto",
-    experienceNavLabel: "Ver experiencia laboral",
-    technologiesNavLabel: "Ver habilidades y tecnologías",
-    activityNavLabel: "Ver actividad de GitHub",
-    contactNavLabel: "Ver contacto",
-    preferencesLabel: "Preferencias del sitio",
-    openSettingsLabel: "Abrir preferencias",
-    closeSettingsLabel: "Cerrar preferencias",
-    languageLabel: "Cambiar idioma a inglés",
-    languageText: "ES",
-    lightThemeLabel: "Cambiar a tema oscuro",
-    darkThemeLabel: "Cambiar a tema claro",
-    lightThemeText: "Claro",
-    darkThemeText: "Oscuro",
-  },
-  en: {
-    introHighlight: "Full Stack Developer",
-    introRest:
-      " specialized in building digital systems, administrative platforms, and web and mobile applications. I have experience in the analysis, design, development, deployment, and optimization of functional, scalable, and well-structured solutions, using different tools and technologies to solve technical problems and participate in the full software development lifecycle.",
-    profileAlt: "Ricardo Nava profile photo",
-    profileHint: "Press here",
-    openProfileLabel: "Open profile panel",
-    closeProfileLabel: "Close profile panel",
-    profileMenuTitle: "Profile",
-    profileEmail: "lic.ricardo.nm@gmail.com",
-    profileLocation: "Mexico",
-    linkedinLabel: "Open LinkedIn profile",
-    githubLabel: "Open GitHub profile",
-    githubActivityTitle: "GitHub activity",
-    githubActivityLoading: "Loading activity...",
-    githubActivityError: "Activity could not be loaded.",
-    githubActivityLess: "Less",
-    githubActivityMore: "More",
-    githubAchievementsLabel: "Achievements",
-    githubFollowerLabel: "Follower",
-    githubRepositoriesLabel: "Repositories",
-    githubViewProfileLabel: "View profile",
-    githubProfileSummaryLabel: "GitHub profile summary",
-    skillsTitle: "Skills and Technologies",
-    projectsRouteTitle: "Projects",
-    projectsSubtitle:
-      "Selected projects, digital products, and solutions I have developed.",
-    technologiesSubtitle:
-      "Technologies, languages, and tools I use to develop complete web solutions and applications.",
-    activitySubtitle:
-      "Visual summary of my GitHub contributions over the past year.",
-    contactSubtitle: "Send me a direct message.",
-    contactFullNameLabel: "Full name",
-    contactFullNamePlaceholder: "Enter your name",
-    contactEmailLabel: "Email",
-    contactEmailPlaceholder: "email@example.com",
-    contactMessageLabel: "Message",
-    contactMessagePlaceholder: "Write your message...",
-    contactMessageCounterLabel: "characters",
-    contactUnsafeMessage:
-      "The message contains unsupported content. Remove it to continue.",
-    contactSendLabel: "Send",
-    contactSendingLabel: "Sending...",
-    contactSuccessTitle: "Message sent",
-    contactSuccessDescription: "Your message has been sent successfully.",
-    contactErrorMessage: "The message could not be sent. Please try again.",
-    contactLeaveTitle: "Leave and discard this content?",
-    contactLeaveDescription:
-      "You have information written in the form. If you leave now, it will be lost.",
-    contactStayLabel: "Stay",
-    contactLeaveLabel: "Leave",
-    aboutTitle: "About me",
-    resumeLabel: "Download resume",
-    breadcrumbLabel: "Breadcrumb",
-    homeNavLabel: "Main navigation",
-    homeRouteLabel: "Go home",
-    drawerNavigationTitle: "Navigation",
-    experienceRouteTitle: "Work experience",
-    projectsNavLabel: "View projects",
-    technologiesRouteTitle: "Skills and Technologies",
-    activityRouteTitle: "GitHub activity",
-    contactRouteTitle: "Contact",
-    experienceNavLabel: "View work experience",
-    technologiesNavLabel: "View skills and technologies",
-    activityNavLabel: "View GitHub activity",
-    contactNavLabel: "View contact",
-    preferencesLabel: "Site preferences",
-    openSettingsLabel: "Open preferences",
-    closeSettingsLabel: "Close preferences",
-    languageLabel: "Switch language to Spanish",
-    languageText: "EN",
-    lightThemeLabel: "Switch to dark theme",
-    darkThemeLabel: "Switch to light theme",
-    lightThemeText: "Light",
-    darkThemeText: "Dark",
-  },
-} as const;
-
-const MONTH_LABELS = {
-  es: [
-    "Ene",
-    "Feb",
-    "Mar",
-    "Abr",
-    "May",
-    "Jun",
-    "Jul",
-    "Ago",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dic",
-  ],
-  en: [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ],
-} as const;
-
-type TechnologyItem = {
-  color: string;
-  darkColor?: string;
-  icon: string;
-  label: string;
-  lightColor?: string;
-};
-
-const TECHNOLOGY_CATEGORIES = [
-  {
-    title: {
-      es: "FRONTEND",
-      en: "FRONTEND",
-    },
-    items: [
-      {
-        label: "JavaScript",
-        icon: "javascript.svg",
-        color: "#f7df1e",
-      },
-      { label: "TypeScript", icon: "typescript.svg", color: "#3178c6" },
-      { label: "HTML5", icon: "html5.svg", color: "#e34f26" },
-      { label: "CSS", icon: "css.svg", color: "#663399" },
-      {
-        label: "Tailwind CSS",
-        icon: "tailwindcss.svg",
-        color: "#06b6d4",
-        lightColor: "#164e63",
-      },
-      {
-        label: "React",
-        icon: "react.svg",
-        color: "#61dafb",
-        lightColor: "#134e5e",
-      },
-      {
-        label: "Expo",
-        icon: "expo.svg",
-        color: "#000020",
-        darkColor: "#ffffff",
-      },
-      { label: "Flutter", icon: "flutter.svg", color: "#02569b" },
-      {
-        label: "Next.js",
-        icon: "nextdotjs.svg",
-        color: "#000000",
-        darkColor: "#ffffff",
-      },
-    ],
-  },
-  {
-    title: {
-      es: "BACKEND",
-      en: "BACKEND",
-    },
-    items: [
-      { label: "C#", icon: "csharp.svg", color: "#9a5196" },
-      { label: ".NET", icon: "dotnet.svg", color: "#512bd4" },
-      { label: "Node.js", icon: "nodedotjs.svg", color: "#5fa04e" },
-      { label: "NestJS", icon: "nestjs.svg", color: "#e0234e" },
-      {
-        label: "Express.js",
-        icon: "express.svg",
-        color: "#000000",
-        darkColor: "#ffffff",
-      },
-      {
-        label: "Prisma ORM",
-        icon: "prisma.svg",
-        color: "#2d3748",
-        darkColor: "#ffffff",
-      },
-    ],
-  },
-  {
-    title: {
-      es: "BASES DE DATOS",
-      en: "DATABASES",
-    },
-    items: [
-      { label: "MongoDB", icon: "mongodb.svg", color: "#47a248" },
-      { label: "MySQL", icon: "mysql.svg", color: "#4479a1" },
-      { label: "PostgreSQL", icon: "postgresql.svg", color: "#4169e1" },
-      { label: "Redis", icon: "redis.svg", color: "#ff4438" },
-    ],
-  },
-  {
-    title: {
-      es: "HERRAMIENTAS",
-      en: "TOOLS",
-    },
-    items: [
-      { label: "Git", icon: "git.svg", color: "#f05032" },
-      {
-        label: "GitHub",
-        icon: "github.svg",
-        color: "#181717",
-        darkColor: "#ffffff",
-      },
-      { label: "Docker", icon: "docker.svg", color: "#2496ed" },
-      { label: "ESLint", icon: "eslint.svg", color: "#4b32c3" },
-      { label: "Figma", icon: "figma.svg", color: "#f24e1e" },
-      {
-        label: "VPS Linux",
-        icon: "linux.svg",
-        color: "#fcc624",
-        lightColor: "#1d1d1f",
-      },
-      { label: "Nginx", icon: "nginx.svg", color: "#009639" },
-      { label: "PM2", icon: "pm2.svg", color: "#2b037a", darkColor: "#8e6cff" },
-      { label: "IIS", icon: "iis.svg", color: "#0078d4" },
-    ],
-  },
-] satisfies Array<{
-  items: TechnologyItem[];
-  title: Record<Locale, string>;
-}>;
-
-function getInitialTheme(): Theme {
-  if (typeof window === "undefined") {
-    return "light";
-  }
-
-  const stored = window.localStorage.getItem(STORAGE_KEYS.theme);
-  if (stored === "light" || stored === "dark") {
-    return stored;
-  }
-
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
-}
-
-function getInitialLocale(): Locale {
-  if (typeof window === "undefined") {
-    return "es";
-  }
-
-  return window.localStorage.getItem(STORAGE_KEYS.locale) === "en"
-    ? "en"
-    : "es";
-}
-
-function getCurrentPath() {
-  if (typeof window === "undefined") {
-    return "/";
-  }
-
-  return window.location.pathname.replace(/\/$/, "") || "/";
-}
-
-function getContributionLevel(count: number, maxCount: number) {
-  if (count <= 0 || maxCount <= 0) {
-    return 0;
-  }
-
-  return Math.min(4, Math.max(1, Math.ceil((count / maxCount) * 4)));
-}
+import ContactForm from "./preference-controls/ContactForm";
+import ContactLeaveModal from "./preference-controls/ContactLeaveModal";
+import ContactSuccessModal from "./preference-controls/ContactSuccessModal";
+import DrawerRouteLinks from "./preference-controls/DrawerRouteLinks";
+import FloatingNav from "./preference-controls/FloatingNav";
+import GitHubActivity from "./preference-controls/GitHubActivity";
+import GitHubProfileCard from "./preference-controls/GitHubProfileCard";
+import IntroCopyContent from "./preference-controls/IntroCopyContent";
+import PreferencesFloat from "./preference-controls/PreferencesFloat";
+import ProfileDrawerMeta from "./preference-controls/ProfileDrawerMeta";
+import ProfileLinkIcon from "./preference-controls/ProfileLinkIcon";
+import ProfileLinks from "./preference-controls/ProfileLinks";
+import RoutePageShell from "./preference-controls/RoutePageShell";
+import RouteIcon from "./preference-controls/RouteIcon";
+import TechnologyCategories from "./preference-controls/TechnologyCategories";
+import {
+  CONTACT_LEAVE_FADE_DURATION_MS,
+  CONTACT_MESSAGE_MAX_LENGTH,
+  CONTACT_SUCCESS_AUTO_CLOSE_MS,
+  MONTH_LABELS,
+  STORAGE_KEYS,
+  UNSAFE_CONTACT_MESSAGE_PATTERN,
+} from "./preference-controls/constants";
+import { preferenceCopy } from "./preference-controls/copy";
+import type {
+  ContactSubmitStatus,
+  ContributionDay,
+  FlipAvatar,
+  FlipIntroCopy,
+  FlipProfileLink,
+  FlipRouteLink,
+  GitHubContributionTooltip,
+  GitHubContributions,
+  GitHubContributionsStatus,
+  Locale,
+  PreferenceControlsProps,
+  ProfileLinkId,
+  RouteItem,
+  RouteLinkId,
+  Theme,
+} from "./preference-controls/types";
+import {
+  getCurrentPath,
+  getInitialLocale,
+  getInitialTheme,
+} from "./preference-controls/utils";
 
 export default function PreferenceControls({
   mode = "home",
@@ -731,7 +339,7 @@ export default function PreferenceControls({
 
   const nextTheme = theme === "light" ? "dark" : "light";
   const nextLocale = locale === "es" ? "en" : "es";
-  const labels = copy[locale];
+  const labels = preferenceCopy[locale];
   const themeLabel =
     theme === "light" ? labels.lightThemeLabel : labels.darkThemeLabel;
   const themeText =
@@ -1145,27 +753,6 @@ export default function PreferenceControls({
   const settingsLabel = isPreferencesOpen
     ? labels.closeSettingsLabel
     : labels.openSettingsLabel;
-  const renderRouteIcon = (id: RouteLinkId, size = 24) => {
-    if (id === "experience") {
-      return (
-        <BriefcaseBusiness aria-hidden="true" size={size} strokeWidth={2.1} />
-      );
-    }
-
-    if (id === "technologies") {
-      return <CodeXml aria-hidden="true" size={size + 1} strokeWidth={2.1} />;
-    }
-
-    if (id === "projects") {
-      return <FolderCode aria-hidden="true" size={size} strokeWidth={2.1} />;
-    }
-
-    if (id === "activity") {
-      return <CalendarRange aria-hidden="true" size={size} strokeWidth={2.1} />;
-    }
-
-    return <Mail aria-hidden="true" size={size} strokeWidth={2.1} />;
-  };
   const routeItems = [
     {
       href: "/experience",
@@ -1197,23 +784,7 @@ export default function PreferenceControls({
       label: labels.contactNavLabel,
       title: labels.contactRouteTitle,
     },
-  ] satisfies Array<{
-    href: string;
-    id: RouteLinkId;
-    label: string;
-    title: string;
-  }>;
-  const navItems = [
-    {
-      href: "/",
-      icon: <Home aria-hidden="true" size={24} strokeWidth={2.1} />,
-      label: labels.homeRouteLabel,
-    },
-    ...routeItems.map((item) => ({
-      ...item,
-      icon: renderRouteIcon(item.id),
-    })),
-  ];
+  ] satisfies RouteItem[];
   const openPreferences = () => {
     if (closeTimerRef.current) {
       window.clearTimeout(closeTimerRef.current);
@@ -1579,405 +1150,6 @@ export default function PreferenceControls({
       "--flip-target-width": `${flipIntroCopy.targetWidth}px`,
       "--flip-target-height": `${flipIntroCopy.targetHeight}px`,
     } as CSSProperties);
-  const renderProfileLinkIcon = (id: ProfileLinkId) => {
-    if (id === "resume") {
-      return (
-        <svg
-          className="profile-link-svg"
-          aria-hidden="true"
-          viewBox="0 0 16 16"
-          width="16"
-          height="16"
-          fill="currentColor"
-        >
-          <path d="M11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
-          <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2v9.255S12 12 8 12s-5 1.755-5 1.755V2a1 1 0 0 1 1-1h5.5z" />
-        </svg>
-      );
-    }
-
-    return (
-      <span
-        className={`profile-link-icon profile-link-icon-${id}`}
-        aria-hidden="true"
-      />
-    );
-  };
-  const renderIntroCopyContent = () => (
-    <>
-      <strong>{labels.introHighlight}</strong>
-      {labels.introRest}
-    </>
-  );
-  const renderGitHubActivity = ({
-    activityRef,
-    className = "",
-    hidden = false,
-    scrollRef,
-  }: {
-    activityRef?: Ref<HTMLDivElement>;
-    className?: string;
-    hidden?: boolean;
-    scrollRef?: Ref<HTMLDivElement>;
-  }) => (
-    <div
-      className={`github-activity ${className}`.trim()}
-      aria-hidden={hidden}
-      data-hidden={hidden}
-      ref={activityRef}
-    >
-      <h4>{labels.githubActivityTitle}</h4>
-      <div
-        className="github-calendar-panel"
-        data-state={githubContributionsStatus}
-      >
-        {githubContributionsStatus === "loading" && (
-          <p className="github-calendar-message">
-            {labels.githubActivityLoading}
-          </p>
-        )}
-
-        {githubContributionsStatus === "error" && (
-          <p className="github-calendar-message">
-            {labels.githubActivityError}
-          </p>
-        )}
-
-        {githubContributions && (
-          <>
-            <div
-              className="github-calendar-scroll"
-              ref={scrollRef}
-              onScroll={hideGitHubDayTooltip}
-            >
-              <div
-                className="github-calendar-track"
-                style={githubCalendarStyle}
-              >
-                <div className="github-calendar-months" aria-hidden="true">
-                  {githubMonthMarkers.map((marker) => (
-                    <span
-                      key={`${marker.label}-${marker.weekIndex}`}
-                      style={
-                        {
-                          gridColumn: `${marker.weekIndex + 1}`,
-                        } as CSSProperties
-                      }
-                    >
-                      {marker.label}
-                    </span>
-                  ))}
-                </div>
-
-                <div
-                  className="github-calendar-grid"
-                  aria-label={labels.githubActivityTitle}
-                >
-                  {githubContributions.weeks.map((week, weekIndex) =>
-                    week.contributionDays.map((day) => {
-                      const level = getContributionLevel(
-                        day.contributionCount,
-                        githubMaxContributions,
-                      );
-                      const tooltipText = getGitHubDayTooltip(day);
-
-                      return (
-                        <span
-                          aria-label={tooltipText}
-                          className="github-calendar-day"
-                          data-level={level}
-                          key={day.date}
-                          onBlur={hideGitHubDayTooltip}
-                          onFocus={(event) =>
-                            showGitHubDayTooltip(event, tooltipText)
-                          }
-                          onMouseEnter={(event) =>
-                            showGitHubDayTooltip(event, tooltipText)
-                          }
-                          onMouseLeave={hideGitHubDayTooltip}
-                          onMouseMove={(event) =>
-                            showGitHubDayTooltip(event, tooltipText)
-                          }
-                          style={
-                            {
-                              gridColumn: `${weekIndex + 1}`,
-                              gridRow: `${day.weekday + 1}`,
-                            } as CSSProperties
-                          }
-                        />
-                      );
-                    }),
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="github-calendar-footer">
-              <strong>
-                {locale === "es"
-                  ? `${githubContributions.totalContributions} contribuciones en el último año`
-                  : `${githubContributions.totalContributions} contributions in the last year`}
-              </strong>
-              <span className="github-calendar-legend">
-                {labels.githubActivityLess}
-                {[0, 1, 2, 3, 4].map((level) => (
-                  <i aria-hidden="true" data-level={level} key={level} />
-                ))}
-                {labels.githubActivityMore}
-              </span>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-  const renderGitHubProfileCard = () => (
-    <article
-      className="github-profile-card"
-      aria-label={labels.githubProfileSummaryLabel}
-    >
-      <div className="github-profile-card-head">
-        <img
-          src="/assets/profileGitHub.png"
-          alt={labels.profileAlt}
-          className="github-profile-avatar"
-          loading="lazy"
-        />
-
-        <div className="github-profile-head-content">
-          <div className="github-profile-identity">
-            <strong>RICHARD</strong>
-            <span>Ricardo-NM</span>
-          </div>
-
-          <div className="github-profile-achievements">
-            <span>{labels.githubAchievementsLabel}</span>
-            <img
-              src="/assets/quickdraw-default-39c6aec8ff89.png"
-              alt={labels.githubAchievementsLabel}
-              className="github-profile-achievement"
-              loading="lazy"
-            />
-          </div>
-        </div>
-      </div>
-
-      <p className="github-profile-role">Full Stack Developer</p>
-
-      <div className="github-profile-meta-row">
-        <p className="github-profile-location">
-          <MapPin aria-hidden="true" size={15} strokeWidth={1.8} />
-          <strong>Hidalgo, MX (UTC -06:00)</strong>
-        </p>
-
-        <a
-          className="github-profile-link-badge"
-          href="https://github.com/Ricardo-NM"
-          target="_blank"
-          rel="noreferrer"
-          aria-label={labels.githubLabel}
-        >
-          <span className="github-profile-github-icon" aria-hidden="true" />
-          <strong>{labels.githubViewProfileLabel}</strong>
-        </a>
-      </div>
-
-      <span className="github-profile-divider" aria-hidden="true" />
-
-      <div className="github-profile-footer">
-        <div className="github-profile-stats">
-          <p>
-            <Users aria-hidden="true" size={15} strokeWidth={1.8} />
-            <strong>1</strong> {labels.githubFollowerLabel}
-          </p>
-
-          <p>
-            <BookMarked aria-hidden="true" size={15} strokeWidth={1.8} />
-            <strong>17</strong> {labels.githubRepositoriesLabel}
-          </p>
-        </div>
-
-        <span className="github-profile-pro-badge">
-          <Star aria-hidden="true" size={13} strokeWidth={1.9} />
-          <strong>PRO</strong>
-        </span>
-      </div>
-    </article>
-  );
-  const renderTechnologyVisual = (technology: TechnologyItem) => {
-    return (
-      <span
-        aria-hidden="true"
-        className="technology-category-icon"
-        style={
-          {
-            "--technology-icon-url": `url("/assets/icons/Technologies/${technology.icon}")`,
-          } as CSSProperties
-        }
-      />
-    );
-  };
-  const renderTechnologyCategories = () => (
-    <div className="technology-category-list" aria-label={labels.skillsTitle}>
-      {TECHNOLOGY_CATEGORIES.map((category) => (
-        <article className="technology-category-card" key={category.title.es}>
-          <h2>{category.title[locale]}</h2>
-
-          <span className="technology-category-divider" aria-hidden="true" />
-
-          <div className="technology-category-icons">
-            {category.items.map((technology) => (
-              <span
-                aria-label={technology.label}
-                className="technology-category-item"
-                data-label={technology.label}
-                key={technology.label}
-                role="img"
-                style={
-                  {
-                    "--technology-brand-color": technology.color,
-                    "--technology-brand-color-dark":
-                      technology.darkColor ?? technology.color,
-                    "--technology-brand-color-light":
-                      technology.lightColor ?? technology.color,
-                  } as CSSProperties
-                }
-                tabIndex={0}
-              >
-                {renderTechnologyVisual(technology)}
-              </span>
-            ))}
-          </div>
-        </article>
-      ))}
-    </div>
-  );
-  const renderPreferencesFloat = () => (
-    <div
-      className="preferences-float"
-      onMouseLeave={queueClosePreferences}
-      onFocus={openPreferences}
-      onBlur={(event) => {
-        const nextFocusedElement = event.relatedTarget;
-
-        if (
-          !(nextFocusedElement instanceof Node) ||
-          !event.currentTarget.contains(nextFocusedElement)
-        ) {
-          setIsPreferencesOpen(false);
-        }
-      }}
-    >
-      <button
-        className="settings-button"
-        type="button"
-        onMouseEnter={openPreferences}
-        onClick={togglePreferences}
-        aria-controls="site-preferences"
-        aria-expanded={isPreferencesOpen}
-        aria-label={settingsLabel}
-        data-open={isPreferencesOpen}
-      >
-        <Settings aria-hidden="true" size={26} strokeWidth={1.75} />
-      </button>
-
-      <div
-        className="preference-controls"
-        id="site-preferences"
-        aria-label={labels.preferencesLabel}
-        aria-hidden={!isPreferencesOpen}
-        data-open={isPreferencesOpen}
-        onMouseEnter={openPreferences}
-      >
-        <button
-          className="preference-button"
-          type="button"
-          tabIndex={isPreferencesOpen ? 0 : -1}
-          onClick={() => setLocale(nextLocale)}
-          aria-label={labels.languageLabel}
-        >
-          <Languages aria-hidden="true" size={16} strokeWidth={1.8} />
-          <span>{labels.languageText}</span>
-        </button>
-
-        <button
-          className="preference-button"
-          type="button"
-          tabIndex={isPreferencesOpen ? 0 : -1}
-          onClick={() => setTheme(nextTheme)}
-          aria-label={themeLabel}
-        >
-          {theme === "light" ? (
-            <Sun aria-hidden="true" size={16} strokeWidth={1.8} />
-          ) : (
-            <Moon aria-hidden="true" size={16} strokeWidth={1.8} />
-          )}
-          <span>{themeText}</span>
-        </button>
-      </div>
-    </div>
-  );
-  const renderFloatingNav = (hidden = false) => (
-    <nav
-      className="home-route-links"
-      aria-label={labels.homeNavLabel}
-      data-hidden={hidden || flipRouteLinks.length > 0}
-      data-instant-hidden={hidden}
-    >
-      {navItems.map((item) => {
-        const isActive = currentPath === item.href;
-        const routeId = "id" in item ? item.id : undefined;
-
-        return (
-          <a
-            className="home-route-link"
-            href={item.href}
-            aria-current={isActive ? "page" : undefined}
-            aria-label={item.label}
-            data-active={isActive}
-            data-route-id={routeId}
-            data-route-hidden={Boolean(routeId && hideRouteNavItems)}
-            key={item.href}
-          >
-            {item.icon}
-          </a>
-        );
-      })}
-    </nav>
-  );
-  const renderDrawerRouteLinks = (
-    refs: Record<RouteLinkId, HTMLSpanElement | null>,
-    hidden = false,
-    onClick?: MouseEventHandler<HTMLAnchorElement>,
-  ) => (
-    <div
-      className="profile-route-list"
-      aria-label={locale === "es" ? "Secciones" : "Sections"}
-    >
-      <h4>{labels.drawerNavigationTitle}</h4>
-      {routeItems.map((item) => (
-        <div className="profile-route-link" key={item.id}>
-          <span
-            className="profile-route-icon"
-            data-hidden={hidden}
-            ref={(element) => {
-              refs[item.id] = element;
-            }}
-          >
-            {renderRouteIcon(item.id, 20)}
-          </span>
-          <a
-            className="profile-route-title"
-            href={item.href}
-            aria-label={item.label}
-            onClick={onClick}
-          >
-            {item.title}
-          </a>
-        </div>
-      ))}
-    </div>
-  );
   const cancelContactNavigation = () => {
     closeContactLeaveModal();
   };
@@ -2010,115 +1182,53 @@ export default function PreferenceControls({
       setPendingContactNavigation(null);
     });
   };
-  const renderContactLeaveModal = () => {
-    if (!isContactLeaveModalOpen) {
-      return null;
-    }
-
-    return (
-      <div
-        className="contact-leave-backdrop"
-        data-state={
-          isContactNavigationConfirming
-            ? "leaving"
-            : isContactLeaveClosing
-              ? "closing"
-              : "open"
-        }
-        role="presentation"
-      >
-        <section
-          aria-describedby="contact-leave-description"
-          aria-labelledby="contact-leave-title"
-          aria-modal="true"
-          className="contact-leave-modal"
-          role="dialog"
-        >
-          <div className="contact-leave-message">
-            <span
-              className="contact-leave-icon contact-warning-icon"
-              aria-hidden="true"
-            >
-              <AlertTriangle size={22} strokeWidth={1.9} />
-            </span>
-
-            <div>
-              <h2 id="contact-leave-title">{labels.contactLeaveTitle}</h2>
-              <p id="contact-leave-description">
-                {labels.contactLeaveDescription}
-              </p>
-            </div>
-          </div>
-
-          <div className="contact-leave-actions">
-            <button
-              className="contact-leave-button contact-leave-button-secondary"
-              disabled={isContactNavigationConfirming || isContactLeaveClosing}
-              onClick={cancelContactNavigation}
-              ref={contactLeaveCancelRef}
-              type="button"
-            >
-              {labels.contactStayLabel}
-            </button>
-
-            <button
-              className="contact-leave-button contact-leave-button-primary"
-              disabled={isContactNavigationConfirming || isContactLeaveClosing}
-              onClick={confirmContactNavigation}
-              type="button"
-            >
-              {labels.contactLeaveLabel}
-            </button>
-          </div>
-        </section>
-      </div>
-    );
-  };
-  const renderContactSuccessModal = () => {
-    if (!isContactSuccessModalOpen) {
-      return null;
-    }
-
-    return (
-      <div
-        className="contact-leave-backdrop contact-success-backdrop"
-        role="presentation"
-      >
-        <section
-          aria-describedby="contact-success-description"
-          aria-labelledby="contact-success-title"
-          aria-modal="true"
-          className="contact-leave-modal contact-success-modal"
-          ref={contactSuccessModalRef}
-          role="dialog"
-          tabIndex={-1}
-        >
-          <div className="contact-leave-message">
-            <span
-              className="contact-leave-icon contact-success-icon"
-              aria-hidden="true"
-            >
-              <MailCheck size={24} strokeWidth={1.9} />
-            </span>
-
-            <div>
-              <h2 id="contact-success-title">{labels.contactSuccessTitle}</h2>
-              <p id="contact-success-description">
-                {labels.contactSuccessDescription}
-              </p>
-            </div>
-          </div>
-        </section>
-      </div>
-    );
-  };
+  const contactLeaveModal = (
+    <ContactLeaveModal
+      cancelRef={contactLeaveCancelRef}
+      isClosing={isContactLeaveClosing}
+      isConfirming={isContactNavigationConfirming}
+      isOpen={isContactLeaveModalOpen}
+      labels={labels}
+      onCancel={cancelContactNavigation}
+      onConfirm={confirmContactNavigation}
+    />
+  );
+  const floatingNav = (hidden = false) => (
+    <FloatingNav
+      currentPath={currentPath}
+      hidden={hidden}
+      hideRouteNavItems={hideRouteNavItems}
+      homeLabel={labels.homeRouteLabel}
+      label={labels.homeNavLabel}
+      routeItems={routeItems}
+      routeLinksHidden={flipRouteLinks.length > 0}
+    />
+  );
+  const preferencesFloat = (
+    <PreferencesFloat
+      isOpen={isPreferencesOpen}
+      labels={labels}
+      nextLocale={nextLocale}
+      nextTheme={nextTheme}
+      onClose={() => setIsPreferencesOpen(false)}
+      onMouseLeave={queueClosePreferences}
+      onOpen={openPreferences}
+      onSetLocale={setLocale}
+      onSetTheme={setTheme}
+      onToggle={togglePreferences}
+      settingsLabel={settingsLabel}
+      theme={theme}
+      themeLabel={themeLabel}
+      themeText={themeText}
+    />
+  );
 
   if (mode === "chrome" || mode === "preferences") {
     return (
       <>
-        {renderFloatingNav(isProfileMenuOpen)}
-        {renderPreferencesFloat()}
-        {renderContactLeaveModal()}
+        {floatingNav(isProfileMenuOpen)}
+        {preferencesFloat}
+        {contactLeaveModal}
       </>
     );
   }
@@ -2126,28 +1236,21 @@ export default function PreferenceControls({
   if (mode === "technologies") {
     return (
       <>
-        <main className="experience-shell" aria-labelledby="technologies-title">
-          <div className="experience-content">
-            <RouteBreadcrumb
-              currentLabel={labels.skillsTitle}
-              homeLabel={labels.homeRouteLabel}
-              label={labels.breadcrumbLabel}
-            />
-
-            <header className="experience-header">
-              <h1 id="technologies-title">{labels.skillsTitle}</h1>
-              <p>{labels.technologiesSubtitle}</p>
-            </header>
-
-            <section
-              className="technology-categories route-section"
-              aria-label={labels.skillsTitle}
-            >
-              {renderTechnologyCategories()}
-            </section>
-          </div>
-        </main>
-        {renderContactLeaveModal()}
+        <RoutePageShell
+          breadcrumbLabel={labels.breadcrumbLabel}
+          homeLabel={labels.homeRouteLabel}
+          subtitle={labels.technologiesSubtitle}
+          title={labels.skillsTitle}
+          titleId="technologies-title"
+        >
+          <section
+            className="technology-categories route-section"
+            aria-label={labels.skillsTitle}
+          >
+            <TechnologyCategories label={labels.skillsTitle} locale={locale} />
+          </section>
+        </RoutePageShell>
+        {contactLeaveModal}
       </>
     );
   }
@@ -2155,21 +1258,14 @@ export default function PreferenceControls({
   if (mode === "projects") {
     return (
       <>
-        <main className="experience-shell" aria-labelledby="projects-title">
-          <div className="experience-content">
-            <RouteBreadcrumb
-              currentLabel={labels.projectsRouteTitle}
-              homeLabel={labels.homeRouteLabel}
-              label={labels.breadcrumbLabel}
-            />
-
-            <header className="experience-header">
-              <h1 id="projects-title">{labels.projectsRouteTitle}</h1>
-              <p>{labels.projectsSubtitle}</p>
-            </header>
-          </div>
-        </main>
-        {renderContactLeaveModal()}
+        <RoutePageShell
+          breadcrumbLabel={labels.breadcrumbLabel}
+          homeLabel={labels.homeRouteLabel}
+          subtitle={labels.projectsSubtitle}
+          title={labels.projectsRouteTitle}
+          titleId="projects-title"
+        />
+        {contactLeaveModal}
       </>
     );
   }
@@ -2177,28 +1273,31 @@ export default function PreferenceControls({
   if (mode === "activity") {
     return (
       <>
-        <main className="experience-shell" aria-labelledby="activity-title">
-          <div className="experience-content">
-            <RouteBreadcrumb
-              currentLabel={labels.githubActivityTitle}
-              homeLabel={labels.homeRouteLabel}
-              label={labels.breadcrumbLabel}
-            />
+        <RoutePageShell
+          breadcrumbLabel={labels.breadcrumbLabel}
+          homeLabel={labels.homeRouteLabel}
+          subtitle={labels.activitySubtitle}
+          title={labels.githubActivityTitle}
+          titleId="activity-title"
+        >
+          <GitHubActivity
+            activityRef={mainGithubActivityRef}
+            calendarStyle={githubCalendarStyle}
+            className="route-github-activity route-section"
+            contributions={githubContributions}
+            labels={labels}
+            locale={locale}
+            maxContributions={githubMaxContributions}
+            monthMarkers={githubMonthMarkers}
+            onHideTooltip={hideGitHubDayTooltip}
+            onShowTooltip={showGitHubDayTooltip}
+            scrollRef={mainGithubCalendarScrollRef}
+            status={githubContributionsStatus}
+            tooltipForDay={getGitHubDayTooltip}
+          />
 
-            <header className="experience-header">
-              <h1 id="activity-title">{labels.githubActivityTitle}</h1>
-              <p>{labels.activitySubtitle}</p>
-            </header>
-
-            {renderGitHubActivity({
-              activityRef: mainGithubActivityRef,
-              className: "route-github-activity route-section",
-              scrollRef: mainGithubCalendarScrollRef,
-            })}
-
-            {renderGitHubProfileCard()}
-          </div>
-        </main>
+          <GitHubProfileCard labels={labels} />
+        </RoutePageShell>
 
         {githubContributionTooltip && (
           <div
@@ -2221,136 +1320,31 @@ export default function PreferenceControls({
   if (mode === "contact") {
     return (
       <>
-        <main className="experience-shell" aria-labelledby="contact-title">
-          <div className="experience-content">
-            <RouteBreadcrumb
-              currentLabel={labels.contactRouteTitle}
-              homeLabel={labels.homeRouteLabel}
-              label={labels.breadcrumbLabel}
-            />
-
-            <header className="experience-header">
-              <h1 id="contact-title">{labels.contactRouteTitle}</h1>
-              <p>{labels.contactSubtitle}</p>
-            </header>
-
-            <form
-              className="contact-form route-section"
-              onSubmit={handleContactSubmit}
-            >
-              <div className="contact-field-row">
-                <div className="contact-field">
-                  <label htmlFor="contact-name">
-                    {labels.contactFullNameLabel}{" "}
-                    <span aria-hidden="true">*</span>
-                  </label>
-                  <input
-                    autoComplete="name"
-                    id="contact-name"
-                    name="name"
-                    onChange={(event) => {
-                      const { value } = event.currentTarget;
-
-                      updateContactFormValue("name", value);
-                    }}
-                    placeholder={labels.contactFullNamePlaceholder}
-                    required
-                    type="text"
-                    value={contactForm.name}
-                  />
-                </div>
-
-                <div className="contact-field">
-                  <label htmlFor="contact-email">
-                    {labels.contactEmailLabel} <span aria-hidden="true">*</span>
-                  </label>
-                  <input
-                    autoComplete="email"
-                    id="contact-email"
-                    inputMode="email"
-                    name="email"
-                    onChange={(event) => {
-                      const { value } = event.currentTarget;
-
-                      updateContactFormValue("email", value);
-                    }}
-                    placeholder={labels.contactEmailPlaceholder}
-                    required
-                    type="email"
-                    value={contactForm.email}
-                  />
-                </div>
-              </div>
-
-              <div className="contact-field">
-                <label htmlFor="contact-message">
-                  {labels.contactMessageLabel} <span aria-hidden="true">*</span>
-                </label>
-                <textarea
-                  aria-describedby={
-                    isContactMessageUnsafe
-                      ? "contact-message-counter contact-message-safety"
-                      : "contact-message-counter"
-                  }
-                  id="contact-message"
-                  maxLength={CONTACT_MESSAGE_MAX_LENGTH}
-                  name="message"
-                  onChange={(event) => {
-                    const { value } = event.currentTarget;
-
-                    updateContactFormValue("message", value);
-                  }}
-                  placeholder={labels.contactMessagePlaceholder}
-                  required
-                  rows={6}
-                  value={contactForm.message}
-                />
-                <div className="contact-message-meta">
-                  <span
-                    className="contact-message-counter"
-                    id="contact-message-counter"
-                  >
-                    {contactMessageLength}/{CONTACT_MESSAGE_MAX_LENGTH}{" "}
-                    {labels.contactMessageCounterLabel}
-                  </span>
-
-                  {isContactMessageUnsafe && (
-                    <span
-                      className="contact-message-safety"
-                      id="contact-message-safety"
-                      role="alert"
-                    >
-                      {labels.contactUnsafeMessage}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className="contact-actions">
-                <button
-                  className="contact-submit"
-                  aria-busy={isContactSubmitting}
-                  disabled={!isContactFormValid || isContactSubmitting}
-                  type="submit"
-                >
-                  <Send aria-hidden="true" size={17} strokeWidth={2} />
-                  <span>
-                    {isContactSubmitting
-                      ? labels.contactSendingLabel
-                      : labels.contactSendLabel}
-                  </span>
-                </button>
-              </div>
-
-              {contactSubmitStatus === "error" && (
-                <p className="contact-error" role="alert">
-                  {labels.contactErrorMessage}
-                </p>
-              )}
-            </form>
-          </div>
-        </main>
-        {renderContactSuccessModal()}
+        <RoutePageShell
+          breadcrumbLabel={labels.breadcrumbLabel}
+          homeLabel={labels.homeRouteLabel}
+          subtitle={labels.contactSubtitle}
+          title={labels.contactRouteTitle}
+          titleId="contact-title"
+        >
+          <ContactForm
+            contactForm={contactForm}
+            contactMessageLength={contactMessageLength}
+            isContactFormValid={isContactFormValid}
+            isContactMessageUnsafe={isContactMessageUnsafe}
+            isContactSubmitting={isContactSubmitting}
+            labels={labels}
+            maxLength={CONTACT_MESSAGE_MAX_LENGTH}
+            onSubmit={handleContactSubmit}
+            onUpdateValue={updateContactFormValue}
+            submitStatus={contactSubmitStatus}
+          />
+        </RoutePageShell>
+        <ContactSuccessModal
+          isOpen={isContactSuccessModalOpen}
+          labels={labels}
+          modalRef={contactSuccessModalRef}
+        />
       </>
     );
   }
@@ -2392,51 +1386,12 @@ export default function PreferenceControls({
             />
           </button>
 
-          <div
-            className="profile-links"
-            aria-label={locale === "es" ? "Enlaces de perfil" : "Profile links"}
-          >
-            <a
-              className="profile-link"
-              href="https://www.linkedin.com/in/ricardo-nava-mayoral/"
-              target="_blank"
-              rel="noreferrer"
-              aria-label={labels.linkedinLabel}
-              ref={(element) => {
-                mainLinkRefs.current.linkedin = element;
-              }}
-              data-hidden={isProfileMenuOpen || flipProfileLinks.length > 0}
-            >
-              {renderProfileLinkIcon("linkedin")}
-            </a>
-
-            <a
-              className="profile-link"
-              href="https://github.com/Ricardo-NM"
-              target="_blank"
-              rel="noreferrer"
-              aria-label={labels.githubLabel}
-              ref={(element) => {
-                mainLinkRefs.current.github = element;
-              }}
-              data-hidden={isProfileMenuOpen || flipProfileLinks.length > 0}
-            >
-              {renderProfileLinkIcon("github")}
-            </a>
-
-            <a
-              className="profile-link"
-              href="/assets/CV_Ricardo_Nava_Mayoral.pdf"
-              download
-              aria-label={labels.resumeLabel}
-              ref={(element) => {
-                mainLinkRefs.current.resume = element;
-              }}
-              data-hidden={isProfileMenuOpen || flipProfileLinks.length > 0}
-            >
-              {renderProfileLinkIcon("resume")}
-            </a>
-          </div>
+          <ProfileLinks
+            hidden={isProfileMenuOpen || flipProfileLinks.length > 0}
+            labels={labels}
+            locale={locale}
+            refs={mainLinkRefs.current}
+          />
         </div>
 
         <div className="intro-main">
@@ -2445,7 +1400,10 @@ export default function PreferenceControls({
             data-hidden={isProfileMenuOpen || Boolean(flipIntroCopy)}
             ref={introCopyRef}
           >
-            {renderIntroCopyContent()}
+            <IntroCopyContent
+              introHighlight={labels.introHighlight}
+              introRest={labels.introRest}
+            />
           </p>
         </div>
       </div>
@@ -2468,67 +1426,39 @@ export default function PreferenceControls({
               />
             </div>
           </div>
-          <div className="profile-links profile-drawer-links">
-            <a
-              className="profile-link"
-              href="https://www.linkedin.com/in/ricardo-nava-mayoral/"
-              ref={(element) => {
-                drawerLinkMeasureRefs.current.linkedin = element;
-              }}
-            >
-              {renderProfileLinkIcon("linkedin")}
-            </a>
-
-            <a
-              className="profile-link"
-              href="https://github.com/Ricardo-NM"
-              ref={(element) => {
-                drawerLinkMeasureRefs.current.github = element;
-              }}
-            >
-              {renderProfileLinkIcon("github")}
-            </a>
-
-            <a
-              className="profile-link"
-              href="/assets/CV_Ricardo_Nava_Mayoral.pdf"
-              ref={(element) => {
-                drawerLinkMeasureRefs.current.resume = element;
-              }}
-            >
-              {renderProfileLinkIcon("resume")}
-            </a>
-          </div>
+          <ProfileLinks
+            className="profile-links profile-drawer-links"
+            labels={labels}
+            locale={locale}
+            refs={drawerLinkMeasureRefs.current}
+          />
         </div>
         <div className="profile-drawer-name-row">
           <h3>Ricardo Nava Mayoral</h3>
           <span />
         </div>
-        <div className="profile-drawer-meta">
-          <span>
-            <Mail aria-hidden="true" size={16} strokeWidth={1.8} />
-            {profileEmail}
-          </span>
-          <span>
-            <GraduationCap aria-hidden="true" size={16} strokeWidth={1.8} />
-            {educationText}
-          </span>
-          <span>
-            <MapPin aria-hidden="true" size={16} strokeWidth={1.8} />
-            {profileLocation}
-          </span>
-          <span>
-            <FolderCode aria-hidden="true" size={16} strokeWidth={1.8} />
-            {projectsText}
-          </span>
-        </div>
+        <ProfileDrawerMeta
+          educationText={educationText}
+          profileEmail={profileEmail}
+          profileLocation={profileLocation}
+          projectsText={projectsText}
+        />
         <div className="profile-drawer-section profile-about">
           <h4>{labels.aboutTitle}</h4>
           <p className="profile-about-text" ref={drawerAboutMeasureRef}>
-            {renderIntroCopyContent()}
+            <IntroCopyContent
+              introHighlight={labels.introHighlight}
+              introRest={labels.introRest}
+            />
           </p>
         </div>
-        {renderDrawerRouteLinks(drawerRouteMeasureRefs.current)}
+        <DrawerRouteLinks
+          label={labels.drawerNavigationTitle}
+          locale={locale}
+          refs={drawerRouteMeasureRefs.current}
+          routeItems={routeItems}
+          title={labels.drawerNavigationTitle}
+        />
       </div>
 
       {flipAvatarStyle && (
@@ -2548,7 +1478,7 @@ export default function PreferenceControls({
           aria-hidden="true"
           key={link.id}
         >
-          {renderProfileLinkIcon(link.id)}
+          <ProfileLinkIcon id={link.id} />
         </span>
       ))}
 
@@ -2559,7 +1489,7 @@ export default function PreferenceControls({
           aria-hidden="true"
           key={link.id}
         >
-          {renderRouteIcon(link.id, link.iconSize)}
+          <RouteIcon id={link.id} size={link.iconSize} />
         </span>
       ))}
 
@@ -2570,7 +1500,12 @@ export default function PreferenceControls({
           style={flipIntroCopyStyle}
           aria-hidden="true"
         >
-          <p>{renderIntroCopyContent()}</p>
+          <p>
+            <IntroCopyContent
+              introHighlight={labels.introHighlight}
+              introRest={labels.introRest}
+            />
+          </p>
         </div>
       )}
 
@@ -2611,53 +1546,13 @@ export default function PreferenceControls({
           </div>
 
           <div className="profile-drawer-cover-row">
-            <div
+            <ProfileLinks
               className="profile-links profile-drawer-links"
-              aria-label={
-                locale === "es" ? "Enlaces de perfil" : "Profile links"
-              }
-            >
-              <a
-                className="profile-link"
-                href="https://www.linkedin.com/in/ricardo-nava-mayoral/"
-                target="_blank"
-                rel="noreferrer"
-                aria-label={labels.linkedinLabel}
-                ref={(element) => {
-                  drawerLinkRefs.current.linkedin = element;
-                }}
-                data-hidden={Boolean(flipProfileLinks.length)}
-              >
-                {renderProfileLinkIcon("linkedin")}
-              </a>
-
-              <a
-                className="profile-link"
-                href="https://github.com/Ricardo-NM"
-                target="_blank"
-                rel="noreferrer"
-                aria-label={labels.githubLabel}
-                ref={(element) => {
-                  drawerLinkRefs.current.github = element;
-                }}
-                data-hidden={Boolean(flipProfileLinks.length)}
-              >
-                {renderProfileLinkIcon("github")}
-              </a>
-
-              <a
-                className="profile-link"
-                href="/assets/CV_Ricardo_Nava_Mayoral.pdf"
-                download
-                aria-label={labels.resumeLabel}
-                ref={(element) => {
-                  drawerLinkRefs.current.resume = element;
-                }}
-                data-hidden={Boolean(flipProfileLinks.length)}
-              >
-                {renderProfileLinkIcon("resume")}
-              </a>
-            </div>
+              hidden={Boolean(flipProfileLinks.length)}
+              labels={labels}
+              locale={locale}
+              refs={drawerLinkRefs.current}
+            />
 
             <div className="profile-drawer-identity">
               <div
@@ -2682,24 +1577,12 @@ export default function PreferenceControls({
             <span aria-hidden="true" />
           </div>
 
-          <div className="profile-drawer-meta">
-            <span>
-              <Mail aria-hidden="true" size={16} strokeWidth={1.8} />
-              {profileEmail}
-            </span>
-            <span>
-              <GraduationCap aria-hidden="true" size={16} strokeWidth={1.8} />
-              {educationText}
-            </span>
-            <span>
-              <MapPin aria-hidden="true" size={16} strokeWidth={1.8} />
-              {profileLocation}
-            </span>
-            <span>
-              <FolderCode aria-hidden="true" size={16} strokeWidth={1.8} />
-              {projectsText}
-            </span>
-          </div>
+          <ProfileDrawerMeta
+            educationText={educationText}
+            profileEmail={profileEmail}
+            profileLocation={profileLocation}
+            projectsText={projectsText}
+          />
 
           <div className="profile-drawer-section profile-about">
             <h4>{labels.aboutTitle}</h4>
@@ -2708,15 +1591,22 @@ export default function PreferenceControls({
               data-hidden={Boolean(flipIntroCopy)}
               ref={drawerAboutRef}
             >
-              {renderIntroCopyContent()}
+              <IntroCopyContent
+                introHighlight={labels.introHighlight}
+                introRest={labels.introRest}
+              />
             </p>
           </div>
 
-          {renderDrawerRouteLinks(
-            drawerRouteRefs.current,
-            flipRouteLinks.length > 0,
-            closeProfileMenuForRoute,
-          )}
+          <DrawerRouteLinks
+            hidden={flipRouteLinks.length > 0}
+            label={labels.drawerNavigationTitle}
+            locale={locale}
+            onClick={closeProfileMenuForRoute}
+            refs={drawerRouteRefs.current}
+            routeItems={routeItems}
+            title={labels.drawerNavigationTitle}
+          />
         </section>
       </aside>
     </>

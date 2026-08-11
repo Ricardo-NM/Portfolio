@@ -1,74 +1,16 @@
 ---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import HomeNameMark from "../components/HomeNameMark.astro";
 import PreferenceControls from "../components/PreferenceControls";
-import { ClientRouter } from "astro:transitions";
-import "../styles/global.css";
 
 const name = "Ricardo Nava";
-const nameLetters = Array.from(name);
 ---
 
-<!doctype html>
-<html lang="es" data-theme="light">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="description" content="Portafolio web de Ricardo Nava, desarrollador full stack." />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="generator" content={Astro.generator} />
-    <title>Ricardo NM | Portafolio</title>
-    <ClientRouter />
-    <script is:inline>
-      (() => {
-        const getPreferences = () => {
-          const storedTheme = localStorage.getItem("rn-theme");
-          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-          return {
-            locale: localStorage.getItem("rn-locale") || "es",
-            theme: storedTheme || (prefersDark ? "dark" : "light"),
-          };
-        };
-        const applyPreferences = (root) => {
-          const { locale, theme } = getPreferences();
-
-          root.dataset.theme = theme;
-          root.lang = locale;
-        };
-
-        applyPreferences(document.documentElement);
-
-        document.addEventListener("astro:before-swap", (event) => {
-          applyPreferences(event.newDocument.documentElement);
-        });
-
-        document.addEventListener("astro:after-swap", () => {
-          applyPreferences(document.documentElement);
-        });
-      })();
-    </script>
-  </head>
-  <body>
-    <main class="portfolio-shell" aria-label="Portafolio de Ricardo Nava">
-      <section class="hero-content" aria-labelledby="portfolio-title">
-        <h1 id="portfolio-title" class="name-mark" aria-label={name}>
-          {
-            nameLetters.map((letter, index) => (
-              <span
-                aria-hidden="true"
-                class:list={["name-letter", letter === " " && "name-letter-space"]}
-                style={`--letter-index: ${index};`}
-              >
-                {letter === " " ? "\u00A0" : letter}
-              </span>
-            ))
-          }
-        </h1>
-        <PreferenceControls client:only="react" />
-      </section>
-    </main>
-    <PreferenceControls
-      mode="chrome"
-      client:only="react"
-      transition:persist="site-chrome"
-    />
-  </body>
-</html>
+<BaseLayout description="Portafolio web de Ricardo Nava, desarrollador full stack.">
+  <main class="portfolio-shell" aria-label="Portafolio de Ricardo Nava">
+    <section class="hero-content" aria-labelledby="portfolio-title">
+      <HomeNameMark id="portfolio-title" name={name} />
+      <PreferenceControls client:only="react" />
+    </section>
+  </main>
+</BaseLayout>

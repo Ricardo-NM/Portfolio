@@ -1,10 +1,6 @@
-import { useEffect, useState } from "react";
 import { type Locale, workExperienceItems } from "../data/workExperience";
+import { useSyncedLocale } from "../hooks/useSyncedLocale";
 import RouteBreadcrumb from "./RouteBreadcrumb";
-
-const STORAGE_KEYS = {
-  locale: "rn-locale",
-} as const;
 
 const copy = {
   es: {
@@ -23,31 +19,9 @@ const copy = {
   },
 } as const;
 
-function getInitialLocale(): Locale {
-  if (typeof window === "undefined") {
-    return "es";
-  }
-
-  return window.localStorage.getItem(STORAGE_KEYS.locale) === "en"
-    ? "en"
-    : "es";
-}
-
 export default function ExperienceView() {
-  const [locale, setLocale] = useState<Locale>(getInitialLocale);
+  const locale = useSyncedLocale() as Locale;
   const labels = copy[locale];
-
-  useEffect(() => {
-    const syncLocale = () => setLocale(getInitialLocale());
-
-    window.addEventListener("storage", syncLocale);
-    window.addEventListener("rn-preferences-change", syncLocale);
-
-    return () => {
-      window.removeEventListener("storage", syncLocale);
-      window.removeEventListener("rn-preferences-change", syncLocale);
-    };
-  }, []);
 
   return (
     <main className="experience-shell" aria-labelledby="experience-title">

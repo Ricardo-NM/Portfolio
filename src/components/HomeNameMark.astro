@@ -1,0 +1,23 @@
+---
+type Props = {
+  id: string;
+  name: string;
+};
+
+const { id, name } = Astro.props;
+const nameLetters = Array.from(name);
+---
+
+<h1 id={id} class="name-mark" aria-label={name}>
+  {
+    nameLetters.map((letter, index) => (
+      <span
+        aria-hidden="true"
+        class:list={["name-letter", letter === " " && "name-letter-space"]}
+        style={`--letter-index: ${index};`}
+      >
+        {letter === " " ? "\u00A0" : letter}
+      </span>
+    ))
+  }
+</h1>

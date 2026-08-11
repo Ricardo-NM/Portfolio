@@ -1,57 +1,8 @@
 ---
 import PreferenceControls from "../components/PreferenceControls";
-import { ClientRouter } from "astro:transitions";
-import "../styles/global.css";
+import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
-<!doctype html>
-<html lang="es" data-theme="light">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="description"
-      content="Habilidades y tecnologías de Ricardo Nava, desarrollador full stack."
-    />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="generator" content={Astro.generator} />
-    <title>Ricardo NM | Portafolio</title>
-    <ClientRouter />
-    <script is:inline>
-      (() => {
-        const getPreferences = () => {
-          const storedTheme = localStorage.getItem("rn-theme");
-          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-          return {
-            locale: localStorage.getItem("rn-locale") || "es",
-            theme: storedTheme || (prefersDark ? "dark" : "light"),
-          };
-        };
-        const applyPreferences = (root) => {
-          const { locale, theme } = getPreferences();
-
-          root.dataset.theme = theme;
-          root.lang = locale;
-        };
-
-        applyPreferences(document.documentElement);
-
-        document.addEventListener("astro:before-swap", (event) => {
-          applyPreferences(event.newDocument.documentElement);
-        });
-
-        document.addEventListener("astro:after-swap", () => {
-          applyPreferences(document.documentElement);
-        });
-      })();
-    </script>
-  </head>
-  <body>
-    <PreferenceControls mode="technologies" client:only="react" />
-    <PreferenceControls
-      mode="chrome"
-      client:only="react"
-      transition:persist="site-chrome"
-    />
-  </body>
-</html>
+<BaseLayout description="Habilidades y tecnologías de Ricardo Nava, desarrollador full stack.">
+  <PreferenceControls mode="technologies" client:only="react" />
+</BaseLayout>
