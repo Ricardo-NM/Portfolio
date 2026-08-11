@@ -1,4 +1,5 @@
 import {
+  BookMarked,
   BriefcaseBusiness,
   ChevronDown,
   CodeXml,
@@ -12,7 +13,9 @@ import {
   MessageSquareText,
   Moon,
   Settings,
+  Star,
   Sun,
+  Users,
   X,
 } from "lucide-react";
 import type {
@@ -71,12 +74,7 @@ type GitHubContributionTooltip = {
   top: number;
 };
 type PreferenceControlsMode =
-  | "chrome"
-  | "home"
-  | "preferences"
-  | "technologies"
-  | "activity"
-  | "contact";
+  "chrome" | "home" | "preferences" | "technologies" | "activity" | "contact";
 type PreferenceControlsProps = {
   mode?: PreferenceControlsMode;
 };
@@ -106,7 +104,12 @@ const copy = {
     githubActivityLoading: "Cargando actividad...",
     githubActivityError: "No se pudo cargar la actividad.",
     githubActivityLess: "Menos",
-    githubActivityMore: "Mas",
+    githubActivityMore: "Más",
+    githubAchievementsLabel: "Logros",
+    githubFollowerLabel: "Seguidor",
+    githubRepositoriesLabel: "Repositorios",
+    githubViewProfileLabel: "Ver perfil",
+    githubProfileSummaryLabel: "Resumen de perfil de GitHub",
     skillsTitle: "Habilidades y Tecnologías",
     technologiesSubtitle:
       "Tecnologías, lenguajes y herramientas que utilizo para desarrollar soluciones web y aplicaciones completas.",
@@ -154,6 +157,11 @@ const copy = {
     githubActivityError: "Activity could not be loaded.",
     githubActivityLess: "Less",
     githubActivityMore: "More",
+    githubAchievementsLabel: "Achievements",
+    githubFollowerLabel: "Follower",
+    githubRepositoriesLabel: "Repositories",
+    githubViewProfileLabel: "View profile",
+    githubProfileSummaryLabel: "GitHub profile summary",
     skillsTitle: "Skills and Technologies",
     technologiesSubtitle:
       "Technologies, languages, and tools I use to develop complete web solutions and applications.",
@@ -292,7 +300,7 @@ const TECHNOLOGY_CATEGORIES = [
   },
   {
     title: {
-      es: "DATABASES",
+      es: "BASES DE DATOS",
       en: "DATABASES",
     },
     items: [
@@ -304,8 +312,8 @@ const TECHNOLOGY_CATEGORIES = [
   },
   {
     title: {
-      es: "DEVELOPMENT TOOLS",
-      en: "DEVELOPMENT TOOLS",
+      es: "HERRAMIENTAS",
+      en: "TOOLS",
     },
     items: [
       { label: "Git", icon: "git.svg", color: "#f05032" },
@@ -407,6 +415,7 @@ export default function PreferenceControls({
   const introCopyRef = useRef<HTMLParagraphElement>(null);
   const introToolingRef = useRef<HTMLDivElement>(null);
   const mainGithubActivityRef = useRef<HTMLDivElement>(null);
+  const mainGithubCalendarScrollRef = useRef<HTMLDivElement>(null);
   const drawerAboutRef = useRef<HTMLParagraphElement>(null);
   const drawerAboutMeasureRef = useRef<HTMLParagraphElement>(null);
   const drawerAvatarRef = useRef<HTMLDivElement>(null);
@@ -493,10 +502,12 @@ export default function PreferenceControls({
     }
 
     const syncProfileDrawerState = (event: Event) => {
-      const detail = (event as CustomEvent<{
-        open?: boolean;
-        routeRevealDelayMs?: number;
-      }>).detail;
+      const detail = (
+        event as CustomEvent<{
+          open?: boolean;
+          routeRevealDelayMs?: number;
+        }>
+      ).detail;
 
       if (routeNavRevealTimerRef.current) {
         window.clearTimeout(routeNavRevealTimerRef.current);
@@ -523,10 +534,7 @@ export default function PreferenceControls({
       setHideRouteNavItems(false);
     };
 
-    window.addEventListener(
-      "rn-profile-drawer-toggle",
-      syncProfileDrawerState,
-    );
+    window.addEventListener("rn-profile-drawer-toggle", syncProfileDrawerState);
 
     return () => {
       window.removeEventListener(
@@ -557,10 +565,7 @@ export default function PreferenceControls({
       return;
     }
 
-    if (
-      githubContributions ||
-      githubRequestInFlightRef.current
-    ) {
+    if (githubContributions || githubRequestInFlightRef.current) {
       return;
     }
 
@@ -595,6 +600,34 @@ export default function PreferenceControls({
 
     return () => {
       controller.abort();
+    };
+  }, [githubContributions, mode]);
+
+  useEffect(() => {
+    if (mode !== "activity" || !githubContributions) {
+      return;
+    }
+
+    const scrollElement = mainGithubCalendarScrollRef.current;
+
+    if (!scrollElement) {
+      return;
+    }
+
+    const scrollToLatestMonth = () => {
+      if (!window.matchMedia("(max-width: 720px)").matches) {
+        return;
+      }
+
+      scrollElement.scrollLeft = scrollElement.scrollWidth;
+    };
+    const animationFrame = window.requestAnimationFrame(scrollToLatestMonth);
+
+    window.addEventListener("resize", scrollToLatestMonth);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      window.removeEventListener("resize", scrollToLatestMonth);
     };
   }, [githubContributions, mode]);
 
@@ -1151,7 +1184,9 @@ export default function PreferenceControls({
         )}
 
         {githubContributionsStatus === "error" && (
-          <p className="github-calendar-message">{labels.githubActivityError}</p>
+          <p className="github-calendar-message">
+            {labels.githubActivityError}
+          </p>
         )}
 
         {githubContributions && (
@@ -1161,7 +1196,10 @@ export default function PreferenceControls({
               ref={scrollRef}
               onScroll={hideGitHubDayTooltip}
             >
-              <div className="github-calendar-track" style={githubCalendarStyle}>
+              <div
+                className="github-calendar-track"
+                style={githubCalendarStyle}
+              >
                 <div className="github-calendar-months" aria-hidden="true">
                   {githubMonthMarkers.map((marker) => (
                     <span
@@ -1239,6 +1277,79 @@ export default function PreferenceControls({
       </div>
     </div>
   );
+  const renderGitHubProfileCard = () => (
+    <article
+      className="github-profile-card"
+      aria-label={labels.githubProfileSummaryLabel}
+    >
+      <div className="github-profile-card-head">
+        <img
+          src="/assets/profileGitHub.png"
+          alt={labels.profileAlt}
+          className="github-profile-avatar"
+          loading="lazy"
+        />
+
+        <div className="github-profile-head-content">
+          <div className="github-profile-identity">
+            <strong>RICHARD</strong>
+            <span>Ricardo-NM</span>
+          </div>
+
+          <div className="github-profile-achievements">
+            <span>{labels.githubAchievementsLabel}</span>
+            <img
+              src="/assets/quickdraw-default-39c6aec8ff89.png"
+              alt={labels.githubAchievementsLabel}
+              className="github-profile-achievement"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </div>
+
+      <p className="github-profile-role">Full Stack Developer</p>
+
+      <div className="github-profile-meta-row">
+        <p className="github-profile-location">
+          <MapPin aria-hidden="true" size={15} strokeWidth={1.8} />
+          <strong>Hidalgo, MX (UTC -06:00)</strong>
+        </p>
+
+        <a
+          className="github-profile-link-badge"
+          href="https://github.com/Ricardo-NM"
+          target="_blank"
+          rel="noreferrer"
+          aria-label={labels.githubLabel}
+        >
+          <span className="github-profile-github-icon" aria-hidden="true" />
+          <strong>{labels.githubViewProfileLabel}</strong>
+        </a>
+      </div>
+
+      <span className="github-profile-divider" aria-hidden="true" />
+
+      <div className="github-profile-footer">
+        <div className="github-profile-stats">
+          <p>
+            <Users aria-hidden="true" size={15} strokeWidth={1.8} />
+            <strong>1</strong> {labels.githubFollowerLabel}
+          </p>
+
+          <p>
+            <BookMarked aria-hidden="true" size={15} strokeWidth={1.8} />
+            <strong>17</strong> {labels.githubRepositoriesLabel}
+          </p>
+        </div>
+
+        <span className="github-profile-pro-badge">
+          <Star aria-hidden="true" size={13} strokeWidth={1.9} />
+          <strong>PRO</strong>
+        </span>
+      </div>
+    </article>
+  );
   const renderTechnologyVisual = (technology: TechnologyItem) => {
     return (
       <span
@@ -1255,10 +1366,7 @@ export default function PreferenceControls({
   const renderTechnologyCategories = () => (
     <div className="technology-category-list" aria-label={labels.skillsTitle}>
       {TECHNOLOGY_CATEGORIES.map((category) => (
-        <article
-          className="technology-category-card"
-          key={category.title.es}
-        >
+        <article className="technology-category-card" key={category.title.es}>
           <h2>{category.title[locale]}</h2>
 
           <span className="technology-category-divider" aria-hidden="true" />
@@ -1394,10 +1502,7 @@ export default function PreferenceControls({
     >
       <h4>{labels.drawerNavigationTitle}</h4>
       {routeItems.map((item) => (
-        <div
-          className="profile-route-link"
-          key={item.id}
-        >
+        <div className="profile-route-link" key={item.id}>
           <span
             className="profile-route-icon"
             data-hidden={hidden}
@@ -1453,7 +1558,6 @@ export default function PreferenceControls({
             </section>
           </div>
         </main>
-
       </>
     );
   }
@@ -1477,7 +1581,10 @@ export default function PreferenceControls({
             {renderGitHubActivity({
               activityRef: mainGithubActivityRef,
               className: "route-github-activity route-section",
+              scrollRef: mainGithubCalendarScrollRef,
             })}
+
+            {renderGitHubProfileCard()}
           </div>
         </main>
 
@@ -1495,7 +1602,6 @@ export default function PreferenceControls({
             {githubContributionTooltip.text}
           </div>
         )}
-
       </>
     );
   }
@@ -1516,7 +1622,6 @@ export default function PreferenceControls({
             </header>
           </div>
         </main>
-
       </>
     );
   }
@@ -1613,7 +1718,6 @@ export default function PreferenceControls({
           >
             {renderIntroCopyContent()}
           </p>
-
         </div>
       </div>
 
@@ -1882,10 +1986,8 @@ export default function PreferenceControls({
             flipRouteLinks.length > 0,
             closeProfileMenuForRoute,
           )}
-
         </section>
       </aside>
-
     </>
   );
 }

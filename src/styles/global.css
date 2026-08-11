@@ -1419,6 +1419,282 @@ button {
   font-size: clamp(0.72rem, 0.82vw, 0.8rem);
 }
 
+.github-profile-card {
+  --github-pro-color: #6f42ff;
+  display: grid;
+  width: 100%;
+  gap: 0;
+  margin-top: clamp(0.78rem, 1.8vw, 1rem);
+  padding: clamp(0.82rem, 1.9vw, 1rem);
+  border: 1px solid var(--color-tech-card-border);
+  border-radius: 0.5rem;
+  background: var(--color-tech-card-bg);
+  color: var(--color-text);
+  transition:
+    background-color var(--theme-transition),
+    border-color var(--theme-transition),
+    color var(--theme-transition);
+}
+
+:root[data-theme="dark"] .github-profile-card {
+  --github-pro-color: #8c6cff;
+}
+
+.github-profile-card-head {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: clamp(0.8rem, 1.8vw, 1rem);
+}
+
+.github-profile-avatar {
+  display: block;
+  width: clamp(3.55rem, 6.8vw, 4.35rem);
+  height: clamp(3.55rem, 6.8vw, 4.35rem);
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--color-contrast);
+  object-fit: cover;
+  transition:
+    background-color var(--theme-transition),
+    box-shadow var(--theme-transition);
+}
+
+.github-profile-head-content {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  flex: 1 1 auto;
+}
+
+.github-profile-identity {
+  display: grid;
+  min-width: 0;
+  gap: 0.24rem;
+}
+
+.github-profile-identity strong {
+  min-width: 0;
+  color: var(--color-text);
+  font-size: clamp(0.96rem, 1.45vw, 1.08rem);
+  font-weight: 900;
+  line-height: 1;
+  overflow-wrap: anywhere;
+  transition: color var(--theme-transition);
+}
+
+.github-profile-identity span {
+  min-width: 0;
+  color: var(--color-panel-muted);
+  font-size: clamp(0.82rem, 1vw, 0.92rem);
+  font-weight: 300;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  transition: color var(--theme-transition);
+}
+
+.github-profile-achievements {
+  display: grid;
+  flex: 0 0 auto;
+  justify-items: center;
+  gap: 0.32rem;
+}
+
+.github-profile-achievements span {
+  color: var(--color-text);
+  font-size: clamp(0.86rem, 1vw, 0.95rem);
+  font-weight: 800;
+  line-height: 1.35;
+  transition: color var(--theme-transition);
+}
+
+.github-profile-achievement {
+  display: block;
+  width: clamp(2rem, 3.8vw, 2.45rem);
+  height: clamp(2rem, 3.8vw, 2.45rem);
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.github-profile-role {
+  margin: clamp(0.86rem, 1.7vw, 1rem) 0 0;
+  color: var(--color-text);
+  font-size: clamp(0.86rem, 1vw, 0.95rem);
+  font-weight: 800;
+  line-height: 1.35;
+  transition: color var(--theme-transition);
+}
+
+.github-profile-meta-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: clamp(0.82rem, 1.6vw, 0.95rem) 0 0;
+}
+
+.github-profile-location {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  color: var(--color-panel-muted);
+  font-size: clamp(0.78rem, 0.95vw, 0.88rem);
+  line-height: 1.35;
+  transition: color var(--theme-transition);
+}
+
+.github-profile-location svg {
+  flex: 0 0 auto;
+  color: var(--color-panel-muted);
+  transition: color var(--theme-transition);
+}
+
+.github-profile-location strong {
+  min-width: 0;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.github-profile-divider {
+  display: block;
+  width: 100%;
+  height: 1px;
+  margin: clamp(0.95rem, 1.8vw, 1.1rem) 0 clamp(0.78rem, 1.5vw, 0.9rem);
+  background: var(--color-tech-card-divider);
+  opacity: 0.5;
+  transition:
+    background-color var(--theme-transition),
+    opacity var(--theme-transition);
+}
+
+.github-profile-footer {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.github-profile-stats {
+  display: inline-flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.38rem 0.82rem;
+}
+
+.github-profile-stats p {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0;
+  color: var(--color-panel-muted);
+  font-size: clamp(0.85rem, 1vw, 0.94rem);
+  font-weight: 300;
+  line-height: 1;
+  transition: color var(--theme-transition);
+}
+
+.github-profile-stats p svg {
+  display: block;
+  flex: 0 0 auto;
+  color: var(--color-panel-muted);
+  transition: color var(--theme-transition);
+}
+
+.github-profile-stats p strong {
+  display: block;
+  color: var(--color-text);
+  font-weight: 900;
+  line-height: 1;
+  transition: color var(--theme-transition);
+}
+
+.github-profile-pro-badge {
+  display: inline-flex;
+  min-height: 1.45rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 0.24rem;
+  border: 1px solid var(--github-pro-color);
+  border-radius: 999px;
+  color: var(--github-pro-color);
+  font-size: 0.72rem;
+  line-height: 1;
+  padding: 0.22rem 0.44rem;
+  transition:
+    border-color var(--theme-transition),
+    color var(--theme-transition);
+}
+
+.github-profile-pro-badge svg {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.github-profile-pro-badge strong {
+  font-weight: 900;
+}
+
+.github-profile-link-badge {
+  display: inline-flex;
+  min-height: 1.45rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.28rem;
+  border: 1px solid color-mix(in srgb, var(--color-text) 22%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-panel-surface) 66%, transparent);
+  color: var(--color-text);
+  font-size: 0.72rem;
+  line-height: 1;
+  padding: 0.22rem 0.48rem;
+  text-decoration: none;
+  transition:
+    background-color var(--theme-transition),
+    border-color var(--theme-transition),
+    color var(--theme-transition);
+}
+
+.github-profile-link-badge:hover,
+.github-profile-link-badge:focus-visible {
+  border-color: #050505;
+  background: color-mix(in srgb, var(--color-text) 10%, transparent);
+}
+
+:root[data-theme="dark"] .github-profile-link-badge:hover,
+:root[data-theme="dark"] .github-profile-link-badge:focus-visible {
+  border-color: #ffffff;
+  background: color-mix(in srgb, var(--color-text) 12%, transparent);
+}
+
+.github-profile-link-badge:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-primary) 72%, transparent);
+  outline-offset: 3px;
+}
+
+.github-profile-link-badge strong {
+  font-weight: 900;
+}
+
+.github-profile-github-icon {
+  display: block;
+  width: 0.82rem;
+  height: 0.82rem;
+  flex: 0 0 auto;
+  background: currentColor;
+  mask: url("/assets/icons/github.svg") center / contain no-repeat;
+  -webkit-mask: url("/assets/icons/github.svg") center / contain no-repeat;
+  transition: background-color var(--theme-transition);
+}
+
 .profile-drawer-meta {
   display: grid;
   gap: 0.55rem;
@@ -1817,6 +2093,59 @@ button {
   .portfolio-shell,
   .experience-shell {
     padding-bottom: max(6.4rem, calc(env(safe-area-inset-bottom) + 6.4rem));
+  }
+
+  .route-github-activity {
+    --github-cell-size: 12px;
+    --github-gap: 4px;
+  }
+
+  .route-github-activity .github-calendar-scroll {
+    overflow-x: auto;
+    scrollbar-color: color-mix(in srgb, var(--color-primary) 55%, transparent)
+      transparent;
+    scrollbar-width: thin;
+  }
+
+  .route-github-activity .github-calendar-scroll::-webkit-scrollbar {
+    display: block;
+    height: 0.42rem;
+  }
+
+  .route-github-activity .github-calendar-track {
+    display: inline-block;
+    width: max-content;
+    min-width: max-content;
+  }
+
+  .route-github-activity .github-calendar-months,
+  .route-github-activity .github-calendar-grid {
+    width: max-content;
+    grid-template-columns: repeat(
+      var(--github-week-count),
+      var(--github-cell-size)
+    );
+  }
+
+  .route-github-activity .github-calendar-months span {
+    min-width: 2rem;
+  }
+
+  .route-github-activity .github-calendar-grid {
+    grid-template-rows: repeat(7, var(--github-cell-size));
+    align-items: start;
+    justify-items: start;
+  }
+
+  .route-github-activity .github-calendar-day {
+    width: var(--github-cell-size);
+    min-width: var(--github-cell-size);
+    max-width: var(--github-cell-size);
+    height: var(--github-cell-size);
+    min-height: var(--github-cell-size);
+    max-height: var(--github-cell-size);
+    aspect-ratio: auto;
+    place-self: start;
   }
 
   .home-route-links {
