@@ -79,12 +79,13 @@ export default function GitHubActivity({
             >
               <div className="github-calendar-track" style={calendarStyle}>
                 <div className="github-calendar-months" aria-hidden="true">
-                  {monthMarkers.map((marker) => (
+                  {monthMarkers.map((marker, markerIndex) => (
                     <span
                       key={`${marker.label}-${marker.weekIndex}`}
                       style={
                         {
                           gridColumn: `${marker.weekIndex + 1}`,
+                          "--github-month-index": markerIndex,
                         } as CSSProperties
                       }
                     >
@@ -124,6 +125,7 @@ export default function GitHubActivity({
                             {
                               gridColumn: `${weekIndex + 1}`,
                               gridRow: `${day.weekday + 1}`,
+                              "--github-day-column-index": weekIndex,
                             } as CSSProperties
                           }
                         />

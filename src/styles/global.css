@@ -1516,8 +1516,8 @@ button {
   .experience-card-panel[data-open="true"]
   .experience-bullet-letter {
   opacity: 0;
-  transform: translateY(0.34em);
-  animation: letter-rise 260ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform: translateY(0.38em);
+  animation: letter-rise 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .experience-card[data-intro-open="true"]
@@ -1526,7 +1526,7 @@ button {
   animation-delay: calc(
     var(--experience-content-delay) +
       (var(--experience-card-index) * var(--experience-card-stagger)) +
-      560ms + var(--experience-bullet-delay)
+      560ms
   );
   will-change: opacity, transform;
 }
@@ -1537,7 +1537,7 @@ button {
   animation-delay: calc(
     var(--experience-content-delay) +
       (var(--experience-card-index) * var(--experience-card-stagger)) +
-      560ms + var(--experience-bullet-delay) + (var(--letter-index) * 4ms)
+      560ms + (var(--letter-index) * 12ms)
   );
   will-change: opacity, transform;
 }
@@ -2389,7 +2389,11 @@ button {
 
 .route-github-activity .github-calendar-panel {
   width: 100%;
+  opacity: 0;
   padding: clamp(0.78rem, 1.7vw, 1rem);
+  animation: activity-card-fade-in 360ms ease-out forwards;
+  animation-delay: var(--route-description-start-delay, 340ms);
+  will-change: opacity;
 }
 
 .route-github-activity .github-calendar-scroll {
@@ -2416,6 +2420,14 @@ button {
 
 .route-github-activity .github-calendar-months span {
   min-width: 0;
+  opacity: 0;
+  transform: translateY(-0.42rem);
+  animation: activity-month-slide-in 260ms ease-out forwards;
+  animation-delay: calc(
+    var(--route-description-start-delay, 340ms) + 300ms +
+      (var(--github-month-index) * 45ms)
+  );
+  will-change: opacity, transform;
 }
 
 .route-github-activity .github-calendar-months {
@@ -2437,10 +2449,48 @@ button {
   max-height: none;
   aspect-ratio: 1;
   place-self: stretch;
+  opacity: 0;
+  transform: scale(0);
+  transform-origin: center;
+  animation: activity-calendar-day-scale-in 520ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(
+    var(--route-description-start-delay, 340ms) + 420ms +
+      (var(--github-day-column-index) * 11ms)
+  );
+  will-change: opacity, transform;
 }
 
 .route-github-activity .github-calendar-legend {
   font-size: clamp(0.72rem, 0.82vw, 0.8rem);
+}
+
+.route-github-activity .github-calendar-footer strong {
+  opacity: 0;
+  transform: translateX(-0.78rem);
+  animation: activity-footer-slide-from-left 280ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(var(--route-description-start-delay, 340ms) + 620ms);
+  will-change: opacity, transform;
+}
+
+.route-github-activity .github-calendar-legend {
+  opacity: 0;
+  transform: translateX(0.78rem);
+  animation: activity-footer-slide-from-right 280ms
+    cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(var(--route-description-start-delay, 340ms) + 660ms);
+  will-change: opacity, transform;
+}
+
+.route-github-activity + .github-profile-card {
+  --github-profile-animation-start: calc(
+    var(--route-description-start-delay, 340ms) + 300ms
+  );
+  opacity: 0;
+  animation: activity-card-fade-in 360ms ease-out forwards;
+  animation-delay: calc(var(--route-description-start-delay, 340ms) + 120ms);
+  will-change: opacity;
 }
 
 .github-profile-card {
@@ -2717,6 +2767,210 @@ button {
   mask: url("/assets/icons/github.svg") center / contain no-repeat;
   -webkit-mask: url("/assets/icons/github.svg") center / contain no-repeat;
   transition: background-color var(--theme-transition);
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-avatar,
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-achievement,
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-pro-badge {
+  opacity: 0;
+  transform: scale(0.72);
+  transform-origin: center;
+  animation: activity-profile-scale-in 320ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  will-change: opacity, transform;
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-avatar {
+  animation-delay: var(--github-profile-animation-start);
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-achievement {
+  animation-delay: calc(var(--github-profile-animation-start) + 80ms);
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-identity
+  strong,
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-achievements-label {
+  opacity: 0;
+  transform: translateY(-0.5rem);
+  animation: activity-profile-slide-from-top 280ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  will-change: opacity, transform;
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-identity
+  strong {
+  animation-delay: calc(var(--github-profile-animation-start) + 60ms);
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-achievements-label {
+  animation-delay: calc(var(--github-profile-animation-start) + 120ms);
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-identity
+  span {
+  opacity: 0;
+  transform: translateY(0.5rem);
+  animation: activity-profile-slide-from-bottom 280ms
+    cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(var(--github-profile-animation-start) + 150ms);
+  will-change: opacity, transform;
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-role,
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-location {
+  opacity: 0;
+  transform: translateX(-0.65rem);
+  animation: activity-profile-slide-from-left 280ms
+    cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-role {
+  animation-delay: calc(var(--github-profile-animation-start) + 240ms);
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-location {
+  animation-delay: calc(var(--github-profile-animation-start) + 290ms);
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-link-badge {
+  opacity: 0;
+  transform: translateX(0.65rem);
+  animation: activity-profile-slide-from-right 280ms
+    cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(var(--github-profile-animation-start) + 330ms);
+  will-change: opacity, transform;
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-stats
+  p
+  svg {
+  opacity: 0;
+  transform: translateY(0.5rem);
+  animation: activity-profile-slide-from-bottom 260ms
+    cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-stats
+  p:nth-child(1)
+  svg {
+  animation-delay: calc(var(--github-profile-animation-start) + 470ms);
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-stats
+  p:nth-child(2)
+  svg {
+  animation-delay: calc(var(--github-profile-animation-start) + 510ms);
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-stats
+  p
+  strong,
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-stats-label {
+  opacity: 0;
+  transform: translateX(-0.55rem);
+  animation: activity-profile-slide-from-left 260ms
+    cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-stats
+  p:nth-child(1)
+  strong,
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-stats
+  p:nth-child(1)
+  .github-profile-stats-label {
+  animation-delay: calc(var(--github-profile-animation-start) + 590ms);
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-stats
+  p:nth-child(2)
+  strong,
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-stats
+  p:nth-child(2)
+  .github-profile-stats-label {
+  animation-delay: calc(var(--github-profile-animation-start) + 630ms);
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-pro-badge {
+  animation-delay: calc(var(--github-profile-animation-start) + 760ms);
 }
 
 .profile-drawer-meta {
@@ -3064,6 +3318,75 @@ button {
   }
 }
 
+@keyframes activity-card-fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes activity-month-slide-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes activity-calendar-day-scale-in {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes activity-footer-slide-from-left {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes activity-footer-slide-from-right {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes activity-profile-scale-in {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes activity-profile-slide-from-top {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes activity-profile-slide-from-bottom {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes activity-profile-slide-from-left {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes activity-profile-slide-from-right {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 @keyframes profile-hint-pulse {
   0%,
   100% {
@@ -3125,7 +3448,27 @@ button {
 :root[data-suppress-entry-animations="locale"] .technology-category-title-letter,
 :root[data-suppress-entry-animations="locale"] .technology-category-divider,
 :root[data-suppress-entry-animations="locale"] .technology-category-item,
-:root[data-suppress-entry-animations="locale"] .technology-category-icon {
+:root[data-suppress-entry-animations="locale"] .technology-category-icon,
+:root[data-suppress-entry-animations="locale"]
+  .route-github-activity
+  .github-calendar-panel,
+:root[data-suppress-entry-animations="locale"]
+  .route-github-activity
+  .github-calendar-months
+  span,
+:root[data-suppress-entry-animations="locale"]
+  .route-github-activity
+  .github-calendar-day,
+:root[data-suppress-entry-animations="locale"]
+  .route-github-activity
+  .github-calendar-footer
+  strong,
+:root[data-suppress-entry-animations="locale"]
+  .route-github-activity
+  .github-calendar-legend,
+:root[data-suppress-entry-animations="locale"]
+  .route-github-activity
+  + .github-profile-card {
   animation: none !important;
   opacity: 1 !important;
   transform: none !important;
@@ -3505,7 +3848,34 @@ button {
   .technology-category-title-letter,
   .technology-category-divider,
   .technology-category-item,
-  .technology-category-icon {
+  .technology-category-icon,
+  .route-github-activity .github-calendar-panel,
+  .route-github-activity .github-calendar-months span,
+  .route-github-activity .github-calendar-day,
+  .route-github-activity .github-calendar-footer strong,
+  .route-github-activity .github-calendar-legend,
+  .route-github-activity + .github-profile-card,
+  .route-github-activity + .github-profile-card .github-profile-avatar,
+  .route-github-activity + .github-profile-card .github-profile-achievement,
+  .route-github-activity
+    + .github-profile-card
+    .github-profile-identity
+    strong,
+  .route-github-activity + .github-profile-card .github-profile-identity span,
+  .route-github-activity
+    + .github-profile-card
+    .github-profile-achievements-label,
+  .route-github-activity + .github-profile-card .github-profile-role,
+  .route-github-activity + .github-profile-card .github-profile-location,
+  .route-github-activity + .github-profile-card .github-profile-link-badge,
+  .route-github-activity + .github-profile-card .github-profile-stats p svg,
+  .route-github-activity
+    + .github-profile-card
+    .github-profile-stats
+    p
+    strong,
+  .route-github-activity + .github-profile-card .github-profile-stats-label,
+  .route-github-activity + .github-profile-card .github-profile-pro-badge {
     opacity: 1;
     transform: none;
   }
