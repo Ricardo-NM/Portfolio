@@ -1,3 +1,5 @@
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
 import { type Locale, workExperienceItems } from "../data/workExperience";
 import { useSyncedLocale } from "../hooks/useSyncedLocale";
 import RouteBreadcrumb from "./RouteBreadcrumb";
@@ -6,14 +8,14 @@ const copy = {
   es: {
     title: "Experiencia laboral",
     subtitle:
-      "Resumen de empleos, roles y responsabilidades representadas con contenido de ejemplo.",
+      "Experiencia profesional, responsabilidades y proyectos desarrollados a lo largo de mi trayectoria laboral.",
     breadcrumbLabel: "Ruta de navegacion",
     homeRouteLabel: "Ir al inicio",
   },
   en: {
     title: "Work experience",
     subtitle:
-      "Summary of jobs, roles, and responsibilities represented with sample content.",
+      "Professional experience, responsibilities and projects developed throughout my work career.",
     breadcrumbLabel: "Breadcrumb",
     homeRouteLabel: "Go home",
   },
@@ -22,6 +24,11 @@ const copy = {
 export default function ExperienceView() {
   const locale = useSyncedLocale() as Locale;
   const labels = copy[locale];
+  const [openItem, setOpenItem] = useState("experience-0");
+
+  const toggleItem = (id: string) => {
+    setOpenItem((currentItem) => (currentItem === id ? "" : id));
+  };
 
   return (
     <main className="experience-shell" aria-labelledby="experience-title">
@@ -38,32 +45,72 @@ export default function ExperienceView() {
         </header>
 
         <section className="experience-list" aria-label={labels.title}>
-          {workExperienceItems.map((item) => (
-            <article
-              className="experience-card"
-              key={`${item.company}-${item.date.es}`}
-            >
-              <span className="experience-logo" aria-hidden="true">
-                <img src={item.logo} alt="" loading="lazy" />
-              </span>
+          {workExperienceItems.map((item, index) => {
+            const itemId = `experience-${index}`;
+            const isOpen = openItem === itemId;
 
-              <div className="experience-card-content">
-                <div className="experience-card-heading">
-                  <div>
-                    <h2>{item.role[locale]}</h2>
-                    <p>{item.company}</p>
+            return (
+              <article
+                className="experience-card"
+                key={`${item.company}-${item.date.es}`}
+              >
+                <button
+                  type="button"
+                  className="experience-card-toggle"
+                  aria-controls={`${itemId}-details`}
+                  aria-expanded={isOpen}
+                  onClick={() => toggleItem(itemId)}
+                >
+                  <span className="experience-logo" aria-hidden="true">
+                    <img src={item.logo} alt="" loading="lazy" />
+                  </span>
+
+                  <span className="experience-card-summary">
+                    <span>
+                      <span className="experience-role">
+                        {item.role[locale]}
+                      </span>
+                      <span className="experience-company">{item.company}</span>
+                    </span>
+
+                    <span className="experience-card-meta">
+                      <time>{item.date[locale]}</time>
+                      <span
+                        className="experience-chevron-stack"
+                        aria-hidden="true"
+                      >
+                        <ChevronDown
+                          className="experience-chevron experience-chevron-down"
+                          size={21}
+                          strokeWidth={2.2}
+                        />
+                        <ChevronUp
+                          className="experience-chevron experience-chevron-up"
+                          size={21}
+                          strokeWidth={2.2}
+                        />
+                      </span>
+                    </span>
+                  </span>
+                </button>
+
+                <div
+                  className="experience-card-panel"
+                  id={`${itemId}-details`}
+                  aria-hidden={!isOpen}
+                  data-open={isOpen ? "true" : "false"}
+                >
+                  <div className="experience-card-panel-inner">
+                    <ul className="experience-bullets">
+                      {item.details[locale].map((detail) => (
+                        <li key={detail}>{detail}</li>
+                      ))}
+                    </ul>
                   </div>
-                  <time>{item.date[locale]}</time>
                 </div>
-
-                <ul className="experience-bullets">
-                  {item.details[locale].map((detail) => (
-                    <li key={detail}>{detail}</li>
-                  ))}
-                </ul>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </section>
       </div>
     </main>
