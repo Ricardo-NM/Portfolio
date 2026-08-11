@@ -33,6 +33,7 @@ type GitHubContributionResponse = {
 
 const GITHUB_LOGIN = "Ricardo-NM";
 const GITHUB_GRAPHQL_ENDPOINT = "https://api.github.com/graphql";
+const GITHUB_CALENDAR_UTC_OFFSET_MINUTES = -6 * 60;
 
 const contributionQuery = `
   query GitHubContributions($login: String!, $from: DateTime!, $to: DateTime!) {
@@ -53,6 +54,39 @@ const contributionQuery = `
   }
 `;
 
+function padDatePart(value: number) {
+  return value.toString().padStart(2, "0");
+}
+
+function getFixedOffsetDateParts(date: Date) {
+  const offsetDate = new Date(
+    date.getTime() + GITHUB_CALENDAR_UTC_OFFSET_MINUTES * 60 * 1000,
+  );
+
+  return {
+    dateString: [
+      offsetDate.getUTCFullYear(),
+      padDatePart(offsetDate.getUTCMonth() + 1),
+      padDatePart(offsetDate.getUTCDate()),
+    ].join("-"),
+    day: offsetDate.getUTCDate(),
+    hours: offsetDate.getUTCHours(),
+    milliseconds: offsetDate.getUTCMilliseconds(),
+    minutes: offsetDate.getUTCMinutes(),
+    month: offsetDate.getUTCMonth(),
+    seconds: offsetDate.getUTCSeconds(),
+    year: offsetDate.getUTCFullYear(),
+  };
+}
+
+function formatDateTimeWithFixedOffset(parts: ReturnType<typeof getFixedOffsetDateParts>) {
+  return `${parts.dateString}T${padDatePart(parts.hours)}:${padDatePart(
+    parts.minutes,
+  )}:${padDatePart(parts.seconds)}.${parts.milliseconds
+    .toString()
+    .padStart(3, "0")}-06:00`;
+}
+
 export const GET: APIRoute = async () => {
   const token =
     serverProcess.process?.env?.GITHUB_TOKEN ??
@@ -68,17 +102,33 @@ export const GET: APIRoute = async () => {
     );
   }
 
-  const to = new Date();
-  const from = new Date(to);
-  from.setFullYear(from.getFullYear() - 1);
+  const now = new Date();
+  const toParts = getFixedOffsetDateParts(now);
+  const fromLocalDate = new Date(
+    Date.UTC(
+      toParts.year - 1,
+      toParts.month,
+      toParts.day,
+      toParts.hours,
+      toParts.minutes,
+      toParts.seconds,
+      toParts.milliseconds,
+    ),
+  );
+  const fromParts = getFixedOffsetDateParts(
+    new Date(
+      fromLocalDate.getTime() -
+        GITHUB_CALENDAR_UTC_OFFSET_MINUTES * 60 * 1000,
+    ),
+  );
 
   const response = await fetch(GITHUB_GRAPHQL_ENDPOINT, {
     body: JSON.stringify({
       query: contributionQuery,
       variables: {
-        from: from.toISOString(),
+        from: formatDateTimeWithFixedOffset(fromParts),
         login: GITHUB_LOGIN,
-        to: to.toISOString(),
+        to: formatDateTimeWithFixedOffset(toParts),
       },
     }),
     headers: {
@@ -118,7 +168,13 @@ export const GET: APIRoute = async () => {
   return new Response(
     JSON.stringify({
       totalContributions: calendar.totalContributions,
-      weeks: calendar.weeks,
+      weeks: calendar.weeks
+        .map((week) => ({
+          contributionDays: week.contributionDays.filter(
+            (day) => day.date <= toParts.dateString,
+          ),
+        }))
+        .filter((week) => week.contributionDays.length > 0),
     }),
     {
       headers: {

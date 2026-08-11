@@ -109,9 +109,9 @@ const copy = {
     githubActivityMore: "Mas",
     skillsTitle: "Habilidades y Tecnologías",
     technologiesSubtitle:
-      "Herramientas, lenguajes y plataformas que uso para crear productos digitales completos.",
+      "Tecnologías, lenguajes y herramientas que utilizo para desarrollar soluciones web y aplicaciones completas.",
     activitySubtitle:
-      "Resumen visual de mis contribuciones recientes en GitHub.",
+      "Resumen visual de mis contribuciones en GitHub durante el último año.",
     aboutTitle: "Acerca de mí",
     resumeLabel: "Descargar CV",
     breadcrumbLabel: "Ruta de navegacion",
@@ -156,9 +156,9 @@ const copy = {
     githubActivityMore: "More",
     skillsTitle: "Skills and Technologies",
     technologiesSubtitle:
-      "Tools, languages, and platforms I use to build complete digital products.",
+      "Technologies, languages, and tools I use to develop complete web solutions and applications.",
     activitySubtitle:
-      "Visual summary of my recent GitHub contributions.",
+      "Visual summary of my GitHub contributions over the past year.",
     aboutTitle: "About me",
     resumeLabel: "Download resume",
     breadcrumbLabel: "Breadcrumb",
@@ -216,36 +216,123 @@ const MONTH_LABELS = {
   ],
 } as const;
 
-const TECHNOLOGIES = [
-  { label: "JavaScript", icon: "javascript.svg" },
-  { label: "TypeScript", icon: "typescript.svg" },
-  { label: "HTML5", icon: "html5.svg" },
-  { label: "CSS", icon: "css.svg" },
-  { label: "Tailwind CSS", icon: "tailwindcss.svg" },
-  { label: "React", icon: "react.svg" },
-  { label: "Expo", icon: "expo.svg" },
-  { label: "Prisma ORM", icon: "prisma.svg" },
-  { label: "Flutter", icon: "flutter.svg" },
-  { label: "C#", icon: "csharp.svg" },
-  { label: ".NET", icon: "dotnet.svg" },
-  { label: "Node.js", icon: "nodedotjs.svg" },
-  { label: "Next.js", icon: "nextdotjs.svg" },
-  { label: "NestJS", icon: "nestjs.svg" },
-  { label: "Express.js", icon: "express.svg" },
-  { label: "MongoDB", icon: "mongodb.svg" },
-  { label: "MySQL", icon: "mysql.svg" },
-  { label: "PostgreSQL", icon: "postgresql.svg" },
-  { label: "Redis", icon: "redis.svg" },
-  { label: "Git", icon: "git.svg" },
-  { label: "GitHub", icon: "github.svg" },
-  { label: "VPS Linux", icon: "linux.svg" },
-  { label: "Nginx", icon: "nginx.svg" },
-  { label: "PM2", icon: "pm2.svg" },
-  { label: "IIS", icon: "iis.svg" },
-  { label: "Docker", icon: "docker.svg" },
-  { label: "ESLint", icon: "eslint.svg" },
-  { label: "Figma", icon: "figma.svg" },
-] as const;
+type TechnologyItem = {
+  color: string;
+  darkColor?: string;
+  icon: string;
+  label: string;
+  lightColor?: string;
+};
+
+const TECHNOLOGY_CATEGORIES = [
+  {
+    title: {
+      es: "FRONTEND",
+      en: "FRONTEND",
+    },
+    items: [
+      {
+        label: "JavaScript",
+        icon: "javascript.svg",
+        color: "#f7df1e",
+      },
+      { label: "TypeScript", icon: "typescript.svg", color: "#3178c6" },
+      { label: "HTML5", icon: "html5.svg", color: "#e34f26" },
+      { label: "CSS", icon: "css.svg", color: "#663399" },
+      {
+        label: "Tailwind CSS",
+        icon: "tailwindcss.svg",
+        color: "#06b6d4",
+        lightColor: "#164e63",
+      },
+      {
+        label: "React",
+        icon: "react.svg",
+        color: "#61dafb",
+        lightColor: "#134e5e",
+      },
+      {
+        label: "Expo",
+        icon: "expo.svg",
+        color: "#000020",
+        darkColor: "#ffffff",
+      },
+      { label: "Flutter", icon: "flutter.svg", color: "#02569b" },
+      {
+        label: "Next.js",
+        icon: "nextdotjs.svg",
+        color: "#000000",
+        darkColor: "#ffffff",
+      },
+    ],
+  },
+  {
+    title: {
+      es: "BACKEND",
+      en: "BACKEND",
+    },
+    items: [
+      { label: "C#", icon: "csharp.svg", color: "#9a5196" },
+      { label: ".NET", icon: "dotnet.svg", color: "#512bd4" },
+      { label: "Node.js", icon: "nodedotjs.svg", color: "#5fa04e" },
+      { label: "NestJS", icon: "nestjs.svg", color: "#e0234e" },
+      {
+        label: "Express.js",
+        icon: "express.svg",
+        color: "#000000",
+        darkColor: "#ffffff",
+      },
+      {
+        label: "Prisma ORM",
+        icon: "prisma.svg",
+        color: "#2d3748",
+        darkColor: "#ffffff",
+      },
+    ],
+  },
+  {
+    title: {
+      es: "DATABASES",
+      en: "DATABASES",
+    },
+    items: [
+      { label: "MongoDB", icon: "mongodb.svg", color: "#47a248" },
+      { label: "MySQL", icon: "mysql.svg", color: "#4479a1" },
+      { label: "PostgreSQL", icon: "postgresql.svg", color: "#4169e1" },
+      { label: "Redis", icon: "redis.svg", color: "#ff4438" },
+    ],
+  },
+  {
+    title: {
+      es: "DEVELOPMENT TOOLS",
+      en: "DEVELOPMENT TOOLS",
+    },
+    items: [
+      { label: "Git", icon: "git.svg", color: "#f05032" },
+      {
+        label: "GitHub",
+        icon: "github.svg",
+        color: "#181717",
+        darkColor: "#ffffff",
+      },
+      { label: "Docker", icon: "docker.svg", color: "#2496ed" },
+      { label: "ESLint", icon: "eslint.svg", color: "#4b32c3" },
+      { label: "Figma", icon: "figma.svg", color: "#f24e1e" },
+      {
+        label: "VPS Linux",
+        icon: "linux.svg",
+        color: "#fcc624",
+        lightColor: "#1d1d1f",
+      },
+      { label: "Nginx", icon: "nginx.svg", color: "#009639" },
+      { label: "PM2", icon: "pm2.svg", color: "#2b037a", darkColor: "#8e6cff" },
+      { label: "IIS", icon: "iis.svg", color: "#0078d4" },
+    ],
+  },
+] satisfies Array<{
+  items: TechnologyItem[];
+  title: Record<Locale, string>;
+}>;
 
 function getInitialTheme(): Theme {
   if (typeof window === "undefined") {
@@ -557,14 +644,26 @@ export default function PreferenceControls({
   const githubCalendarStyle = {
     "--github-week-count": githubContributions?.weeks.length ?? 53,
   } as CSSProperties;
-  const getGitHubDayTooltip = (day: ContributionDay) =>
-    locale === "es"
+  const formatGitHubTooltipDate = (date: string) => {
+    if (locale !== "es") {
+      return date;
+    }
+
+    const [year, month, day] = date.split("-");
+
+    return `${day}-${month}-${year}`;
+  };
+  const getGitHubDayTooltip = (day: ContributionDay) => {
+    const displayDate = formatGitHubTooltipDate(day.date);
+
+    return locale === "es"
       ? `${day.contributionCount} ${
           day.contributionCount === 1 ? "contribución" : "contribuciones"
-        } el ${day.date}`
+        } el ${displayDate}`
       : `${day.contributionCount} ${
           day.contributionCount === 1 ? "contribution" : "contributions"
-        } on ${day.date}`;
+        } on ${displayDate}`;
+  };
   const showGitHubDayTooltip = (
     event: ReactMouseEvent<HTMLSpanElement> | ReactFocusEvent<HTMLSpanElement>,
     text: string,
@@ -1140,27 +1239,54 @@ export default function PreferenceControls({
       </div>
     </div>
   );
-  const renderTechnologyGrid = () => (
-    <div className="technology-grid" aria-label={labels.skillsTitle}>
-      {TECHNOLOGIES.map((technology) => (
-        <span
-          aria-label={technology.label}
-          className="technology-item"
-          data-label={technology.label}
-          key={technology.label}
-          role="img"
-          tabIndex={0}
+  const renderTechnologyVisual = (technology: TechnologyItem) => {
+    return (
+      <span
+        aria-hidden="true"
+        className="technology-category-icon"
+        style={
+          {
+            "--technology-icon-url": `url("/assets/icons/Technologies/${technology.icon}")`,
+          } as CSSProperties
+        }
+      />
+    );
+  };
+  const renderTechnologyCategories = () => (
+    <div className="technology-category-list" aria-label={labels.skillsTitle}>
+      {TECHNOLOGY_CATEGORIES.map((category) => (
+        <article
+          className="technology-category-card"
+          key={category.title.es}
         >
-          <span
-            aria-hidden="true"
-            className="technology-icon"
-            style={
-              {
-                "--technology-icon-url": `url("/assets/icons/Technologies/${technology.icon}")`,
-              } as CSSProperties
-            }
-          />
-        </span>
+          <h2>{category.title[locale]}</h2>
+
+          <span className="technology-category-divider" aria-hidden="true" />
+
+          <div className="technology-category-icons">
+            {category.items.map((technology) => (
+              <span
+                aria-label={technology.label}
+                className="technology-category-item"
+                data-label={technology.label}
+                key={technology.label}
+                role="img"
+                style={
+                  {
+                    "--technology-brand-color": technology.color,
+                    "--technology-brand-color-dark":
+                      technology.darkColor ?? technology.color,
+                    "--technology-brand-color-light":
+                      technology.lightColor ?? technology.color,
+                  } as CSSProperties
+                }
+                tabIndex={0}
+              >
+                {renderTechnologyVisual(technology)}
+              </span>
+            ))}
+          </div>
+        </article>
       ))}
     </div>
   );
@@ -1319,8 +1445,11 @@ export default function PreferenceControls({
               <p>{labels.technologiesSubtitle}</p>
             </header>
 
-            <section className="profile-skills route-section">
-              {renderTechnologyGrid()}
+            <section
+              className="technology-categories route-section"
+              aria-label={labels.skillsTitle}
+            >
+              {renderTechnologyCategories()}
             </section>
           </div>
         </main>
