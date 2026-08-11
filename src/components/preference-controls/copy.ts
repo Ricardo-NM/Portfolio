@@ -4,7 +4,7 @@ export const preferenceCopy = {
     introRest:
       " especializado en la creación de sistemas digitales, plataformas administrativas y aplicaciones web y móviles. Cuento con experiencia en el análisis, diseño, desarrollo, despliegue y optimización de soluciones funcionales, escalables y bien estructuradas, utilizando distintas herramientas y tecnologías para resolver problemas técnicos y participar en todo el ciclo de desarrollo de software.",
     profileAlt: "Foto de perfil de Ricardo Nava",
-    profileHint: "Presiona aqui",
+    profileHint: "Presiona aquí",
     openProfileLabel: "Abrir panel de perfil",
     closeProfileLabel: "Cerrar panel de perfil",
     profileMenuTitle: "Perfil",
@@ -155,4 +155,5 @@ export const preferenceCopy = {
   },
 } as const;
 
-export type PreferenceLabels = (typeof preferenceCopy)[keyof typeof preferenceCopy];
+export type PreferenceLabels =
+  (typeof preferenceCopy)[keyof typeof preferenceCopy];
