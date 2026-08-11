@@ -3,6 +3,7 @@ export type Locale = "es" | "en";
 export type ProfileLinkId = "linkedin" | "github" | "resume";
 export type RouteLinkId =
   | "experience"
+  | "achievements"
   | "projects"
   | "technologies"
   | "activity"

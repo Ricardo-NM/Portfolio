@@ -1179,10 +1179,6 @@ button {
   margin-top: clamp(1rem, 2.4vw, 1.8rem);
 }
 
-.experience-achievements-action + .experience-list {
-  margin-top: clamp(0.75rem, 1.8vw, 1.2rem);
-}
-
 .experience-card {
   border: 1px solid var(--color-tech-card-border);
   border-radius: 0.5rem;
@@ -1346,56 +1342,6 @@ button {
 
 .experience-bullets li::marker {
   color: var(--color-primary);
-}
-
-.experience-achievements-action {
-  display: flex;
-  justify-content: center;
-  margin-top: clamp(0.9rem, 2.4vw, 1.5rem);
-}
-
-.experience-achievements-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  color: var(--color-settings);
-  cursor: default;
-  font-size: 0.92rem;
-  font-weight: 800;
-  line-height: 1;
-  pointer-events: none;
-  text-decoration: none;
-  transition:
-    color var(--theme-transition),
-    transform 180ms ease;
-}
-
-.experience-achievements-link:has(svg:hover),
-.experience-achievements-link:has(span:hover),
-.experience-achievements-link:focus-visible {
-  color: var(--color-settings-active);
-}
-
-.experience-achievements-link:has(svg:active),
-.experience-achievements-link:has(span:active) {
-  transform: translateY(1px);
-}
-
-.experience-achievements-link:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--color-primary) 72%, transparent);
-  outline-offset: 4px;
-  border-radius: 0.45rem;
-}
-
-.experience-achievements-link svg {
-  flex: 0 0 auto;
-}
-
-.experience-achievements-link svg,
-.experience-achievements-link span {
-  cursor: pointer;
-  pointer-events: auto;
 }
 
 .achievements-deck {

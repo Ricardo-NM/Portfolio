@@ -19,7 +19,6 @@ const copy = {
       "Selección de resultados, mejoras e hitos alcanzados a lo largo de mi experiencia profesional.",
     breadcrumbLabel: "Ruta de navegacion",
     homeRouteLabel: "Ir al inicio",
-    experienceLabel: "Experiencia laboral",
     previousLabel: "Ver logro anterior",
     nextLabel: "Ver siguiente logro",
     cardLabel: "Logro",
@@ -94,7 +93,6 @@ const copy = {
       "Selection of results, improvements, and milestones achieved throughout my professional experience.",
     breadcrumbLabel: "Breadcrumb",
     homeRouteLabel: "Go home",
-    experienceLabel: "Work experience",
     previousLabel: "View previous achievement",
     nextLabel: "View next achievement",
     cardLabel: "Achievement",
@@ -209,12 +207,6 @@ export default function ExperienceAchievementsView() {
           currentLabel={labels.title}
           homeLabel={labels.homeRouteLabel}
           label={labels.breadcrumbLabel}
-          links={[
-            {
-              href: "/experience",
-              label: labels.experienceLabel,
-            },
-          ]}
         />
 
         <header className="experience-header">

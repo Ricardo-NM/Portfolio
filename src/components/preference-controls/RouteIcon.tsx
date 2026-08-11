@@ -4,6 +4,7 @@ import {
   CodeXml,
   FolderCode,
   Mail,
+  Trophy,
 } from "lucide-react";
 import type { RouteLinkId } from "./types";
 
@@ -21,6 +22,10 @@ export default function RouteIcon({ id, size = 24 }: RouteIconProps) {
 
   if (id === "technologies") {
     return <CodeXml aria-hidden="true" size={size + 1} strokeWidth={2.1} />;
+  }
+
+  if (id === "achievements") {
+    return <Trophy aria-hidden="true" size={size} strokeWidth={2.1} />;
   }
 
   if (id === "projects") {

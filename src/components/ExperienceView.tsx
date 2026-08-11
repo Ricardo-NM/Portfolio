@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, Trophy } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { type Locale, workExperienceItems } from "../data/workExperience";
 import { useSyncedLocale } from "../hooks/useSyncedLocale";
@@ -11,7 +11,6 @@ const copy = {
       "Experiencia profesional, responsabilidades y proyectos desarrollados a lo largo de mi trayectoria laboral.",
     breadcrumbLabel: "Ruta de navegacion",
     homeRouteLabel: "Ir al inicio",
-    achievementsLabel: "Logros destacados",
   },
   en: {
     title: "Work experience",
@@ -19,7 +18,6 @@ const copy = {
       "Professional experience, responsibilities and projects developed throughout my work career.",
     breadcrumbLabel: "Breadcrumb",
     homeRouteLabel: "Go home",
-    achievementsLabel: "Featured achievements",
   },
 } as const;
 
@@ -45,16 +43,6 @@ export default function ExperienceView() {
           <h1 id="experience-title">{labels.title}</h1>
           <p>{labels.subtitle}</p>
         </header>
-
-        <div className="experience-achievements-action">
-          <a
-            className="experience-achievements-link"
-            href="/experience/achievements"
-          >
-            <Trophy aria-hidden="true" size={18} strokeWidth={2.1} />
-            <span>{labels.achievementsLabel}</span>
-          </a>
-        </div>
 
         <section className="experience-list" aria-label={labels.title}>
           {workExperienceItems.map((item, index) => {

@@ -129,6 +129,7 @@ export default function PreferenceControls({
   });
   const drawerRouteRefs = useRef<Record<RouteLinkId, HTMLSpanElement | null>>({
     experience: null,
+    achievements: null,
     projects: null,
     technologies: null,
     activity: null,
@@ -138,6 +139,7 @@ export default function PreferenceControls({
     Record<RouteLinkId, HTMLSpanElement | null>
   >({
     experience: null,
+    achievements: null,
     projects: null,
     technologies: null,
     activity: null,
@@ -761,6 +763,12 @@ export default function PreferenceControls({
       title: labels.experienceRouteTitle,
     },
     {
+      href: "/achievements",
+      id: "achievements",
+      label: labels.achievementsNavLabel,
+      title: labels.achievementsRouteTitle,
+    },
+    {
       href: "/projects",
       id: "projects",
       label: labels.projectsNavLabel,
@@ -954,6 +962,7 @@ export default function PreferenceControls({
       drawerAboutMeasureRef.current?.getBoundingClientRect();
     const navRouteRefs = {
       experience: getNavbarRouteElement("experience"),
+      achievements: getNavbarRouteElement("achievements"),
       projects: getNavbarRouteElement("projects"),
       technologies: getNavbarRouteElement("technologies"),
       activity: getNavbarRouteElement("activity"),
@@ -1002,6 +1011,7 @@ export default function PreferenceControls({
     const introTargetRect = introCopyRef.current?.getBoundingClientRect();
     const navRouteRefs = {
       experience: getNavbarRouteElement("experience"),
+      achievements: getNavbarRouteElement("achievements"),
       projects: getNavbarRouteElement("projects"),
       technologies: getNavbarRouteElement("technologies"),
       activity: getNavbarRouteElement("activity"),
