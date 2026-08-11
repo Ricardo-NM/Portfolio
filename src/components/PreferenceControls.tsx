@@ -518,6 +518,8 @@ export default function PreferenceControls({
     activity: null,
     contact: null,
   });
+  const profileDrawerShellRef = useRef<HTMLElement>(null);
+  const drawerCloseRef = useRef<HTMLButtonElement>(null);
   const mainLinkRefs = useRef<Record<ProfileLinkId, HTMLAnchorElement | null>>({
     linkedin: null,
     github: null,
@@ -1334,8 +1336,8 @@ export default function PreferenceControls({
       deltaX: Math.round(sourceRect.left - targetRect.left),
       deltaY: Math.round(sourceRect.top - targetRect.top),
       endRadius: "0",
-      scaleX: 1,
-      scaleY: 1,
+      scaleX: sourceRect.width / targetRect.width,
+      scaleY: sourceRect.height / targetRect.height,
       startRadius: "0",
       targetLeft: Math.round(targetRect.left),
       targetTop: Math.round(targetRect.top),
@@ -1382,6 +1384,18 @@ export default function PreferenceControls({
       playIntroCopyFlip(introSourceRect, introTargetRect, "drawer");
     }
   };
+  const returnFocusFromProfileMenu = () => {
+    const activeElement = document.activeElement;
+
+    if (
+      activeElement instanceof HTMLElement &&
+      profileDrawerShellRef.current?.contains(activeElement)
+    ) {
+      activeElement.blur();
+    }
+
+    profilePictureRef.current?.focus({ preventScroll: true });
+  };
   const closeProfileMenu = () => {
     const sourceRect = drawerAvatarRef.current?.getBoundingClientRect();
     const targetRect = profilePictureRef.current?.getBoundingClientRect();
@@ -1415,6 +1429,7 @@ export default function PreferenceControls({
       setFlipIntroCopy(null);
     }
 
+    returnFocusFromProfileMenu();
     setIsProfileMenuOpen(false);
     window.dispatchEvent(
       new CustomEvent("rn-profile-drawer-toggle", {
@@ -1432,6 +1447,7 @@ export default function PreferenceControls({
     setFlipProfileLinks([]);
     setFlipRouteLinks([]);
     setFlipIntroCopy(null);
+    returnFocusFromProfileMenu();
     window.dispatchEvent(
       new CustomEvent("rn-profile-drawer-toggle", {
         detail: { open: false },
@@ -1456,6 +1472,19 @@ export default function PreferenceControls({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isProfileMenuOpen, closeProfileMenu]);
+  useEffect(() => {
+    if (!isProfileMenuOpen) {
+      return;
+    }
+
+    const focusTimer = window.setTimeout(() => {
+      drawerCloseRef.current?.focus({ preventScroll: true });
+    }, 0);
+
+    return () => {
+      window.clearTimeout(focusTimer);
+    };
+  }, [isProfileMenuOpen]);
   const flipAvatarStyle =
     flipAvatar &&
     ({
@@ -2499,6 +2528,7 @@ export default function PreferenceControls({
         data-open={isProfileMenuOpen}
         aria-hidden={!isProfileMenuOpen}
         inert={!isProfileMenuOpen}
+        ref={profileDrawerShellRef}
       >
         <button
           className="profile-drawer-backdrop"
@@ -2519,6 +2549,7 @@ export default function PreferenceControls({
               type="button"
               onClick={closeProfileMenu}
               aria-label={labels.closeProfileLabel}
+              ref={drawerCloseRef}
             >
               <X aria-hidden="true" size={18} strokeWidth={1.8} />
             </button>
