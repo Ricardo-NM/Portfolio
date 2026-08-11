@@ -1,4 +1,12 @@
-import { CalendarDays, ChevronLeft, ChevronRight, Flag } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  MonitorUp,
+  Network,
+  ShieldCheck,
+  UserRoundCheck,
+  Zap,
+} from "lucide-react";
 import { useState } from "react";
 import { type Locale } from "../data/workExperience";
 import { useSyncedLocale } from "../hooks/useSyncedLocale";
@@ -8,42 +16,45 @@ const copy = {
   es: {
     title: "Logros destacados",
     subtitle:
-      "Selección breve de resultados, mejoras e hitos profesionales representados con contenido de ejemplo.",
+      "Selección de resultados, mejoras e hitos alcanzados a lo largo de mi experiencia profesional.",
     breadcrumbLabel: "Ruta de navegacion",
     homeRouteLabel: "Ir al inicio",
     experienceLabel: "Experiencia laboral",
     previousLabel: "Ver logro anterior",
     nextLabel: "Ver siguiente logro",
     cardLabel: "Logro",
-    priorityLabel: "Alto",
+    priorityLabels: [
+      "Producto interno",
+      "Centralización",
+      "Seguridad y control",
+      "Liderazgo",
+      "Transformación digital",
+    ],
     achievements: [
       {
-        date: "12 Ene 2024 a las 09pm",
-        owner: "Ricardo Nava",
+        owner: "Ricardo Nava Mayoral",
         progress: "100%",
         title: "ERP interno para 30+ colaboradores",
         description:
           "Diseñé, desarrollé y desplegué un ERP interno utilizado simultáneamente por aproximadamente 30 colaboradores de áreas operativas, administrativas y gerenciales.",
-        tags: ["ERP", "Full Stack", "30+ usuarios", "Despliegue"],
+        tags: ["ERP", "Full Stack", "Producción", "Despliegue"],
       },
       {
-        date: "04 Mar 2024 a las 06pm",
-        owner: "Ricardo Nava",
-        progress: "95%",
+        owner: "Ricardo Nava Mayoral",
+        progress: "100%",
         title: "Centralización de operaciones",
         description:
           "Unifiqué en una sola plataforma la documentación, comunicación y seguimiento de operaciones que anteriormente se gestionaban mediante WhatsApp y archivos compartidos manualmente.",
         tags: [
           "Digitalización",
-          "Centralización",
           "Gestión documental",
+          "Operaciones",
           "Colaboración",
         ],
       },
       {
-        date: "22 May 2024 a las 08pm",
-        owner: "Ricardo Nava",
-        progress: "90%",
+        owner: "Ricardo Nava Mayoral",
+        progress: "100%",
         title: "Trazabilidad y control de acceso",
         description:
           "Implementé trazabilidad, notificaciones y controles de acceso para mejorar la coordinación entre áreas, reducir omisiones y proteger la información financiera y operativa.",
@@ -55,90 +66,107 @@ const copy = {
         ],
       },
       {
-        date: "15 Ago 2024 a las 04pm",
-        owner: "Ricardo Nava",
-        progress: "88%",
+        owner: "Ricardo Nava Mayoral",
+        progress: "100%",
         title: "Liderazgo de proyectos digitales",
         description:
           "Participé en 4 proyectos de transformación digital y lideré 2 de ellos, coordinando actividades técnicas, levantamiento de requerimientos y comunicación directa con clientes.",
-        tags: ["4 proyectos", "2 liderados", "Liderazgo", "Clientes"],
+        tags: ["4 proyectos", "2 liderados", "Requerimientos", "Clientes"],
       },
       {
-        date: "03 Oct 2024 a las 07pm",
-        owner: "Ricardo Nava",
-        progress: "92%",
+        owner: "Ricardo Nava Mayoral",
+        progress: "100%",
         title: "Digitalización de procesos",
         description:
-          "Transformé procesos manuales en soluciones web adaptadas a las necesidades de cada organización, mejorando el control, seguimiento y eficiencia de sus operaciones.",
-        tags: ["Automatización", "Soluciones web", "Optimización", "Procesos"],
+          "Digitalicé 4 procesos manuales mediante soluciones web adaptadas a las necesidades de cada organización, mejorando el control, seguimiento y eficiencia de sus operaciones.",
+        tags: [
+          "4 procesos digitalizados",
+          "Automatización",
+          "Soluciones web",
+          "Optimización",
+        ],
       },
     ],
   },
   en: {
     title: "Featured achievements",
     subtitle:
-      "A brief selection of outcomes, improvements, and professional milestones represented with sample content.",
+      "Selection of results, improvements, and milestones achieved throughout my professional experience.",
     breadcrumbLabel: "Breadcrumb",
     homeRouteLabel: "Go home",
     experienceLabel: "Work experience",
     previousLabel: "View previous achievement",
     nextLabel: "View next achievement",
     cardLabel: "Achievement",
-    priorityLabel: "High",
+    priorityLabels: [
+      "Internal product",
+      "Centralization",
+      "Security and control",
+      "Leadership",
+      "Digital transformation",
+    ],
     achievements: [
       {
-        date: "12 Jan 2024 at 09pm",
-        owner: "Ricardo Nava",
+        owner: "Ricardo Nava Mayoral",
         progress: "100%",
         title: "Internal ERP for 30+ collaborators",
         description:
           "Designed, developed, and deployed an internal ERP used simultaneously by approximately 30 collaborators from operational, administrative, and management areas.",
-        tags: ["ERP", "Full Stack", "30+ users", "Deployment"],
+        tags: ["ERP", "Full Stack", "Production", "Deployment"],
       },
       {
-        date: "04 Mar 2024 at 06pm",
-        owner: "Ricardo Nava",
-        progress: "95%",
+        owner: "Ricardo Nava Mayoral",
+        progress: "100%",
         title: "Centralization of operations",
         description:
           "Centralized the documentation, communication, and tracking of operations that were previously managed through WhatsApp and manually shared files.",
         tags: [
           "Digitalization",
-          "Centralization",
           "Document Management",
+          "Operations",
           "Collaboration",
         ],
       },
       {
-        date: "22 May 2024 at 08pm",
-        owner: "Ricardo Nava",
-        progress: "90%",
+        owner: "Ricardo Nava Mayoral",
+        progress: "100%",
         title: "Trazability and access control",
         description:
           "Implemented trazability, notifications, and access controls to improve coordination between departments, reduce omissions, and protect financial and operational information.",
         tags: ["Trazability", "Notifications", "Access Control", "Security"],
       },
       {
-        date: "15 Aug 2024 at 04pm",
-        owner: "Ricardo Nava",
-        progress: "88%",
+        owner: "Ricardo Nava Mayoral",
+        progress: "100%",
         title: "Leadership in digital projects",
         description:
           "Participated in 4 digital transformation projects and led 2 of them, coordinating technical activities, requirements gathering, and direct communication with clients.",
-        tags: ["4 projects", "2 led", "Leadership", "Clients"],
+        tags: ["4 projects", "2 led", "Requirements", "Clients"],
       },
       {
-        date: "03 Oct 2024 at 07pm",
-        owner: "Ricardo Nava",
-        progress: "92%",
+        owner: "Ricardo Nava Mayoral",
+        progress: "100%",
         title: "Digitalization of processes",
         description:
-          "Transformed manual processes into web-based solutions tailored to each organization's needs, improving control, tracking, and operational efficiency.",
-        tags: ["Digitalization", "Process Improvement", "Web Development"],
+          "Digitalized 4 manual processes through web-based solutions tailored to each organization's needs, improving control, tracking, and operational efficiency.",
+        tags: [
+          "4 processes digitalized",
+          "Automation",
+          "Web solutions",
+          "Optimization",
+        ],
       },
     ],
   },
 } as const;
+
+const achievementBadges = [
+  { Icon: MonitorUp, tone: "product" },
+  { Icon: Network, tone: "centralization" },
+  { Icon: ShieldCheck, tone: "security" },
+  { Icon: UserRoundCheck, tone: "leadership" },
+  { Icon: Zap, tone: "transformation" },
+] as const;
 
 export default function ExperienceAchievementsView() {
   const locale = useSyncedLocale() as Locale;
@@ -203,57 +231,46 @@ export default function ExperienceAchievementsView() {
             aria-live="polite"
             aria-roledescription="carousel"
           >
-            {labels.achievements.map((achievement, index) => (
-              <article
-                className="achievement-card"
-                data-position={getCardPosition(index)}
-                aria-hidden={index !== activeIndex}
-                key={achievement.title}
-              >
-                <div className="achievement-card-content">
-                  <div className="achievement-card-topline">
-                    <span className="achievement-priority">
-                      <Flag size={16} strokeWidth={2.4} aria-hidden="true" />
-                      {labels.priorityLabel}
-                    </span>
-                    <span className="achievement-date">
-                      <CalendarDays
-                        size={17}
-                        strokeWidth={2}
-                        aria-hidden="true"
-                      />
-                      {achievement.date}
-                    </span>
-                  </div>
+            {labels.achievements.map((achievement, index) => {
+              const badge = achievementBadges[index] ?? achievementBadges[0];
+              const PriorityIcon = badge.Icon;
 
-                  <div className="achievement-card-copy">
-                    <h2>{achievement.title}</h2>
-                    <p>{achievement.description}</p>
-                  </div>
-
-                  <div className="achievement-tags" aria-label="Tags">
-                    {achievement.tags.map((tag) => (
-                      <span className="achievement-tag" key={tag}>
-                        {tag}
+              return (
+                <article
+                  className="achievement-card"
+                  data-position={getCardPosition(index)}
+                  data-priority-tone={badge.tone}
+                  aria-hidden={index !== activeIndex}
+                  key={achievement.title}
+                >
+                  <div className="achievement-card-content">
+                    <div className="achievement-card-topline">
+                      <span className="achievement-priority">
+                        <PriorityIcon
+                          size={16}
+                          strokeWidth={2.4}
+                          aria-hidden="true"
+                        />
+                        {labels.priorityLabels[index]}
                       </span>
-                    ))}
-                  </div>
+                    </div>
 
-                  <div className="achievement-card-footer">
-                    <span className="achievement-owner">
-                      <span className="achievement-avatar" aria-hidden="true">
-                        RN
-                      </span>
-                      {achievement.owner}
-                    </span>
-                    <span className="achievement-progress">
-                      <span aria-hidden="true" />
-                      {achievement.progress}
-                    </span>
+                    <div className="achievement-card-copy">
+                      <h2>{achievement.title}</h2>
+                      <p>{achievement.description}</p>
+                    </div>
+
+                    <div className="achievement-tags" aria-label="Tags">
+                      {achievement.tags.map((tag) => (
+                        <span className="achievement-tag" key={tag}>
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
 
           <div className="achievements-deck-controls">
