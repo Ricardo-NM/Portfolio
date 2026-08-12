@@ -62,8 +62,13 @@ export default function GitHubProfileCard({ labels }: GitHubProfileCardProps) {
           rel="noreferrer"
           aria-label={labels.githubLabel}
         >
-          <span className="github-profile-github-icon" aria-hidden="true" />
-          <strong>{labels.githubViewProfileLabel}</strong>
+          <span className="github-profile-link-bg" aria-hidden="true" />
+          <span className="github-profile-link-icon">
+            <span className="github-profile-github-icon" aria-hidden="true" />
+          </span>
+          <strong className="github-profile-link-text">
+            {labels.githubViewProfileLabel}
+          </strong>
         </a>
       </div>
 

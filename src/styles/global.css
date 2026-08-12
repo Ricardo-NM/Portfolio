@@ -1166,6 +1166,31 @@ button {
   contain: layout paint;
 }
 
+:root:not([data-suppress-entry-animations="locale"]) .route-breadcrumb-home {
+  opacity: 0;
+  transform: scale(0);
+  transform-origin: center;
+  animation: contact-submit-bg-scale-in 320ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  will-change: opacity, transform;
+}
+
+:root:not([data-suppress-entry-animations="locale"]) .route-breadcrumb-separator {
+  opacity: 0;
+  transform: translateX(-0.65rem);
+  animation: contact-submit-icon-slide-right 320ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: 140ms;
+  will-change: opacity, transform;
+}
+
+:root:not([data-suppress-entry-animations="locale"]) .route-breadcrumb-current {
+  opacity: 0;
+  animation: contact-input-fade-in 340ms ease-out forwards;
+  animation-delay: 260ms;
+  will-change: opacity;
+}
+
 ::view-transition-group(route-breadcrumb-current) {
   animation-duration: 360ms;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
@@ -1743,7 +1768,8 @@ button {
   transition: color var(--theme-transition);
 }
 
-.achievement-card p {
+.achievement-card p,
+.achievement-card .animated-description {
   margin: 0.8rem 0 0;
   color: color-mix(in srgb, var(--color-text) 68%, transparent);
   font-size: clamp(1rem, 2.4vw, 1.18rem);
@@ -1820,6 +1846,91 @@ button {
   transition: color var(--theme-transition);
 }
 
+:root:not([data-suppress-entry-animations="locale"])
+  .achievements-deck:not([data-has-interacted="true"])
+  .achievements-stack {
+  opacity: 0;
+  animation: activity-card-fade-in 360ms ease-out forwards;
+  animation-delay: var(--route-description-start-delay, 340ms);
+  will-change: opacity;
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .achievements-deck:not([data-has-interacted="true"])
+  .achievement-card:first-child[data-position="active"]
+  .achievement-priority {
+  opacity: 0;
+  transform: scale(0);
+  transform-origin: center;
+  animation: contact-submit-bg-scale-in 340ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: var(--route-description-start-delay, 340ms);
+  will-change: opacity, transform;
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .achievements-deck:not([data-has-interacted="true"])
+  .achievement-card:first-child[data-position="active"]
+  .achievement-card-copy
+  h2 {
+  opacity: 0;
+  transform: translateX(-1rem);
+  animation: contact-submit-icon-slide-right 340ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(var(--route-description-start-delay, 340ms) + 60ms);
+  will-change: opacity, transform;
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .achievements-deck:not([data-has-interacted="true"])
+  .achievement-card:first-child[data-position="active"]
+  .achievement-tag {
+  opacity: 0;
+  transform: scale(0);
+  transform-origin: center;
+  animation: contact-submit-bg-scale-in 320ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(
+    var(--route-description-start-delay, 340ms) + 160ms +
+      (var(--tag-index, 0) * 80ms)
+  );
+  will-change: opacity, transform;
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .achievements-deck:not([data-has-interacted="true"])
+  .achievements-deck-button-prev {
+  opacity: 0;
+  transform: translateX(1rem);
+  animation: contact-submit-text-slide-left 340ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(var(--route-description-start-delay, 340ms) + 320ms);
+  will-change: opacity, transform;
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .achievements-deck:not([data-has-interacted="true"])
+  .achievements-deck-button-next {
+  opacity: 0;
+  transform: translateX(-1rem);
+  animation: contact-submit-icon-slide-right 340ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(var(--route-description-start-delay, 340ms) + 320ms);
+  will-change: opacity, transform;
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .achievements-deck:not([data-has-interacted="true"])
+  .achievements-deck-counter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.75rem);
+  animation: contact-counter-slide-up 340ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(var(--route-description-start-delay, 340ms) + 320ms);
+  will-change: opacity, transform;
+}
+
 .route-section {
   margin-top: clamp(1rem, 2.4vw, 1.8rem);
 }
@@ -1842,11 +1953,21 @@ button {
 }
 
 .contact-field label {
+  display: inline-block;
   color: var(--color-text);
   font-size: 0.94rem;
   font-weight: 900;
   line-height: 1.2;
+  opacity: 0;
+  transform: translateY(-0.75rem);
+  animation: contact-label-slide-down 340ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(
+    var(--route-description-start-delay, 340ms) +
+      (var(--contact-field-index, 0) * 80ms)
+  );
   transition: color var(--theme-transition);
+  will-change: opacity, transform;
 }
 
 .contact-field label span {
@@ -1866,12 +1987,19 @@ button {
   font-size: 0.95rem;
   font-weight: 300;
   line-height: 1.5;
+  opacity: 0;
   padding: 0.75rem 0.82rem;
+  animation: contact-input-fade-in 340ms ease-out forwards;
+  animation-delay: calc(
+    var(--route-description-start-delay, 340ms) + 60ms +
+      (var(--contact-field-index, 0) * 80ms)
+  );
   transition:
     background-color var(--theme-transition),
     border-color var(--theme-transition),
     box-shadow var(--motion-standard),
     color var(--theme-transition);
+  will-change: opacity;
 }
 
 .contact-field textarea {
@@ -1898,6 +2026,16 @@ button {
   transition: color var(--theme-transition);
 }
 
+.contact-message-counter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.75rem);
+  animation: contact-counter-slide-up 340ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(var(--route-description-start-delay, 340ms) + 320ms);
+  will-change: opacity, transform;
+}
+
 .contact-message-safety {
   max-width: 28rem;
   color: var(--color-primary);
@@ -1906,8 +2044,17 @@ button {
 
 .contact-field input::placeholder,
 .contact-field textarea::placeholder {
+  display: inline-block;
   color: var(--color-panel-muted);
-  opacity: 0.72;
+  opacity: 0;
+  transform: translateX(-0.85rem);
+  animation: contact-placeholder-slide-right 340ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(
+    var(--route-description-start-delay, 340ms) + 120ms +
+      (var(--contact-field-index, 0) * 80ms)
+  );
+  will-change: opacity, transform;
 }
 
 .contact-field input:hover,
@@ -1934,20 +2081,22 @@ button {
 }
 
 .contact-submit {
+  position: relative;
   display: inline-flex;
   min-width: 8.4rem;
   min-height: 2.75rem;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border: 1px solid color-mix(in srgb, var(--color-primary) 72%, transparent);
+  border: 1px solid transparent;
   border-radius: 0.46rem;
-  background: var(--color-primary);
+  background: transparent;
   color: var(--color-background);
   cursor: pointer;
   font-size: 0.92rem;
   font-weight: 900;
   line-height: 1;
+  overflow: hidden;
   padding: 0.72rem 1.15rem;
   touch-action: manipulation;
   transition:
@@ -1956,6 +2105,48 @@ button {
     color var(--theme-transition),
     opacity var(--motion-standard),
     transform var(--motion-standard);
+}
+
+.contact-submit-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 72%, transparent);
+  border-radius: inherit;
+  background: var(--color-primary);
+  opacity: 0;
+  transform: scale(0);
+  transform-origin: center;
+  animation: contact-submit-bg-scale-in 360ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(var(--route-description-start-delay, 340ms) + 400ms);
+  will-change: opacity, transform;
+}
+
+.contact-submit-icon {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateX(-0.85rem);
+  animation: contact-submit-icon-slide-right 320ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(var(--route-description-start-delay, 340ms) + 620ms);
+  will-change: opacity, transform;
+}
+
+.contact-submit-text {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  opacity: 0;
+  transform: translateX(0.85rem);
+  animation: contact-submit-text-slide-left 320ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(var(--route-description-start-delay, 340ms) + 620ms);
+  will-change: opacity, transform;
 }
 
 .contact-submit:hover:not(:disabled),
@@ -2718,17 +2909,19 @@ button {
 }
 
 .github-profile-link-badge {
+  position: relative;
   display: inline-flex;
   min-height: 1.45rem;
   align-items: center;
   justify-content: center;
   gap: 0.28rem;
-  border: 1px solid color-mix(in srgb, var(--color-text) 22%, transparent);
+  border: 1px solid transparent;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--color-panel-surface) 66%, transparent);
+  background: transparent;
   color: var(--color-text);
   font-size: 0.72rem;
   line-height: 1;
+  overflow: hidden;
   padding: 0.22rem 0.48rem;
   text-decoration: none;
   transition:
@@ -2737,14 +2930,30 @@ button {
     color var(--theme-transition);
 }
 
-.github-profile-link-badge:hover,
-.github-profile-link-badge:focus-visible {
+.github-profile-link-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border: 1px solid color-mix(in srgb, var(--color-text) 22%, transparent);
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--color-panel-surface) 66%, transparent);
+  opacity: 0;
+  transform: scale(0);
+  transform-origin: center;
+  transition:
+    background-color var(--theme-transition),
+    border-color var(--theme-transition);
+  will-change: opacity, transform;
+}
+
+.github-profile-link-badge:hover .github-profile-link-bg,
+.github-profile-link-badge:focus-visible .github-profile-link-bg {
   border-color: #050505;
   background: color-mix(in srgb, var(--color-text) 10%, transparent);
 }
 
-:root[data-theme="dark"] .github-profile-link-badge:hover,
-:root[data-theme="dark"] .github-profile-link-badge:focus-visible {
+:root[data-theme="dark"] .github-profile-link-badge:hover .github-profile-link-bg,
+:root[data-theme="dark"] .github-profile-link-badge:focus-visible .github-profile-link-bg {
   border-color: #ffffff;
   background: color-mix(in srgb, var(--color-text) 12%, transparent);
 }
@@ -2754,7 +2963,18 @@ button {
   outline-offset: 3px;
 }
 
-.github-profile-link-badge strong {
+.github-profile-link-icon {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.github-profile-link-text {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
   font-weight: 900;
 }
 
@@ -2879,12 +3099,33 @@ button {
 :root:not([data-suppress-entry-animations="locale"])
   .route-github-activity
   + .github-profile-card
-  .github-profile-link-badge {
+  .github-profile-link-bg {
+  animation: contact-submit-bg-scale-in 340ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(var(--github-profile-animation-start) + 820ms);
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-link-icon {
+  opacity: 0;
+  transform: translateX(-0.65rem);
+  animation: contact-submit-icon-slide-right 300ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(var(--github-profile-animation-start) + 1000ms);
+  will-change: opacity, transform;
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .route-github-activity
+  + .github-profile-card
+  .github-profile-link-text {
   opacity: 0;
   transform: translateX(0.65rem);
-  animation: activity-profile-slide-from-right 280ms
-    cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: calc(var(--github-profile-animation-start) + 330ms);
+  animation: contact-submit-text-slide-left 300ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(var(--github-profile-animation-start) + 1000ms);
   will-change: opacity, transform;
 }
 
@@ -3338,6 +3579,30 @@ button {
   }
 }
 
+@keyframes achievement-card-fade-next {
+  to {
+    opacity: 0.46;
+  }
+}
+
+@keyframes achievement-card-fade-third {
+  to {
+    opacity: 0.24;
+  }
+}
+
+@keyframes achievement-card-fade-next-dark {
+  to {
+    opacity: 0.64;
+  }
+}
+
+@keyframes achievement-card-fade-third-dark {
+  to {
+    opacity: 0.42;
+  }
+}
+
 @keyframes activity-footer-slide-from-left {
   to {
     opacity: 1;
@@ -3434,6 +3699,54 @@ button {
   }
 }
 
+@keyframes contact-input-fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes contact-label-slide-down {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes contact-placeholder-slide-right {
+  to {
+    opacity: 0.72;
+    transform: translateX(0);
+  }
+}
+
+@keyframes contact-counter-slide-up {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes contact-submit-bg-scale-in {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes contact-submit-icon-slide-right {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes contact-submit-text-slide-left {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 :root[data-suppress-entry-animations="locale"] .animated-title-letter,
 :root[data-suppress-entry-animations="locale"] .animated-description-letter,
 :root[data-suppress-entry-animations="locale"] .experience-card,
@@ -3449,6 +3762,28 @@ button {
 :root[data-suppress-entry-animations="locale"] .technology-category-divider,
 :root[data-suppress-entry-animations="locale"] .technology-category-item,
 :root[data-suppress-entry-animations="locale"] .technology-category-icon,
+:root[data-suppress-entry-animations="locale"] .contact-field label,
+:root[data-suppress-entry-animations="locale"] .contact-field input,
+:root[data-suppress-entry-animations="locale"] .contact-field textarea,
+:root[data-suppress-entry-animations="locale"] .contact-field input::placeholder,
+:root[data-suppress-entry-animations="locale"] .contact-field textarea::placeholder,
+:root[data-suppress-entry-animations="locale"] .contact-message-counter,
+:root[data-suppress-entry-animations="locale"] .contact-submit-bg,
+:root[data-suppress-entry-animations="locale"] .contact-submit-icon,
+:root[data-suppress-entry-animations="locale"] .contact-submit-text,
+:root[data-suppress-entry-animations="locale"] .github-profile-link-bg,
+:root[data-suppress-entry-animations="locale"] .github-profile-link-icon,
+:root[data-suppress-entry-animations="locale"] .github-profile-link-text,
+:root[data-suppress-entry-animations="locale"] .route-breadcrumb-home,
+:root[data-suppress-entry-animations="locale"] .route-breadcrumb-separator,
+:root[data-suppress-entry-animations="locale"] .route-breadcrumb-current,
+:root[data-suppress-entry-animations="locale"] .achievements-stack,
+:root[data-suppress-entry-animations="locale"] .achievement-priority,
+:root[data-suppress-entry-animations="locale"] .achievement-card-copy h2,
+:root[data-suppress-entry-animations="locale"] .achievement-tag,
+:root[data-suppress-entry-animations="locale"] .achievements-deck-button-prev,
+:root[data-suppress-entry-animations="locale"] .achievements-deck-button-next,
+:root[data-suppress-entry-animations="locale"] .achievements-deck-counter,
 :root[data-suppress-entry-animations="locale"]
   .route-github-activity
   .github-calendar-panel,

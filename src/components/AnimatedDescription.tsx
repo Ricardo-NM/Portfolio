@@ -2,6 +2,8 @@ import type { CSSProperties } from "react";
 import { getAnimatedLetterCount } from "./AnimatedTitle";
 
 type AnimatedDescriptionProps = {
+  className?: string;
+  startDelay?: number;
   text: string;
   title: string;
 };
@@ -21,18 +23,21 @@ export function getDescriptionStartDelay(title: string) {
 }
 
 export default function AnimatedDescription({
+  className = "animated-description",
+  startDelay,
   text,
   title,
 }: AnimatedDescriptionProps) {
   let letterIndex = 0;
   const parts = text.split(/(\s+)/).filter(Boolean);
+  const delay = startDelay ?? getDescriptionStartDelay(title);
 
   return (
     <p
-      className="animated-description"
+      className={className}
       style={
         {
-          "--description-start-delay": `${getDescriptionStartDelay(title)}ms`,
+          "--description-start-delay": `${delay}ms`,
         } as CSSProperties
       }
     >

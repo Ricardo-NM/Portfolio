@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Send } from "lucide-react";
 import type { PreferenceLabels } from "./copy";
 import type { ContactSubmitStatus } from "./types";
@@ -36,7 +37,14 @@ export default function ContactForm({
   return (
     <form className="contact-form route-section" onSubmit={onSubmit}>
       <div className="contact-field-row">
-        <div className="contact-field">
+        <div
+          className="contact-field"
+          style={
+            {
+              "--contact-field-index": 0,
+            } as CSSProperties
+          }
+        >
           <label htmlFor="contact-name">
             {labels.contactFullNameLabel} <span aria-hidden="true">*</span>
           </label>
@@ -52,7 +60,14 @@ export default function ContactForm({
           />
         </div>
 
-        <div className="contact-field">
+        <div
+          className="contact-field"
+          style={
+            {
+              "--contact-field-index": 1,
+            } as CSSProperties
+          }
+        >
           <label htmlFor="contact-email">
             {labels.contactEmailLabel} <span aria-hidden="true">*</span>
           </label>
@@ -72,7 +87,14 @@ export default function ContactForm({
         </div>
       </div>
 
-      <div className="contact-field">
+      <div
+        className="contact-field"
+        style={
+          {
+            "--contact-field-index": 2,
+          } as CSSProperties
+        }
+      >
         <label htmlFor="contact-message">
           {labels.contactMessageLabel} <span aria-hidden="true">*</span>
         </label>
@@ -118,8 +140,11 @@ export default function ContactForm({
           disabled={!isContactFormValid || isContactSubmitting}
           type="submit"
         >
-          <Send aria-hidden="true" size={17} strokeWidth={2} />
-          <span>
+          <span className="contact-submit-bg" aria-hidden="true" />
+          <span className="contact-submit-icon">
+            <Send aria-hidden="true" size={17} strokeWidth={2} />
+          </span>
+          <span className="contact-submit-text">
             {isContactSubmitting
               ? labels.contactSendingLabel
               : labels.contactSendLabel}
@@ -135,3 +160,4 @@ export default function ContactForm({
     </form>
   );
 }
+

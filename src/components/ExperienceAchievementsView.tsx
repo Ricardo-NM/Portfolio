@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -10,7 +11,7 @@ import {
 import { useState } from "react";
 import { type Locale } from "../data/workExperience";
 import { useSyncedLocale } from "../hooks/useSyncedLocale";
-import AnimatedDescription from "./AnimatedDescription";
+import AnimatedDescription, { getDescriptionStartDelay } from "./AnimatedDescription";
 import AnimatedTitle from "./AnimatedTitle";
 import RouteBreadcrumb from "./RouteBreadcrumb";
 
@@ -172,15 +173,19 @@ export default function ExperienceAchievementsView() {
   const locale = useSyncedLocale() as Locale;
   const labels = copy[locale];
   const [activeIndex, setActiveIndex] = useState(0);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const cardCount = labels.achievements.length;
+  const descriptionStartDelay = getDescriptionStartDelay(labels.title);
 
   const showPrevious = () => {
+    setHasInteracted(true);
     setActiveIndex((currentIndex) =>
       currentIndex === 0 ? cardCount - 1 : currentIndex - 1,
     );
   };
 
   const showNext = () => {
+    setHasInteracted(true);
     setActiveIndex((currentIndex) => (currentIndex + 1) % cardCount);
   };
 
@@ -203,7 +208,15 @@ export default function ExperienceAchievementsView() {
   };
 
   return (
-    <main className="experience-shell" aria-labelledby="achievements-title">
+    <main
+      className="experience-shell"
+      aria-labelledby="achievements-title"
+      style={
+        {
+          "--route-description-start-delay": `${descriptionStartDelay}ms`,
+        } as CSSProperties
+      }
+    >
       <div className="experience-content">
         <RouteBreadcrumb
           currentLabel={labels.title}
@@ -218,6 +231,7 @@ export default function ExperienceAchievementsView() {
 
         <section
           className="achievements-deck route-section"
+          data-has-interacted={hasInteracted}
           aria-label={labels.title}
         >
           <div
@@ -253,12 +267,28 @@ export default function ExperienceAchievementsView() {
 
                     <div className="achievement-card-copy">
                       <h2>{achievement.title}</h2>
-                      <p>{achievement.description}</p>
+                      {index === 0 && !hasInteracted ? (
+                        <AnimatedDescription
+                          text={achievement.description}
+                          title={labels.title}
+                          startDelay={descriptionStartDelay}
+                        />
+                      ) : (
+                        <p>{achievement.description}</p>
+                      )}
                     </div>
 
                     <div className="achievement-tags" aria-label="Tags">
-                      {achievement.tags.map((tag) => (
-                        <span className="achievement-tag" key={tag}>
+                      {achievement.tags.map((tag, tagIndex) => (
+                        <span
+                          className="achievement-tag"
+                          key={tag}
+                          style={
+                            {
+                              "--tag-index": tagIndex,
+                            } as CSSProperties
+                          }
+                        >
                           {tag}
                         </span>
                       ))}
@@ -272,7 +302,7 @@ export default function ExperienceAchievementsView() {
           <div className="achievements-deck-controls">
             <button
               type="button"
-              className="achievements-deck-button"
+              className="achievements-deck-button achievements-deck-button-prev"
               aria-label={labels.previousLabel}
               onClick={showPrevious}
             >
@@ -285,7 +315,7 @@ export default function ExperienceAchievementsView() {
 
             <button
               type="button"
-              className="achievements-deck-button"
+              className="achievements-deck-button achievements-deck-button-next"
               aria-label={labels.nextLabel}
               onClick={showNext}
             >
