@@ -1584,6 +1584,7 @@ export default function PreferenceControls({
             <IntroCopyContent
               introHighlight={labels.introHighlight}
               introRest={labels.introRest}
+              isDrawer={true}
             />
           </p>
         </div>
@@ -1653,6 +1654,7 @@ export default function PreferenceControls({
             <IntroCopyContent
               introHighlight={labels.introHighlight}
               introRest={labels.introRest}
+              isDrawer={flipIntroCopy.variant === "drawer"}
             />
           </p>
         </div>
@@ -1743,6 +1745,7 @@ export default function PreferenceControls({
               <IntroCopyContent
                 introHighlight={labels.introHighlight}
                 introRest={labels.introRest}
+                isDrawer={true}
               />
             </p>
           </div>

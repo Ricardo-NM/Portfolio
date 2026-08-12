@@ -4,6 +4,7 @@ import type { Locale } from "./types";
 type IntroCopyContentProps = {
   introHighlight: string;
   introRest: string;
+  isDrawer?: boolean;
   locale?: Locale;
 };
 
@@ -25,8 +26,19 @@ const INTRO_COPY_LINES_EN = [
 
 export default function IntroCopyContent({
   introHighlight,
+  introRest,
+  isDrawer = false,
   locale = "es",
 }: IntroCopyContentProps) {
+  if (isDrawer) {
+    return (
+      <>
+        <strong>{introHighlight}</strong>
+        {introRest}
+      </>
+    );
+  }
+
   const lines = locale === "en" ? INTRO_COPY_LINES_EN : INTRO_COPY_LINES_ES;
 
   return (
