@@ -1534,36 +1534,25 @@ button {
   transform: none;
 }
 
+@keyframes experience-bullet-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .experience-card[data-intro-open="true"]
   .experience-card-panel[data-open="true"]
-  .experience-bullet-marker,
-.experience-card[data-intro-open="true"]
-  .experience-card-panel[data-open="true"]
-  .experience-bullet-letter {
+  .experience-bullet {
   opacity: 0;
-  transform: translateY(0.38em);
-  animation: letter-rise 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.experience-card[data-intro-open="true"]
-  .experience-card-panel[data-open="true"]
-  .experience-bullet-marker {
-  animation-delay: calc(
-    var(--experience-content-delay) +
-      (var(--experience-card-index) * var(--experience-card-stagger)) +
-      560ms
-  );
-  will-change: opacity, transform;
-}
-
-.experience-card[data-intro-open="true"]
-  .experience-card-panel[data-open="true"]
-  .experience-bullet-letter {
-  animation-delay: calc(
-    var(--experience-content-delay) +
-      (var(--experience-card-index) * var(--experience-card-stagger)) +
-      560ms + (var(--letter-index) * 12ms)
-  );
+  transform: translateY(-14px);
+  animation: experience-bullet-slide-down 480ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(var(--experience-content-delay, 320ms) + 320ms + var(--bullet-index) * 110ms);
   will-change: opacity, transform;
 }
 
@@ -1769,15 +1758,39 @@ button {
 }
 
 .achievement-card p,
+.achievement-card .achievement-description,
 .achievement-card .animated-description {
   margin: 0.8rem 0 0;
   color: color-mix(in srgb, var(--color-text) 68%, transparent);
   font-size: clamp(1rem, 2.4vw, 1.18rem);
   font-weight: 300;
   line-height: 1.45;
-  text-align: justify;
   transition: color var(--theme-transition);
 }
+
+.achievement-description-line {
+  display: block;
+  text-align: justify;
+  text-align-last: justify;
+}
+
+.achievement-description-line:last-child {
+  text-align-last: left;
+}
+
+@keyframes achievement-line-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
 
 .achievement-tags {
   display: flex;
@@ -1884,6 +1897,22 @@ button {
 :root:not([data-suppress-entry-animations="locale"])
   .achievements-deck:not([data-has-interacted="true"])
   .achievement-card:first-child[data-position="active"]
+  .achievement-description
+  .achievement-description-line {
+  opacity: 0;
+  transform: translateY(-16px);
+  animation: achievement-line-slide-down 520ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+  animation-delay: calc(
+    var(--route-description-start-delay, 340ms) + 400ms +
+      (var(--line-index) * 130ms)
+  );
+  will-change: opacity, transform;
+}
+
+:root:not([data-suppress-entry-animations="locale"])
+  .achievements-deck:not([data-has-interacted="true"])
+  .achievement-card:first-child[data-position="active"]
   .achievement-tag {
   opacity: 0;
   transform: scale(0);
@@ -1891,7 +1920,7 @@ button {
   animation: contact-submit-bg-scale-in 320ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
   animation-delay: calc(
-    var(--route-description-start-delay, 340ms) + 160ms +
+    var(--route-description-start-delay, 340ms) + 680ms +
       (var(--tag-index, 0) * 80ms)
   );
   will-change: opacity, transform;
@@ -3745,6 +3774,108 @@ button {
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+@keyframes profile-picture-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes intro-line-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes profile-hint-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+
+  to {
+    opacity: 0.24;
+    transform: translateY(0);
+  }
+}
+
+@keyframes profile-link-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.intro-copy-line {
+  display: block;
+  text-align: justify;
+  text-align-last: justify;
+}
+
+.intro-copy-line:last-child {
+  text-align-last: left;
+}
+
+.intro-layout[data-initial-entry="true"] .profile-picture-frame {
+  opacity: 0;
+  transform: scale(0.3);
+  animation: profile-picture-scale-in 600ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 240ms;
+  will-change: opacity, transform;
+}
+
+.intro-layout[data-initial-entry="true"] .intro-copy-line {
+  opacity: 0;
+  transform: translateY(-16px);
+  animation: intro-line-slide-down 560ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(480ms + var(--line-index) * 110ms);
+  will-change: opacity, transform;
+}
+
+.intro-layout[data-initial-entry="true"] .profile-hint {
+  opacity: 0;
+  transform: translateY(-16px);
+  animation: profile-hint-slide-down 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 1150ms;
+  will-change: opacity, transform;
+}
+
+.intro-layout[data-initial-entry="true"] .profile-links .profile-link {
+  opacity: 0;
+  transform: scale(0);
+  animation: profile-link-scale-in 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: color var(--theme-transition);
+  will-change: opacity, transform;
+}
+
+.intro-layout[data-initial-entry="true"] .profile-links .profile-link:nth-child(1) {
+  animation-delay: 1300ms;
+}
+
+.intro-layout[data-initial-entry="true"] .profile-links .profile-link:nth-child(2) {
+  animation-delay: 1420ms;
+}
+
+.intro-layout[data-initial-entry="true"] .profile-links .profile-link:nth-child(3) {
+  animation-delay: 1540ms;
 }
 
 :root[data-suppress-entry-animations="locale"] .animated-title-letter,

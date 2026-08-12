@@ -169,6 +169,97 @@ const achievementBadges = [
   { Icon: Zap, tone: "transformation" },
 ] as const;
 
+const ACHIEVEMENT_LINES = {
+  es: [
+    [
+      "Diseñé, desarrollé y desplegué un ERP interno",
+      "utilizado simultáneamente por aproximadamente",
+      "30 colaboradores de áreas operativas,",
+      "administrativas y gerenciales.",
+    ],
+    [
+      "Unifiqué en una sola plataforma la documentación,",
+      "comunicación y seguimiento de operaciones que",
+      "anteriormente se gestionaban mediante WhatsApp",
+      "y archivos compartidos manualmente.",
+    ],
+    [
+      "Implementé trazabilidad, notificaciones y controles",
+      "de acceso para mejorar la coordinación entre áreas,",
+      "reducir omisiones y proteger la información",
+      "financiera y operativa.",
+    ],
+    [
+      "Participé en 4 proyectos de transformación digital",
+      "y lideré 2 de ellos, coordinando actividades",
+      "técnicas, levantamiento de requerimientos y",
+      "comunicación directa con clientes.",
+    ],
+    [
+      "Digitalicé 4 procesos manuales mediante soluciones",
+      "web adaptadas a las necesidades de cada organización,",
+      "mejorando el control, seguimiento y eficiencia",
+      "de sus operaciones.",
+    ],
+  ],
+  en: [
+    [
+      "Designed, developed, and deployed an internal",
+      "ERP used simultaneously by approximately 30",
+      "collaborators from operational, administrative,",
+      "and management areas.",
+    ],
+    [
+      "Centralized the documentation, communication, and",
+      "tracking of operations that were previously managed",
+      "through WhatsApp and manually shared files.",
+    ],
+    [
+      "Implemented trazability, notifications, and access",
+      "controls to improve coordination between departments,",
+      "reduce omissions, and protect financial and",
+      "operational information.",
+    ],
+    [
+      "Participated in 4 digital transformation projects",
+      "and led 2 of them, coordinating technical activities,",
+      "requirements gathering, and direct communication",
+      "with clients.",
+    ],
+    [
+      "Digitalized 4 manual processes through web-based",
+      "solutions tailored to each organization's needs,",
+      "improving control, tracking, and operational",
+      "efficiency.",
+    ],
+  ],
+};
+
+function AchievementDescription({
+  achievementIndex,
+  locale,
+}: {
+  achievementIndex: number;
+  locale: Locale;
+}) {
+  const lines =
+    ACHIEVEMENT_LINES[locale]?.[achievementIndex] ?? ACHIEVEMENT_LINES.es[0];
+
+  return (
+    <p className="achievement-description">
+      {lines.map((line, lineIndex) => (
+        <span
+          className="achievement-description-line"
+          key={line}
+          style={{ "--line-index": lineIndex } as CSSProperties}
+        >
+          {line}
+        </span>
+      ))}
+    </p>
+  );
+}
+
 export default function ExperienceAchievementsView() {
   const locale = useSyncedLocale() as Locale;
   const labels = copy[locale];
@@ -267,15 +358,10 @@ export default function ExperienceAchievementsView() {
 
                     <div className="achievement-card-copy">
                       <h2>{achievement.title}</h2>
-                      {index === 0 && !hasInteracted ? (
-                        <AnimatedDescription
-                          text={achievement.description}
-                          title={labels.title}
-                          startDelay={descriptionStartDelay}
-                        />
-                      ) : (
-                        <p>{achievement.description}</p>
-                      )}
+                      <AchievementDescription
+                        achievementIndex={index}
+                        locale={locale}
+                      />
                     </div>
 
                     <div className="achievement-tags" aria-label="Tags">

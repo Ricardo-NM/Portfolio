@@ -98,6 +98,15 @@ export default function PreferenceControls({
   const [isContactLeaveClosing, setIsContactLeaveClosing] = useState(false);
   const [isContactNavigationConfirming, setIsContactNavigationConfirming] =
     useState(false);
+  const [isInitialEntry, setIsInitialEntry] = useState(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+    if (document.documentElement.dataset.suppressEntryAnimations === "locale") {
+      return false;
+    }
+    return true;
+  });
   const closeTimerRef = useRef<number | undefined>(undefined);
   const flipTimerRef = useRef<number | undefined>(undefined);
   const routeNavRevealTimerRef = useRef<number | undefined>(undefined);
@@ -285,6 +294,8 @@ export default function PreferenceControls({
       }
     };
   }, []);
+
+
 
   useEffect(() => {
     if (mode !== "activity") {
@@ -1013,6 +1024,7 @@ export default function PreferenceControls({
     queueFlipCleanup();
   };
   const openProfileMenu = () => {
+    setIsInitialEntry(false);
     const sourceRect = profilePictureRef.current?.getBoundingClientRect();
     const targetRect = drawerAvatarMeasureRef.current?.getBoundingClientRect();
     const introSourceRect = introCopyRef.current?.getBoundingClientRect();
@@ -1422,6 +1434,7 @@ export default function PreferenceControls({
       <div
         className="intro-layout"
         data-profile-open={isProfileMenuOpen}
+        data-initial-entry={isInitialEntry ? "true" : undefined}
         ref={introLayoutRef}
         style={
           {
@@ -1471,6 +1484,7 @@ export default function PreferenceControls({
             <IntroCopyContent
               introHighlight={labels.introHighlight}
               introRest={labels.introRest}
+              locale={locale}
             />
           </p>
         </div>

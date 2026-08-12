@@ -6,7 +6,7 @@ import { useSyncedLocale } from "../hooks/useSyncedLocale";
 import AnimatedDescription, {
   getDescriptionStartDelay,
 } from "./AnimatedDescription";
-import AnimatedTitle, { getAnimatedLetterCount } from "./AnimatedTitle";
+import AnimatedTitle from "./AnimatedTitle";
 import RouteBreadcrumb from "./RouteBreadcrumb";
 
 const copy = {
@@ -26,86 +26,26 @@ const copy = {
   },
 } as const;
 
-const EXPERIENCE_BULLET_ANIMATION_DURATION = 260;
-const EXPERIENCE_BULLET_GAP = 80;
-const EXPERIENCE_BULLET_LETTER_DELAY = 4;
-const EXPERIENCE_BULLET_SEQUENCE_OFFSET = 560;
 
-function getExperienceBulletSequence(details: readonly string[]) {
-  let nextDelay = 0;
-
-  const delays = details.map((detail) => {
-    const currentDelay = nextDelay;
-    const letterCount = getAnimatedLetterCount(detail);
-
-    nextDelay +=
-      EXPERIENCE_BULLET_ANIMATION_DURATION +
-      letterCount * EXPERIENCE_BULLET_LETTER_DELAY +
-      EXPERIENCE_BULLET_GAP;
-
-    return currentDelay;
-  });
-
-  return {
-    delays,
-    duration: nextDelay,
-  };
-}
 
 function AnimatedExperienceBullet({
-  delay,
+  bulletIndex,
   detail,
 }: {
-  delay: number;
+  bulletIndex: number;
   detail: string;
 }) {
-  let letterIndex = 0;
-  const parts = detail.split(/(\s+)/).filter(Boolean);
-
   return (
     <li
       className="experience-bullet"
       style={
         {
-          "--experience-bullet-delay": `${delay}ms`,
+          "--bullet-index": bulletIndex,
         } as CSSProperties
       }
     >
-      <span className="screen-reader-text">{detail}</span>
       <span className="experience-bullet-marker" aria-hidden="true" />
-      <span className="experience-bullet-copy" aria-hidden="true">
-        {parts.map((part, partIndex) => {
-          if (/^\s+$/.test(part)) {
-            return " ";
-          }
-
-          return (
-            <span
-              className="experience-bullet-word"
-              key={`${part}-${partIndex}`}
-            >
-              {Array.from(part).map((letter) => {
-                const currentIndex = letterIndex;
-                letterIndex += 1;
-
-                return (
-                  <span
-                    className="experience-bullet-letter"
-                    key={`${detail}-${currentIndex}-${letter}`}
-                    style={
-                      {
-                        "--letter-index": currentIndex,
-                      } as CSSProperties
-                    }
-                  >
-                    {letter}
-                  </span>
-                );
-              })}
-            </span>
-          );
-        })}
-      </span>
+      <span className="experience-bullet-copy">{detail}</span>
     </li>
   );
 }
@@ -116,9 +56,6 @@ export default function ExperienceView() {
   const [openItem, setOpenItem] = useState("experience-0");
   const [introAnimationsEnabled, setIntroAnimationsEnabled] = useState(true);
   const experienceContentDelay = getDescriptionStartDelay(labels.title);
-  const firstCardBulletSequence = getExperienceBulletSequence(
-    workExperienceItems[0]?.details[locale] ?? [],
-  );
 
   useEffect(() => {
     if (
@@ -130,17 +67,12 @@ export default function ExperienceView() {
 
     setIntroAnimationsEnabled(true);
 
-    const introDuration =
-      experienceContentDelay +
-      EXPERIENCE_BULLET_SEQUENCE_OFFSET +
-      firstCardBulletSequence.duration +
-      240;
     const introTimer = window.setTimeout(() => {
       setIntroAnimationsEnabled(false);
-    }, introDuration);
+    }, 2200);
 
     return () => window.clearTimeout(introTimer);
-  }, [experienceContentDelay, firstCardBulletSequence.duration, locale]);
+  }, [locale]);
 
   const toggleItem = (id: string) => {
     setIntroAnimationsEnabled(false);
@@ -176,9 +108,6 @@ export default function ExperienceView() {
           {workExperienceItems.map((item, index) => {
             const itemId = `experience-${index}`;
             const isOpen = openItem === itemId;
-            const bulletSequence = getExperienceBulletSequence(
-              item.details[locale],
-            );
 
             return (
               <article
@@ -243,7 +172,7 @@ export default function ExperienceView() {
                     <ul className="experience-bullets">
                       {item.details[locale].map((detail, bulletIndex) => (
                         <AnimatedExperienceBullet
-                          delay={bulletSequence.delays[bulletIndex] ?? 0}
+                          bulletIndex={bulletIndex}
                           detail={detail}
                           key={detail}
                         />
