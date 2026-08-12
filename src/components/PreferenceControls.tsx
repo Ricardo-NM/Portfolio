@@ -140,6 +140,26 @@ export default function PreferenceControls({
     github: null,
     resume: null,
   });
+  const flipAvatarOverlayRef = useRef<HTMLDivElement | null>(null);
+  const flipIntroCopyOverlayRef = useRef<HTMLDivElement | null>(null);
+  const flipProfileLinkOverlayRefs = useRef<
+    Record<ProfileLinkId, HTMLSpanElement | null>
+  >({
+    linkedin: null,
+    github: null,
+    resume: null,
+  });
+  const flipRouteLinkOverlayRefs = useRef<
+    Record<RouteLinkId, HTMLSpanElement | null>
+  >({
+    experience: null,
+    achievements: null,
+    projects: null,
+    technologies: null,
+    activity: null,
+    contact: null,
+  });
+  const [flipKey, setFlipKey] = useState(0);
   const drawerRouteRefs = useRef<Record<RouteLinkId, HTMLSpanElement | null>>({
     experience: null,
     achievements: null,
@@ -893,6 +913,8 @@ export default function PreferenceControls({
       window.clearTimeout(flipTimerRef.current);
     }
 
+    setFlipKey((prev) => prev + 1);
+
     flipTimerRef.current = window.setTimeout(() => {
       setFlipAvatar(null);
       setFlipProfileLinks([]);
@@ -907,12 +929,16 @@ export default function PreferenceControls({
     startRadius: string,
     endRadius: string,
   ) => {
+    const activeOverlayRect =
+      flipAvatarOverlayRef.current?.getBoundingClientRect();
+    const effectiveSourceRect = activeOverlayRect ?? sourceRect;
+
     setFlipAvatar({
-      deltaX: sourceRect.left - targetRect.left,
-      deltaY: sourceRect.top - targetRect.top,
+      deltaX: effectiveSourceRect.left - targetRect.left,
+      deltaY: effectiveSourceRect.top - targetRect.top,
       endRadius,
-      scaleX: sourceRect.width / targetRect.width,
-      scaleY: sourceRect.height / targetRect.height,
+      scaleX: effectiveSourceRect.width / targetRect.width,
+      scaleY: effectiveSourceRect.height / targetRect.height,
       startRadius,
       targetLeft: targetRect.left,
       targetTop: targetRect.top,
@@ -928,7 +954,10 @@ export default function PreferenceControls({
   ) => {
     const nextFlips = (Object.keys(sourceRefs) as ProfileLinkId[]).flatMap(
       (id) => {
-        const sourceRect = sourceRefs[id]?.getBoundingClientRect();
+        const activeOverlayRect =
+          flipProfileLinkOverlayRefs.current[id]?.getBoundingClientRect();
+        const sourceRect =
+          activeOverlayRect ?? sourceRefs[id]?.getBoundingClientRect();
         const targetRect = targetRefs[id]?.getBoundingClientRect();
 
         if (!sourceRect || !targetRect) {
@@ -973,7 +1002,10 @@ export default function PreferenceControls({
   ) => {
     const nextFlips = (Object.keys(sourceRefs) as RouteLinkId[]).flatMap(
       (id) => {
-        const sourceRect = sourceRefs[id]?.getBoundingClientRect();
+        const activeOverlayRect =
+          flipRouteLinkOverlayRefs.current[id]?.getBoundingClientRect();
+        const sourceRect =
+          activeOverlayRect ?? sourceRefs[id]?.getBoundingClientRect();
         const targetRect = targetRefs[id]?.getBoundingClientRect();
 
         if (!sourceRect || !targetRect) {
@@ -1007,12 +1039,16 @@ export default function PreferenceControls({
     targetRect: DOMRect,
     variant: FlipIntroCopy["variant"],
   ) => {
+    const activeOverlayRect =
+      flipIntroCopyOverlayRef.current?.getBoundingClientRect();
+    const effectiveSourceRect = activeOverlayRect ?? sourceRect;
+
     setFlipIntroCopy({
-      deltaX: Math.round(sourceRect.left - targetRect.left),
-      deltaY: Math.round(sourceRect.top - targetRect.top),
+      deltaX: Math.round(effectiveSourceRect.left - targetRect.left),
+      deltaY: Math.round(effectiveSourceRect.top - targetRect.top),
       endRadius: "0",
-      scaleX: sourceRect.width / targetRect.width,
-      scaleY: sourceRect.height / targetRect.height,
+      scaleX: effectiveSourceRect.width / targetRect.width,
+      scaleY: effectiveSourceRect.height / targetRect.height,
       startRadius: "0",
       targetLeft: Math.round(targetRect.left),
       targetTop: Math.round(targetRect.top),
@@ -1024,6 +1060,11 @@ export default function PreferenceControls({
     queueFlipCleanup();
   };
   const openProfileMenu = () => {
+    if (flipTimerRef.current) {
+      window.clearTimeout(flipTimerRef.current);
+      flipTimerRef.current = undefined;
+    }
+
     setIsInitialEntry(false);
     const sourceRect = profilePictureRef.current?.getBoundingClientRect();
     const targetRect = drawerAvatarMeasureRef.current?.getBoundingClientRect();
@@ -1075,9 +1116,21 @@ export default function PreferenceControls({
     profilePictureRef.current?.focus({ preventScroll: true });
   };
   const closeProfileMenu = () => {
-    const sourceRect = drawerAvatarRef.current?.getBoundingClientRect();
+    if (flipTimerRef.current) {
+      window.clearTimeout(flipTimerRef.current);
+      flipTimerRef.current = undefined;
+    }
+
+    const sourceAvatarEl =
+      drawerAvatarMeasureRef.current ?? drawerAvatarRef.current;
+    const sourceAboutEl =
+      drawerAboutMeasureRef.current ?? drawerAboutRef.current;
+    const sourceLinkRefs = drawerLinkMeasureRefs.current;
+    const sourceRouteRefs = drawerRouteMeasureRefs.current;
+
+    const sourceRect = sourceAvatarEl?.getBoundingClientRect();
     const targetRect = profilePictureRef.current?.getBoundingClientRect();
-    const introSourceRect = drawerAboutRef.current?.getBoundingClientRect();
+    const introSourceRect = sourceAboutEl?.getBoundingClientRect();
     const introTargetRect = introCopyRef.current?.getBoundingClientRect();
     const navRouteRefs = {
       experience: getNavbarRouteElement("experience"),
@@ -1096,8 +1149,8 @@ export default function PreferenceControls({
 
     if (shouldAnimateClose && sourceRect && targetRect) {
       playAvatarFlip(sourceRect, targetRect, "999px", "0.75rem");
-      playProfileLinkFlips(drawerLinkRefs.current, mainLinkRefs.current);
-      playRouteLinkFlips(drawerRouteRefs.current, navRouteRefs);
+      playProfileLinkFlips(sourceLinkRefs, mainLinkRefs.current);
+      playRouteLinkFlips(sourceRouteRefs, navRouteRefs);
 
       if (introSourceRect && introTargetRect) {
         playIntroCopyFlip(introSourceRect, introTargetRect, "intro");
@@ -1544,7 +1597,13 @@ export default function PreferenceControls({
       </div>
 
       {flipAvatarStyle && (
-        <div className="flip-avatar" style={flipAvatarStyle} aria-hidden="true">
+        <div
+          className="flip-avatar"
+          style={flipAvatarStyle}
+          aria-hidden="true"
+          key={`flip-avatar-${flipKey}`}
+          ref={flipAvatarOverlayRef}
+        >
           <img
             src="/assets/profilePicture.jpeg"
             alt=""
@@ -1558,7 +1617,10 @@ export default function PreferenceControls({
           className="flip-profile-link"
           style={link.style}
           aria-hidden="true"
-          key={link.id}
+          key={`${link.id}-${flipKey}`}
+          ref={(el) => {
+            flipProfileLinkOverlayRefs.current[link.id] = el;
+          }}
         >
           <ProfileLinkIcon id={link.id} />
         </span>
@@ -1569,7 +1631,10 @@ export default function PreferenceControls({
           className="flip-route-link"
           style={link.style}
           aria-hidden="true"
-          key={link.id}
+          key={`${link.id}-${flipKey}`}
+          ref={(el) => {
+            flipRouteLinkOverlayRefs.current[link.id] = el;
+          }}
         >
           <RouteIcon id={link.id} size={link.iconSize} />
         </span>
@@ -1581,6 +1646,8 @@ export default function PreferenceControls({
           data-variant={flipIntroCopy.variant}
           style={flipIntroCopyStyle}
           aria-hidden="true"
+          key={`flip-intro-${flipKey}`}
+          ref={flipIntroCopyOverlayRef}
         >
           <p>
             <IntroCopyContent

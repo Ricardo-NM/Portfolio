@@ -2508,7 +2508,6 @@ button {
 
 .technology-category-item {
   --technology-icon-color: var(--technology-brand-color-light);
-  --technology-icon-shift-y: 0.62rem;
   position: relative;
   display: inline-flex;
   width: clamp(2rem, 3.25vw, 2.35rem);
@@ -2518,17 +2517,19 @@ button {
   justify-content: center;
   color: var(--technology-icon-color);
   outline: none;
-  transform: translateY(var(--technology-icon-shift-y)) scale(1);
-  animation: technology-icon-rise 340ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+  transform: scale(0);
+  transform-origin: center;
+  animation: profile-link-scale-in 380ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   animation-delay: calc(
     var(--route-description-start-delay, 340ms) +
-      (var(--technology-card-index) * 120ms) + 420ms +
-      (var(--technology-icon-index) * 42ms)
+      (var(--technology-card-index) * 140ms) + 360ms +
+      (var(--technology-icon-index) * 110ms)
   );
   transition:
     color var(--theme-transition),
     transform var(--motion-standard);
-  will-change: transform;
+  will-change: opacity, transform;
 }
 
 :root[data-theme="dark"] .technology-category-item {
@@ -2542,18 +2543,10 @@ button {
   background: currentColor;
   mask: var(--technology-icon-url) center / contain no-repeat;
   -webkit-mask: var(--technology-icon-url) center / contain no-repeat;
-  opacity: 0;
-  transform: scale(1);
-  animation: technology-icon-fade-in 300ms ease-out forwards;
-  animation-delay: calc(
-    var(--route-description-start-delay, 340ms) +
-      (var(--technology-card-index) * 120ms) + 420ms +
-      (var(--technology-icon-index) * 42ms)
-  );
   transition:
     background-color var(--theme-transition),
     transform var(--motion-standard);
-  will-change: opacity, transform;
+  will-change: transform;
 }
 
 .technology-category-item:hover .technology-category-icon,
