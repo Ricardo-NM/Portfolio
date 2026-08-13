@@ -16,6 +16,7 @@ import DrawerRouteLinks from "./preference-controls/DrawerRouteLinks";
 import FloatingNav from "./preference-controls/FloatingNav";
 import GitHubActivity from "./preference-controls/GitHubActivity";
 import GitHubProfileCard from "./preference-controls/GitHubProfileCard";
+import HomeProjectGallery from "./preference-controls/HomeProjectGallery";
 import IntroCopyContent from "./preference-controls/IntroCopyContent";
 import PreferencesFloat from "./preference-controls/PreferencesFloat";
 import ProfileDrawerMeta from "./preference-controls/ProfileDrawerMeta";
@@ -1509,6 +1510,12 @@ export default function PreferenceControls({
             />
           </p>
         </div>
+
+        <HomeProjectGallery
+          locale={locale}
+          ref={introToolingRef}
+          revealDelay={isInitialEntry ? 1520 : 0}
+        />
       </div>
 
       <div className="profile-drawer-measure" aria-hidden="true">

@@ -911,6 +911,44 @@ button {
   transform: translateY(calc(var(--intro-tooling-offset, 0px) * -1));
 }
 
+.home-project-gallery-shell {
+  grid-template-columns: minmax(0, 1fr);
+  margin-top: clamp(0.95rem, 2vw, 1.35rem);
+}
+
+.home-project-gallery {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.58rem, 1.4vw, 0.95rem);
+}
+
+.home-project-gallery-item {
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 0.65rem;
+  opacity: 0;
+  transform: translateY(1.55rem) scale(0.94);
+  transform-origin: center bottom;
+  transition:
+    opacity 520ms ease,
+    transform 620ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--project-index) * 40ms);
+  will-change: opacity, transform;
+}
+
+.home-project-gallery-item[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.home-project-gallery-item img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .profile-skills {
   width: 100%;
   margin-top: 0.35rem;
