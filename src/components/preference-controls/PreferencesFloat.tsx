@@ -64,7 +64,7 @@ export default function PreferencesFloat({
         aria-label={settingsLabel}
         data-open={isOpen}
       >
-        <Settings aria-hidden="true" size={26} strokeWidth={1.75} />
+        <Settings aria-hidden="true" size={20} strokeWidth={1.9} />
       </button>
 
       <div

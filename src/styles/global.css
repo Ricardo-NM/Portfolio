@@ -20,6 +20,21 @@
   --color-nav-icon-hover: var(--color-settings-active);
   --color-nav-active-bg: #ffffff;
   --color-nav-active-icon: var(--color-settings-active);
+  --color-scrollbar-track: color-mix(
+    in srgb,
+    var(--color-background) 84%,
+    var(--color-contrast)
+  );
+  --color-scrollbar-thumb: color-mix(
+    in srgb,
+    var(--color-primary) 46%,
+    var(--color-settings)
+  );
+  --color-scrollbar-thumb-hover: color-mix(
+    in srgb,
+    var(--color-primary) 66%,
+    var(--color-settings-active)
+  );
   --color-tech-card-bg: #ffffff;
   --color-tech-card-border: rgba(20, 20, 24, 0.16);
   --color-tech-card-divider: rgba(20, 20, 24, 0.28);
@@ -29,6 +44,14 @@
   --font-display:
     Bahnschrift, "Aptos Display", "Segoe UI Variable", "Segoe UI",
     ui-sans-serif, system-ui, sans-serif;
+  --floating-nav-bottom: max(0.78rem, env(safe-area-inset-bottom));
+  --floating-nav-gap: 0.1rem;
+  --floating-nav-link-size: 2.24rem;
+  --floating-nav-padding: 0.2rem;
+  --floating-nav-content-inset: calc(
+    var(--floating-nav-bottom) + var(--floating-nav-link-size) +
+      (var(--floating-nav-padding) * 2) + 1.2rem
+  );
   --motion-standard: 220ms ease;
   --theme-transition: 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -69,13 +92,36 @@
 
 html {
   min-width: 320px;
+  overflow-y: auto;
   background: var(--color-background);
   color: var(--color-text);
   font-family: var(--font-display);
+  scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
   text-rendering: optimizeLegibility;
   transition:
     background-color var(--theme-transition),
     color var(--theme-transition);
+}
+
+html::-webkit-scrollbar {
+  width: 0.58rem;
+  height: 0.58rem;
+}
+
+html::-webkit-scrollbar-track {
+  background: var(--color-scrollbar-track);
+}
+
+html::-webkit-scrollbar-thumb {
+  border: 2px solid var(--color-scrollbar-track);
+  border-radius: 999px;
+  background: var(--color-scrollbar-thumb);
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background: var(--color-scrollbar-thumb-hover);
 }
 
 body {
@@ -114,6 +160,7 @@ button {
   flex-direction: column;
   align-items: center;
   padding-inline: clamp(1rem, 4vw, 4rem);
+  padding-bottom: var(--floating-nav-content-inset);
   overflow-x: hidden;
 }
 
@@ -348,18 +395,19 @@ button {
 
 .home-route-links {
   position: fixed;
-  top: 50%;
-  right: max(0.95rem, env(safe-area-inset-right));
+  bottom: var(--floating-nav-bottom);
+  left: 50%;
   z-index: 9;
   display: inline-flex;
-  flex-direction: column;
+  max-width: calc(100vw - 1.5rem);
+  flex-direction: row;
   align-items: center;
-  gap: 0.32rem;
-  padding: 0.46rem;
+  gap: var(--floating-nav-gap);
+  padding: var(--floating-nav-padding);
   border: 1px solid color-mix(in srgb, var(--color-nav-icon) 9%, transparent);
-  border-radius: 0.72rem;
+  border-radius: 0.62rem;
   background: var(--color-nav-shell);
-  transform: translateY(-50%);
+  transform: translateX(-50%);
   transition:
     background-color var(--theme-transition),
     border-color var(--theme-transition),
@@ -379,12 +427,14 @@ button {
 }
 
 .home-route-link {
+  position: relative;
   display: inline-flex;
-  width: 2.85rem;
-  height: 2.85rem;
+  width: var(--floating-nav-link-size);
+  height: var(--floating-nav-link-size);
+  flex: 0 0 var(--floating-nav-link-size);
   align-items: center;
   justify-content: center;
-  border-radius: 0.58rem;
+  border-radius: 0.5rem;
   background: transparent;
   color: var(--color-nav-icon);
   text-decoration: none;
@@ -394,9 +444,21 @@ button {
     color var(--theme-transition);
 }
 
+.home-route-link::before {
+  position: absolute;
+  inset: 0.2rem;
+  border-radius: 0.34rem;
+  background: transparent;
+  content: "";
+  transition: background-color var(--theme-transition);
+}
+
 .home-route-link[data-active="true"] {
-  background: var(--color-nav-active-bg);
   color: var(--color-nav-active-icon);
+}
+
+.home-route-link[data-active="true"]::before {
+  background: var(--color-nav-active-bg);
 }
 
 .home-route-link[data-route-hidden="true"] {
@@ -419,6 +481,8 @@ button {
 }
 
 .home-route-link svg {
+  position: relative;
+  z-index: 1;
   display: block;
   transition:
     color var(--theme-transition),
@@ -900,8 +964,7 @@ button {
 .github-calendar-scroll {
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-color: color-mix(in srgb, var(--color-primary) 55%, transparent)
-    transparent;
+  scrollbar-color: var(--color-scrollbar-thumb) transparent;
   scrollbar-width: thin;
 }
 
@@ -915,7 +978,7 @@ button {
 
 .github-calendar-scroll::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  background: var(--color-scrollbar-thumb);
 }
 
 .github-calendar-track {
@@ -1075,6 +1138,9 @@ button {
 .experience-shell {
   min-height: 100dvh;
   padding: clamp(1rem, 4vw, 4rem);
+  padding-bottom: calc(
+    clamp(1rem, 4vw, 4rem) + var(--floating-nav-content-inset)
+  );
   background: var(--color-background);
   color: var(--color-text);
   transition:
@@ -3374,18 +3440,19 @@ button {
 
 .preferences-float {
   position: fixed;
-  right: max(1rem, env(safe-area-inset-right));
-  bottom: max(1rem, env(safe-area-inset-bottom));
+  bottom: calc(var(--floating-nav-bottom) + var(--floating-nav-padding));
+  right: max(0.78rem, env(safe-area-inset-right));
   z-index: 10;
-  width: 3.25rem;
-  height: 3.25rem;
+  width: var(--floating-nav-link-size);
+  height: var(--floating-nav-link-size);
 }
 
 .preference-controls {
   position: absolute;
   right: 0;
-  bottom: calc(100% + 0.05rem);
+  bottom: calc(100% + 0.45rem);
   display: flex;
+  max-width: calc(100vw - 1.5rem);
   flex-direction: column;
   justify-content: center;
   gap: 0.5rem;
@@ -3469,8 +3536,8 @@ button {
 
 .settings-button {
   display: inline-flex;
-  width: 3.25rem;
-  height: 3.25rem;
+  width: var(--floating-nav-link-size);
+  height: var(--floating-nav-link-size);
   align-items: center;
   justify-content: center;
   border: 0;
@@ -4170,25 +4237,15 @@ button {
   }
 
   .preferences-float {
-    right: max(0.9rem, env(safe-area-inset-right));
-    bottom: max(0.9rem, env(safe-area-inset-bottom));
-  }
-
-  .home-route-links {
-    right: max(0.65rem, env(safe-area-inset-right));
-    gap: 0.28rem;
-  }
-
-  .home-route-link {
-    width: 2.7rem;
-    height: 2.7rem;
+    right: max(0.78rem, env(safe-area-inset-right));
   }
 }
 
 @media (max-width: 720px) {
-  .portfolio-shell,
-  .experience-shell {
-    padding-bottom: max(6.4rem, calc(env(safe-area-inset-bottom) + 6.4rem));
+  :root {
+    --floating-nav-gap: 0.08rem;
+    --floating-nav-link-size: 2.12rem;
+    --floating-nav-padding: 0.18rem;
   }
 
   .route-github-activity {
@@ -4198,8 +4255,7 @@ button {
 
   .route-github-activity .github-calendar-scroll {
     overflow-x: auto;
-    scrollbar-color: color-mix(in srgb, var(--color-primary) 55%, transparent)
-      transparent;
+    scrollbar-color: var(--color-scrollbar-thumb) transparent;
     scrollbar-width: thin;
   }
 
@@ -4244,25 +4300,9 @@ button {
     place-self: start;
   }
 
-  .home-route-links {
-    top: auto;
-    right: auto;
-    bottom: max(0.75rem, env(safe-area-inset-bottom));
-    left: 50%;
-    flex-direction: row;
-    gap: 0.22rem;
-    padding: 0.42rem;
-    border-radius: 0.72rem;
-    transform: translateX(-50%);
-  }
-
-  .home-route-link {
-    width: 2.55rem;
-    height: 2.55rem;
-  }
-
   .preferences-float {
-    bottom: max(5.65rem, calc(env(safe-area-inset-bottom) + 5.65rem));
+    width: var(--floating-nav-link-size);
+    height: var(--floating-nav-link-size);
   }
 }
 

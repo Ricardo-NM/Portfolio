@@ -2,6 +2,8 @@ import { Home } from "lucide-react";
 import RouteIcon from "./RouteIcon";
 import type { RouteItem } from "./types";
 
+const NAV_ICON_SIZE = 20;
+
 type FloatingNavProps = {
   currentPath: string;
   hidden?: boolean;
@@ -52,9 +54,9 @@ export default function FloatingNav({
             key={item.href}
           >
             {routeId ? (
-              <RouteIcon id={routeId} />
+              <RouteIcon id={routeId} size={NAV_ICON_SIZE} />
             ) : (
-              <Home aria-hidden="true" size={24} strokeWidth={2.1} />
+              <Home aria-hidden="true" size={NAV_ICON_SIZE} strokeWidth={2.1} />
             )}
           </a>
         );

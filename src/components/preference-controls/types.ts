@@ -4,7 +4,6 @@ export type ProfileLinkId = "linkedin" | "github" | "resume";
 export type RouteLinkId =
   | "experience"
   | "achievements"
-  | "projects"
   | "technologies"
   | "activity"
   | "contact";
@@ -62,7 +61,6 @@ export type PreferenceControlsMode =
   | "chrome"
   | "home"
   | "preferences"
-  | "projects"
   | "technologies"
   | "activity"
   | "contact";

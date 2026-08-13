@@ -25,9 +25,6 @@ export const preferenceCopy = {
     githubViewProfileLabel: "Ver perfil",
     githubProfileSummaryLabel: "Resumen de perfil de GitHub",
     skillsTitle: "Habilidades y Tecnologías",
-    projectsRouteTitle: "Proyectos",
-    projectsSubtitle:
-      "Selección de proyectos destacados, productos digitales y soluciones que he desarrollado.",
     technologiesSubtitle:
       "Tecnologías, lenguajes y herramientas que utilizo para desarrollar soluciones web y aplicaciones completas.",
     activitySubtitle:
@@ -60,7 +57,6 @@ export const preferenceCopy = {
     drawerNavigationTitle: "Navegación",
     experienceRouteTitle: "Experiencia laboral",
     achievementsRouteTitle: "Logros destacados",
-    projectsNavLabel: "Ver proyectos",
     technologiesRouteTitle: "Habilidades y Tecnologías",
     activityRouteTitle: "Actividad de GitHub",
     contactRouteTitle: "Contacto",
@@ -103,9 +99,6 @@ export const preferenceCopy = {
     githubViewProfileLabel: "View profile",
     githubProfileSummaryLabel: "GitHub profile summary",
     skillsTitle: "Skills and Technologies",
-    projectsRouteTitle: "Projects",
-    projectsSubtitle:
-      "Selected projects, digital products, and solutions I have developed.",
     technologiesSubtitle:
       "Technologies, languages, and tools I use to develop complete web solutions and applications.",
     activitySubtitle:
@@ -138,7 +131,6 @@ export const preferenceCopy = {
     drawerNavigationTitle: "Navigation",
     experienceRouteTitle: "Work experience",
     achievementsRouteTitle: "Featured achievements",
-    projectsNavLabel: "View projects",
     technologiesRouteTitle: "Skills and Technologies",
     activityRouteTitle: "GitHub activity",
     contactRouteTitle: "Contact",

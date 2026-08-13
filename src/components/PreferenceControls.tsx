@@ -154,7 +154,6 @@ export default function PreferenceControls({
   >({
     experience: null,
     achievements: null,
-    projects: null,
     technologies: null,
     activity: null,
     contact: null,
@@ -163,7 +162,6 @@ export default function PreferenceControls({
   const drawerRouteRefs = useRef<Record<RouteLinkId, HTMLSpanElement | null>>({
     experience: null,
     achievements: null,
-    projects: null,
     technologies: null,
     activity: null,
     contact: null,
@@ -173,7 +171,6 @@ export default function PreferenceControls({
   >({
     experience: null,
     achievements: null,
-    projects: null,
     technologies: null,
     activity: null,
     contact: null,
@@ -399,8 +396,6 @@ export default function PreferenceControls({
     locale === "es"
       ? "Licenciatura en Ciencias Computacionales"
       : "Bachelor's Degree in Computer Science";
-  const projectsText =
-    locale === "es" ? "+10 Proyectos desarrollados" : "+10 Projects developed";
   const profileLocation =
     locale === "es" ? "Hidalgo, México" : "Hidalgo, Mexico";
   const profileEmail = "lic.ricardo.nm@gmail.com";
@@ -858,12 +853,6 @@ export default function PreferenceControls({
       title: labels.achievementsRouteTitle,
     },
     {
-      href: "/projects",
-      id: "projects",
-      label: labels.projectsNavLabel,
-      title: labels.projectsRouteTitle,
-    },
-    {
       href: "/technologies",
       id: "technologies",
       label: labels.technologiesNavLabel,
@@ -989,13 +978,9 @@ export default function PreferenceControls({
     document.querySelector<HTMLElement>(
       `.home-route-link[data-route-id="${id}"]`,
     );
-  const getRouteFlipIconSize = (targetElement: HTMLElement | null) => {
-    if (targetElement?.classList.contains("home-route-link")) {
-      return 24;
-    }
-
-    return 20;
-  };
+  const getRouteIconRect = (element: HTMLElement | null) =>
+    element?.querySelector("svg.lucide")?.getBoundingClientRect() ??
+    element?.getBoundingClientRect();
   const playRouteLinkFlips = (
     sourceRefs: Record<RouteLinkId, HTMLElement | null>,
     targetRefs: Record<RouteLinkId, HTMLElement | null>,
@@ -1005,8 +990,8 @@ export default function PreferenceControls({
         const activeOverlayRect =
           flipRouteLinkOverlayRefs.current[id]?.getBoundingClientRect();
         const sourceRect =
-          activeOverlayRect ?? sourceRefs[id]?.getBoundingClientRect();
-        const targetRect = targetRefs[id]?.getBoundingClientRect();
+          activeOverlayRect ?? getRouteIconRect(sourceRefs[id]);
+        const targetRect = getRouteIconRect(targetRefs[id]);
 
         if (!sourceRect || !targetRect) {
           return [];
@@ -1017,11 +1002,11 @@ export default function PreferenceControls({
             id,
             deltaX: sourceRect.left - targetRect.left,
             deltaY: sourceRect.top - targetRect.top,
-            endRadius: "0.55rem",
-            iconSize: getRouteFlipIconSize(targetRefs[id]),
+            endRadius: "0",
+            iconSize: Math.round(targetRect.width),
             scaleX: sourceRect.width / targetRect.width,
             scaleY: sourceRect.height / targetRect.height,
-            startRadius: "0.58rem",
+            startRadius: "0",
             targetLeft: targetRect.left,
             targetTop: targetRect.top,
             targetWidth: targetRect.width,
@@ -1074,7 +1059,6 @@ export default function PreferenceControls({
     const navRouteRefs = {
       experience: getNavbarRouteElement("experience"),
       achievements: getNavbarRouteElement("achievements"),
-      projects: getNavbarRouteElement("projects"),
       technologies: getNavbarRouteElement("technologies"),
       activity: getNavbarRouteElement("activity"),
       contact: getNavbarRouteElement("contact"),
@@ -1135,7 +1119,6 @@ export default function PreferenceControls({
     const navRouteRefs = {
       experience: getNavbarRouteElement("experience"),
       achievements: getNavbarRouteElement("achievements"),
-      projects: getNavbarRouteElement("projects"),
       technologies: getNavbarRouteElement("technologies"),
       activity: getNavbarRouteElement("activity"),
       contact: getNavbarRouteElement("contact"),
@@ -1388,21 +1371,6 @@ export default function PreferenceControls({
     );
   }
 
-  if (mode === "projects") {
-    return (
-      <>
-        <RoutePageShell
-          breadcrumbLabel={labels.breadcrumbLabel}
-          homeLabel={labels.homeRouteLabel}
-          subtitle={labels.projectsSubtitle}
-          title={labels.projectsRouteTitle}
-          titleId="projects-title"
-        />
-        {contactLeaveModal}
-      </>
-    );
-  }
-
   if (mode === "activity") {
     return (
       <>
@@ -1576,7 +1544,6 @@ export default function PreferenceControls({
           educationText={educationText}
           profileEmail={profileEmail}
           profileLocation={profileLocation}
-          projectsText={projectsText}
         />
         <div className="profile-drawer-section profile-about">
           <h4>{labels.aboutTitle}</h4>
@@ -1732,7 +1699,6 @@ export default function PreferenceControls({
             educationText={educationText}
             profileEmail={profileEmail}
             profileLocation={profileLocation}
-            projectsText={projectsText}
           />
 
           <div className="profile-drawer-section profile-about">
