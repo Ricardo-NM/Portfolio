@@ -9,6 +9,8 @@ type TechnologyCategoriesProps = {
   locale: Locale;
 };
 
+const TECHNOLOGIES_HIDDEN_FROM_ROUTE = new Set(["Bootstrap", "Vite"]);
+
 function TechnologyVisual({ technology }: { technology: TechnologyItem }) {
   return (
     <span
@@ -97,28 +99,33 @@ export default function TechnologyCategories({
             className="technology-category-icons"
             data-locale-flip-key={`${category.title.es}-icons`}
           >
-            {category.items.map((technology, technologyIndex) => (
-              <span
-                aria-label={technology.label}
-                className="technology-category-item"
-                data-label={technology.label}
-                key={technology.label}
-                role="img"
-                style={
-                  {
-                    "--technology-brand-color": technology.color,
-                    "--technology-brand-color-dark":
-                      technology.darkColor ?? technology.color,
-                    "--technology-brand-color-light":
-                      technology.lightColor ?? technology.color,
-                    "--technology-icon-index": technologyIndex,
-                  } as CSSProperties
-                }
-                tabIndex={0}
-              >
-                <TechnologyVisual technology={technology} />
-              </span>
-            ))}
+            {category.items
+              .filter(
+                (technology) =>
+                  !TECHNOLOGIES_HIDDEN_FROM_ROUTE.has(technology.label),
+              )
+              .map((technology, technologyIndex) => (
+                <span
+                  aria-label={technology.label}
+                  className="technology-category-item"
+                  data-label={technology.label}
+                  key={technology.label}
+                  role="img"
+                  style={
+                    {
+                      "--technology-brand-color": technology.color,
+                      "--technology-brand-color-dark":
+                        technology.darkColor ?? technology.color,
+                      "--technology-brand-color-light":
+                        technology.lightColor ?? technology.color,
+                      "--technology-icon-index": technologyIndex,
+                    } as CSSProperties
+                  }
+                  tabIndex={0}
+                >
+                  <TechnologyVisual technology={technology} />
+                </span>
+              ))}
           </div>
         </article>
       ))}

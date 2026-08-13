@@ -15,6 +15,7 @@ export const TECHNOLOGY_CATEGORIES = [
       { label: "TypeScript", icon: "typescript.svg", color: "#3178c6" },
       { label: "HTML5", icon: "html5.svg", color: "#e34f26" },
       { label: "CSS", icon: "css.svg", color: "#663399" },
+      { label: "Bootstrap", icon: "bootstrap.svg", color: "#7952b3" },
       {
         label: "Tailwind CSS",
         icon: "tailwindcss.svg",
@@ -27,6 +28,7 @@ export const TECHNOLOGY_CATEGORIES = [
         color: "#61dafb",
         lightColor: "#134e5e",
       },
+      { label: "Vite", icon: "vite.svg", color: "#646cff" },
       {
         label: "Expo",
         icon: "expo.svg",
@@ -58,6 +60,7 @@ export const TECHNOLOGY_CATEGORIES = [
         color: "#000000",
         darkColor: "#ffffff",
       },
+      { label: "Axios", icon: "axios.svg", color: "#5a29e4" },
       {
         label: "Prisma ORM",
         icon: "prisma.svg",
