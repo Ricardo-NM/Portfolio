@@ -1001,9 +1001,12 @@ button {
 .home-project-gallery-trigger {
   display: block;
   width: 100%;
+  overflow: hidden;
   border: 0;
+  border-radius: inherit;
   background: transparent;
   cursor: pointer;
+  line-height: 0;
   padding: 0;
   touch-action: manipulation;
 }
@@ -1013,10 +1016,13 @@ button {
   outline-offset: -3px;
 }
 
-.home-project-gallery-trigger img {
+.home-project-gallery-trigger img,
+.home-project-gallery-trigger video {
   display: block;
   width: 100%;
   height: auto;
+  border-radius: inherit;
+  object-fit: cover;
 }
 
 .home-project-card-backdrop {
@@ -1025,6 +1031,7 @@ button {
   z-index: 40;
   display: grid;
   place-items: center;
+  overflow: hidden;
   padding: clamp(1rem, 4vw, 2.5rem);
   background:
     radial-gradient(
@@ -1054,7 +1061,7 @@ button {
   );
   --project-card-badge-text: #ffffff;
   position: relative;
-  width: min(100%, 30rem);
+  width: min(100%, var(--project-card-width, 30rem));
   overflow: hidden;
   border: 1px solid var(--color-panel-border);
   border-radius: 1.8rem;
@@ -1101,17 +1108,14 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.32);
-  color: #ffffff;
+  color: rgba(255, 255, 255, 0.68);
   cursor: pointer;
   padding: 0;
-  transition:
-    background-color var(--motion-standard),
-    transform var(--motion-standard);
+  transition: color var(--motion-standard);
 }
 
 .home-project-card-close:hover {
-  background: rgba(0, 0, 0, 0.48);
-  transform: scale(1.04);
+  color: #ffffff;
 }
 
 .home-project-card-close:focus-visible {
@@ -1122,7 +1126,7 @@ button {
 .home-project-card-media {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: var(--project-media-aspect-ratio, 4 / 3);
   overflow: hidden;
   background: var(--project-card-surface);
   padding: 0.6rem 0.6rem 0;
@@ -1132,19 +1136,21 @@ button {
   content: none;
 }
 
-.home-project-card-media img {
+.home-project-card-media img,
+.home-project-card-media video {
   display: block;
   width: 100%;
   height: 100%;
   border-radius: 1.18rem;
   mask-image: none;
-  object-fit: cover;
+  object-fit: contain;
   -webkit-mask-image: none;
 }
 
 .home-project-card-body {
   position: relative;
   display: grid;
+  width: 100%;
   gap: 0.72rem;
   margin-top: 0;
   padding: 0.92rem 1.1rem 1.18rem;
@@ -4520,6 +4526,10 @@ button {
 @media (max-width: 820px) {
   .intro-tooling {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .home-project-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

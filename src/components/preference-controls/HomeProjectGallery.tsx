@@ -3,6 +3,7 @@ import { forwardRef, useEffect, useRef, useState } from "react";
 import { ExternalLinkIcon, XIcon } from "lucide-react";
 import HomeProjectTechnologies from "./HomeProjectTechnologies";
 import HomeProjectGalleryTitle from "./HomeProjectGalleryTitle";
+import HomeProjectMedia from "./HomeProjectMedia";
 import { TECHNOLOGY_CATEGORIES } from "./technologies";
 import type { Locale } from "./types";
 
@@ -77,6 +78,14 @@ const XBOX_CARD_STUDIO_TECHNOLOGIES = [
   "PM2",
 ].map(getProjectTechnology);
 
+const SPOTIFY_WEB_PLAYER_TECHNOLOGIES = [
+  "React",
+  "Vite",
+  "Tailwind CSS",
+  "TypeScript",
+  "Node.js",
+].map(getProjectTechnology);
+
 const PROJECT_GALLERY_IMAGES = [
   {
     alt: {
@@ -92,9 +101,11 @@ const PROJECT_GALLERY_IMAGES = [
       es: "Aplicacion web en desarrollo para administrar informacion financiera personal desde un panel privado. Incluye autenticacion propia, sesiones seguras, recuperacion de contrasena, soporte multilenguaje y vistas iniciales para pagos, calendario, estadisticas y configuracion.",
     },
     dominantColor: "52 58 62",
+    cardWidth: "30rem",
     links: {
       github: "https://github.com/Ricardo-NM/KUENTAS",
     },
+    mediaAspectRatio: "4 / 3",
     src: "/assets/projects/project1.svg",
     technologies: KUENTAS_TECHNOLOGIES,
     title: "KUENTAS",
@@ -113,10 +124,12 @@ const PROJECT_GALLERY_IMAGES = [
       es: "Sistema privado orientado a centralizar procesos operativos, administrativos y documentales relacionados con gestion logistica, seguimiento de referencias, control de documentos, facturacion, reportes, comunicacion interna y actividades de recursos humanos.",
     },
     dominantColor: "56 145 213",
+    cardWidth: "30rem",
     links: {
       github: "https://github.com/Ricardo-NM/K-PUGA-Docs",
       live: "https://ricardo-nm.github.io/K-PUGA-Docs/",
     },
+    mediaAspectRatio: "4 / 3",
     src: "/assets/projects/project2.svg",
     technologies: GESTION_OPERATIVA_TECHNOLOGIES,
     title: "ERP para comercio exterior",
@@ -135,10 +148,12 @@ const PROJECT_GALLERY_IMAGES = [
       es: "Herramienta web creada para la comunidad gamer que permite sincronizar tu perfil de Xbox y personalizar manualmente una tarjeta de jugador con estetica premium. Disenada con formato 9:16, degradados dinamicos, insignias personalizadas, metricas de juegos y estadisticas reales, disenadas especialmente para compartir en redes sociales.",
     },
     dominantColor: "13 28 54",
+    cardWidth: "30rem",
     links: {
       github: "https://github.com/Ricardo-NM/xbox-card-studio",
       live: "https://xcs.rnm.com.mx/",
     },
+    mediaAspectRatio: "4 / 3",
     src: "/assets/projects/project4.svg",
     technologies: XBOX_CARD_STUDIO_TECHNOLOGIES,
     title: "Xbox Card Studio",
@@ -157,13 +172,39 @@ const PROJECT_GALLERY_IMAGES = [
       es: "Sistema web orientado a la gestion y control operativo de activos fijos contables. Su proposito es centralizar informacion, facilitar solicitudes internas, mantener trazabilidad de movimientos y apoyar la generacion de documentos relacionados con asignaciones, bajas, devoluciones y traspasos.",
     },
     dominantColor: "135 169 19",
+    cardWidth: "30rem",
     links: {
       github: "https://github.com/Ricardo-NM/totis-gdb-docs",
       live: "https://ricardo-nm.github.io/totis-gdb-docs/",
     },
+    mediaAspectRatio: "4 / 3",
     src: "/assets/projects/project3.svg",
     technologies: TOTIS_TECHNOLOGIES,
     title: "Totis® | Gestión de bienes",
+  },
+  {
+    alt: {
+      en: "Spotify Web Player preview",
+      es: "Vista previa de Spotify Web Player",
+    },
+    badge: {
+      en: "Music",
+      es: "Música",
+    },
+    description: {
+      en: "Web music player widget. The project recreates a player-style experience with a song carousel, playback queue, favorites, volume controls, shuffle, and animated transitions.\n\nThe app queries the Spotify Web API through a local proxy, automatically completes cover art, artists, title, album, and duration, and calculates dynamic colors from each song cover.",
+      es: "Widget web de reproductor musical. El proyecto recrea una experiencia tipo player con carrusel de canciones, cola de reproducción, favoritos, controles de volumen, shuffle y transiciones animadas.\n\nLa app consulta Spotify Web API desde un proxy local, completa automáticamente portada, artistas, título, álbum y duración, y calcula colores dinámicos desde la portada de cada canción.",
+    },
+    dominantColor: "30 215 96",
+    cardWidth: "34rem",
+    links: {
+      github: "https://github.com/Ricardo-NM/SpotifyWebPlayer",
+    },
+    mediaAspectRatio: "16 / 9",
+    src: "/assets/projects/SpotifyWebPlayer/Banner.png",
+    technologies: SPOTIFY_WEB_PLAYER_TECHNOLOGIES,
+    title: "Spotify Web Player",
+    videoSrc: "/assets/projects/SpotifyWebPlayer/Demo.webm",
   },
 ] as const;
 
@@ -173,6 +214,7 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
     const [selectedProjectIndex, setSelectedProjectIndex] = useState<
       number | null
     >(null);
+    const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
     const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set());
     const itemRefs = useRef<Array<HTMLElement | null>>([]);
     const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -186,6 +228,20 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
       0,
       firstProjectRowSize,
     ).every((_, index) => visibleItems.has(index));
+
+    useEffect(() => {
+      const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const updateMotionPreference = () => {
+        setPrefersReducedMotion(mediaQuery.matches);
+      };
+
+      updateMotionPreference();
+      mediaQuery.addEventListener("change", updateMotionPreference);
+
+      return () => {
+        mediaQuery.removeEventListener("change", updateMotionPreference);
+      };
+    }, []);
 
     useEffect(() => {
       if (isRevealReady) {
@@ -274,6 +330,11 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
       }
 
       closeButtonRef.current?.focus({ preventScroll: true });
+      const previousHtmlOverflow = document.documentElement.style.overflow;
+      const previousBodyOverflow = document.body.style.overflow;
+
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
 
       const handleKeyDown = (event: KeyboardEvent) => {
         if (event.key === "Escape") {
@@ -284,6 +345,8 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
       window.addEventListener("keydown", handleKeyDown);
 
       return () => {
+        document.documentElement.style.overflow = previousHtmlOverflow;
+        document.body.style.overflow = previousBodyOverflow;
         window.removeEventListener("keydown", handleKeyDown);
       };
     }, [selectedProject]);
@@ -333,10 +396,14 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
                       : `View ${project.title} details`
                   }
                 >
-                  <img
-                    src={project.src}
+                  <HomeProjectMedia
                     alt={project.alt[locale]}
+                    imageSrc={project.src}
+                    isVideoEnabled={
+                      visibleItems.has(index) && !prefersReducedMotion
+                    }
                     loading={index === 0 ? "eager" : "lazy"}
+                    videoSrc={"videoSrc" in project ? project.videoSrc : undefined}
                   />
                 </button>
               </figure>
@@ -355,6 +422,9 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
             style={
               {
                 "--project-accent": selectedProject.dominantColor,
+                "--project-card-width": selectedProject.cardWidth,
+                "--project-media-aspect-ratio":
+                  selectedProject.mediaAspectRatio,
               } as CSSProperties
             }
           >
@@ -377,9 +447,16 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
               </button>
 
               <div className="home-project-card-media">
-                <img
-                  src={selectedProject.src}
+                <HomeProjectMedia
                   alt={selectedProject.alt[locale]}
+                  imageSrc={selectedProject.src}
+                  isVideoEnabled={!prefersReducedMotion}
+                  loading="eager"
+                  videoSrc={
+                    "videoSrc" in selectedProject
+                      ? selectedProject.videoSrc
+                      : undefined
+                  }
                 />
               </div>
 
@@ -430,7 +507,11 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
                   </div>
                 </div>
 
-                <p>{selectedProject.description[locale]}</p>
+                {selectedProject.description[locale]
+                  .split("\n\n")
+                  .map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
 
                 <HomeProjectTechnologies
                   label={
