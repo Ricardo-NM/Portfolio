@@ -101,7 +101,7 @@ const PROJECT_GALLERY_IMAGES = [
       es: "Aplicacion web en desarrollo para administrar informacion financiera personal desde un panel privado. Incluye autenticacion propia, sesiones seguras, recuperacion de contrasena, soporte multilenguaje y vistas iniciales para pagos, calendario, estadisticas y configuracion.",
     },
     dominantColor: "52 58 62",
-    cardWidth: "30rem",
+    cardWidth: "34rem",
     links: {
       github: "https://github.com/Ricardo-NM/KUENTAS",
     },
@@ -153,10 +153,11 @@ const PROJECT_GALLERY_IMAGES = [
       github: "https://github.com/Ricardo-NM/xbox-card-studio",
       live: "https://xcs.rnm.com.mx/",
     },
-    mediaAspectRatio: "4 / 3",
-    src: "/assets/projects/project4.svg",
+    mediaAspectRatio: "16 / 9",
+    src: "/assets/projects/XboxCardStudio/Banner.png",
     technologies: XBOX_CARD_STUDIO_TECHNOLOGIES,
     title: "Xbox Card Studio",
+    videoSrc: "/assets/projects/XboxCardStudio/Demo.webm",
   },
   {
     alt: {
