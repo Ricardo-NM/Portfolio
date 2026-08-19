@@ -1,5 +1,4 @@
 import type { APIRoute } from "astro";
-import { loadEnv } from "vite";
 
 const serverProcess = globalThis as typeof globalThis & {
   process?: {
@@ -88,9 +87,7 @@ function formatDateTimeWithFixedOffset(parts: ReturnType<typeof getFixedOffsetDa
 }
 
 export const GET: APIRoute = async () => {
-  const token =
-    serverProcess.process?.env?.GITHUB_TOKEN ??
-    loadEnv("", ".", "").GITHUB_TOKEN;
+  const token = serverProcess.process?.env?.GITHUB_TOKEN;
 
   if (!token) {
     return new Response(

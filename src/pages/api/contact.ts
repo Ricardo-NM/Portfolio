@@ -1,6 +1,5 @@
 import type { APIRoute } from "astro";
 import { Resend } from "resend";
-import { loadEnv } from "vite";
 
 const serverProcess = globalThis as typeof globalThis & {
   process?: {
@@ -98,7 +97,7 @@ function emptyResponse(status = 204) {
 }
 
 function getEnvValue(key: string) {
-  return serverProcess.process?.env?.[key] ?? loadEnv("", ".", "")[key];
+  return serverProcess.process?.env?.[key];
 }
 
 function escapeHtml(value: string) {
