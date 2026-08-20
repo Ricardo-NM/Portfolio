@@ -1017,15 +1017,17 @@ button {
 
 .home-project-gallery {
   --home-project-gallery-gap: clamp(0.58rem, 1.4vw, 0.95rem);
-  display: grid;
+  display: block;
   width: 100%;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--home-project-gallery-gap);
+  columns: 3;
+  column-gap: var(--home-project-gallery-gap);
 }
 
 .home-project-gallery-item {
+  display: block;
   width: 100%;
-  margin: 0;
+  break-inside: avoid;
+  margin: 0 0 var(--home-project-gallery-gap);
   overflow: hidden;
   border-radius: 0.65rem;
   opacity: 0;
@@ -4637,15 +4639,7 @@ button {
   }
 
   .home-project-gallery {
-    display: block;
     columns: 2;
-    column-gap: var(--home-project-gallery-gap);
-  }
-
-  .home-project-gallery-item {
-    display: block;
-    break-inside: avoid;
-    margin-bottom: var(--home-project-gallery-gap);
   }
 }
 

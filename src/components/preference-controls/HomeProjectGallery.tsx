@@ -129,15 +129,16 @@ const PROJECT_GALLERY_IMAGES = [
       es: "Sistema privado orientado a centralizar procesos operativos, administrativos y documentales relacionados con gestión logística, seguimiento de referencias, control de documentos, facturación, reportes, comunicación interna y actividades de recursos humanos.",
     },
     dominantColor: "56 145 213",
-    cardWidth: "30rem",
+    cardWidth: "34rem",
     links: {
       github: "https://github.com/Ricardo-NM/K-PUGA-Docs",
       live: "https://ricardo-nm.github.io/K-PUGA-Docs/",
     },
-    mediaAspectRatio: "4 / 3",
-    src: "/assets/projects/project2.svg",
+    mediaAspectRatio: "16 / 9",
+    src: "/assets/projects/ERPComercioExterior/Banner.png",
     technologies: GESTION_OPERATIVA_TECHNOLOGIES,
     title: "ERP para comercio exterior",
+    videoSrc: "/assets/projects/ERPComercioExterior/Demo.webm",
   },
   {
     alt: {
