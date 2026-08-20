@@ -13,6 +13,7 @@ type HomeProjectGalleryProps = {
   revealDelay: number;
 };
 
+const MOBILE_VIEWPORT_QUERY = "(max-width: 720px)";
 const PROJECT_GALLERY_ITEM_ENTRY_MS = 620;
 const PROJECT_GALLERY_ITEM_STAGGER_MS = 40;
 const PROJECT_GALLERY_INTERACTION_BUFFER_MS = 40;
@@ -387,7 +388,16 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
         return;
       }
 
-      closeButtonRef.current?.focus({ preventScroll: true });
+      if (window.matchMedia(MOBILE_VIEWPORT_QUERY).matches) {
+        const activeElement = document.activeElement;
+
+        if (activeElement instanceof HTMLElement) {
+          activeElement.blur();
+        }
+      } else {
+        closeButtonRef.current?.focus({ preventScroll: true });
+      }
+
       const previousHtmlOverflow = document.documentElement.style.overflow;
       const previousBodyOverflow = document.body.style.overflow;
 

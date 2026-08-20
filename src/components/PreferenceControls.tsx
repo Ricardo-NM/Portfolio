@@ -1303,6 +1303,14 @@ export default function PreferenceControls({
   const returnFocusFromProfileMenu = () => {
     const activeElement = document.activeElement;
 
+    if (window.matchMedia(MOBILE_PROFILE_DRAWER_QUERY).matches) {
+      if (activeElement instanceof HTMLElement) {
+        activeElement.blur();
+      }
+
+      return;
+    }
+
     if (
       activeElement instanceof HTMLElement &&
       profileDrawerShellRef.current?.contains(activeElement)
@@ -1436,6 +1444,16 @@ export default function PreferenceControls({
   }, [isProfileMenuOpen, closeProfileMenu]);
   useEffect(() => {
     if (!isProfileMenuOpen) {
+      return;
+    }
+
+    if (window.matchMedia(MOBILE_PROFILE_DRAWER_QUERY).matches) {
+      const activeElement = document.activeElement;
+
+      if (activeElement instanceof HTMLElement) {
+        activeElement.blur();
+      }
+
       return;
     }
 
