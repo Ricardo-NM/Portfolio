@@ -129,6 +129,12 @@ html::-webkit-scrollbar-thumb:hover {
   background: var(--color-scrollbar-thumb-hover);
 }
 
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none !important;
+}
+
 body {
   min-height: 100dvh;
   margin: 0;
@@ -187,6 +193,7 @@ button {
   letter-spacing: 0;
   text-align: center;
   white-space: nowrap;
+  transform: translateZ(0);
   user-select: none;
 }
 
@@ -207,13 +214,11 @@ button {
   background-clip: text;
   -webkit-background-clip: text;
   opacity: 0;
-  transform: translateY(0.38em);
+  transform: translate3d(0, 0.38em, 0);
   animation: letter-rise 560ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   animation-delay: calc(var(--letter-index) * 45ms);
-  transition:
-    background var(--theme-transition),
-    opacity var(--motion-standard),
-    transform var(--motion-standard);
+  backface-visibility: hidden;
+  transition: background var(--theme-transition);
   will-change: opacity, transform;
 }
 
@@ -435,7 +440,7 @@ button {
 .home-route-links[data-entry-ready="false"] {
   opacity: 0;
   pointer-events: none;
-  transform: translateX(-50%) scale(0.68);
+  transform: translateX(-50%);
   transform-origin: center;
   visibility: hidden;
 }
@@ -475,14 +480,14 @@ button {
   text-decoration: none;
   touch-action: manipulation;
   transition:
-    background-color var(--theme-transition),
-    color var(--theme-transition);
+    background-color 120ms ease,
+    color 120ms ease;
 }
 
 .home-route-links[data-entry-ready="false"] .home-route-link {
   cursor: default;
   opacity: 0;
-  transform: translateY(0.58rem) scale(0.68);
+  transform: translate3d(0, 0.38rem, 0);
 }
 
 .home-route-links[data-entry-ready="true"][data-entry-animated="true"]
@@ -503,7 +508,7 @@ button {
   border-radius: 0.34rem;
   background: transparent;
   content: "";
-  transition: background-color var(--theme-transition);
+  transition: background-color 120ms ease;
 }
 
 .home-route-link[data-active="true"] {
@@ -520,8 +525,10 @@ button {
   visibility: hidden;
 }
 
-.home-route-link:hover {
-  color: var(--color-nav-icon-hover);
+@media (hover: hover) {
+  .home-route-link:hover {
+    color: var(--color-nav-icon-hover);
+  }
 }
 
 .home-route-link:active {
@@ -537,14 +544,7 @@ button {
   position: relative;
   z-index: 1;
   display: block;
-  transition:
-    color var(--theme-transition),
-    transform var(--motion-standard);
-}
-
-.home-route-link:hover svg,
-.home-route-link:focus-visible svg {
-  transform: scale(1.12);
+  transition: color 120ms ease;
 }
 
 .profile-drawer-measure {
@@ -1634,6 +1634,10 @@ button {
 }
 
 .experience-shell {
+  --route-description-active-start-delay: var(
+    --route-description-start-delay,
+    340ms
+  );
   min-height: 100dvh;
   padding: clamp(1rem, 4vw, 4rem);
   padding-bottom: calc(
@@ -1787,9 +1791,17 @@ button {
   transition: color var(--theme-transition);
 }
 
+.animated-title {
+  view-transition-name: none;
+}
+
 .animated-title-word {
   display: inline-block;
   white-space: nowrap;
+}
+
+.animated-description {
+  --description-active-start-delay: var(--description-start-delay);
 }
 
 .animated-title-letter {
@@ -1816,7 +1828,7 @@ button {
   transform: translateY(0.38em);
   animation: letter-rise 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   animation-delay: calc(
-    var(--description-start-delay) + (var(--letter-index) * 12ms)
+    var(--description-active-start-delay) + (var(--letter-index) * 12ms)
   );
   transition:
     opacity var(--motion-standard),
@@ -1837,6 +1849,7 @@ button {
 }
 
 .experience-list {
+  --experience-content-active-delay: var(--experience-content-delay);
   --experience-card-stagger: 120ms;
   display: grid;
   gap: 1rem;
@@ -1851,7 +1864,7 @@ button {
   padding: clamp(0.54rem, 1.1vw, 0.66rem) clamp(0.72rem, 1.8vw, 1rem);
   animation: experience-card-fade-in 360ms ease-out forwards;
   animation-delay: calc(
-    var(--experience-content-delay) +
+    var(--experience-content-active-delay) +
       (var(--experience-card-index) * var(--experience-card-stagger))
   );
   transition:
@@ -1908,7 +1921,7 @@ button {
   animation: experience-logo-slide-in 420ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
   animation-delay: calc(
-    var(--experience-content-delay) +
+    var(--experience-content-active-delay) +
       (var(--experience-card-index) * var(--experience-card-stagger)) +
       150ms
   );
@@ -1939,7 +1952,7 @@ button {
   animation: experience-content-slide-down 360ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
   animation-delay: calc(
-    var(--experience-content-delay) +
+    var(--experience-content-active-delay) +
       (var(--experience-card-index) * var(--experience-card-stagger)) +
       210ms
   );
@@ -1964,7 +1977,7 @@ button {
   animation: experience-content-slide-up 360ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
   animation-delay: calc(
-    var(--experience-content-delay) +
+    var(--experience-content-active-delay) +
       (var(--experience-card-index) * var(--experience-card-stagger)) +
       270ms
   );
@@ -1980,7 +1993,7 @@ button {
   animation: experience-content-slide-down 360ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
   animation-delay: calc(
-    var(--experience-content-delay) +
+    var(--experience-content-active-delay) +
       (var(--experience-card-index) * var(--experience-card-stagger)) +
       210ms
   );
@@ -1998,7 +2011,7 @@ button {
   animation: experience-content-slide-up 360ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
   animation-delay: calc(
-    var(--experience-content-delay) +
+    var(--experience-content-active-delay) +
       (var(--experience-card-index) * var(--experience-card-stagger)) +
       270ms
   );
@@ -2116,7 +2129,10 @@ button {
   opacity: 0;
   transform: translateY(-14px);
   animation: experience-bullet-slide-down 480ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: calc(var(--experience-content-delay, 320ms) + 320ms + var(--bullet-index) * 110ms);
+  animation-delay: calc(
+    var(--experience-content-active-delay, 320ms) + 320ms +
+      var(--bullet-index) * 110ms
+  );
   will-change: opacity, transform;
 }
 
@@ -2210,7 +2226,7 @@ button {
 .achievement-card-content {
   display: grid;
   width: 100%;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto auto auto;
   gap: clamp(1rem, 2.8vw, 1.4rem);
   padding: clamp(1.15rem, 3.4vw, 1.65rem);
   opacity: 1;
@@ -2329,17 +2345,9 @@ button {
   font-size: clamp(1rem, 2.4vw, 1.18rem);
   font-weight: 300;
   line-height: 1.45;
-  transition: color var(--theme-transition);
-}
-
-.achievement-description-line {
-  display: block;
   text-align: justify;
-  text-align-last: justify;
-}
-
-.achievement-description-line:last-child {
   text-align-last: left;
+  transition: color var(--theme-transition);
 }
 
 @keyframes achievement-line-slide-down {
@@ -2360,16 +2368,18 @@ button {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  margin-top: 1rem;
 }
 
 .achievement-tag {
   border: 1px solid
     color-mix(in srgb, var(--color-tech-card-border) 82%, transparent);
-  border-radius: 0.85rem;
+  border-radius: 0.52rem;
   color: color-mix(in srgb, var(--color-text) 70%, transparent);
-  font-size: 0.94rem;
+  font-size: 0.82rem;
   font-weight: 500;
-  padding: 0.48rem 0.72rem;
+  line-height: 0.95;
+  padding: 0.18rem 0.48rem;
   transition:
     border-color var(--theme-transition),
     color var(--theme-transition);
@@ -2428,7 +2438,7 @@ button {
   .achievements-stack {
   opacity: 0;
   animation: activity-card-fade-in 360ms ease-out forwards;
-  animation-delay: var(--route-description-start-delay, 340ms);
+  animation-delay: var(--route-description-active-start-delay, 340ms);
   will-change: opacity;
 }
 
@@ -2441,7 +2451,7 @@ button {
   transform-origin: center;
   animation: contact-submit-bg-scale-in 340ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
-  animation-delay: var(--route-description-start-delay, 340ms);
+  animation-delay: var(--route-description-active-start-delay, 340ms);
   will-change: opacity, transform;
 }
 
@@ -2454,23 +2464,19 @@ button {
   transform: translateX(-1rem);
   animation: contact-submit-icon-slide-right 340ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
-  animation-delay: calc(var(--route-description-start-delay, 340ms) + 60ms);
+  animation-delay: calc(var(--route-description-active-start-delay, 340ms) + 60ms);
   will-change: opacity, transform;
 }
 
 :root:not([data-suppress-entry-animations="locale"])
   .achievements-deck:not([data-has-interacted="true"])
   .achievement-card:first-child[data-position="active"]
-  .achievement-description
-  .achievement-description-line {
+  .achievement-description {
   opacity: 0;
   transform: translateY(-16px);
   animation: achievement-line-slide-down 520ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
-  animation-delay: calc(
-    var(--route-description-start-delay, 340ms) + 400ms +
-      (var(--line-index) * 130ms)
-  );
+  animation-delay: calc(var(--route-description-active-start-delay, 340ms) + 400ms);
   will-change: opacity, transform;
 }
 
@@ -2484,7 +2490,7 @@ button {
   animation: contact-submit-bg-scale-in 320ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
   animation-delay: calc(
-    var(--route-description-start-delay, 340ms) + 680ms +
+    var(--route-description-active-start-delay, 340ms) + 680ms +
       (var(--tag-index, 0) * 80ms)
   );
   will-change: opacity, transform;
@@ -2497,7 +2503,7 @@ button {
   transform: translateX(1rem);
   animation: contact-submit-text-slide-left 340ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
-  animation-delay: calc(var(--route-description-start-delay, 340ms) + 320ms);
+  animation-delay: calc(var(--route-description-active-start-delay, 340ms) + 320ms);
   will-change: opacity, transform;
 }
 
@@ -2508,7 +2514,7 @@ button {
   transform: translateX(-1rem);
   animation: contact-submit-icon-slide-right 340ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
-  animation-delay: calc(var(--route-description-start-delay, 340ms) + 320ms);
+  animation-delay: calc(var(--route-description-active-start-delay, 340ms) + 320ms);
   will-change: opacity, transform;
 }
 
@@ -2520,7 +2526,7 @@ button {
   transform: translateY(0.75rem);
   animation: contact-counter-slide-up 340ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
-  animation-delay: calc(var(--route-description-start-delay, 340ms) + 320ms);
+  animation-delay: calc(var(--route-description-active-start-delay, 340ms) + 320ms);
   will-change: opacity, transform;
 }
 
@@ -2556,7 +2562,7 @@ button {
   animation: contact-label-slide-down 340ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
   animation-delay: calc(
-    var(--route-description-start-delay, 340ms) +
+    var(--route-description-active-start-delay, 340ms) +
       (var(--contact-field-index, 0) * 80ms)
   );
   transition: color var(--theme-transition);
@@ -2584,7 +2590,7 @@ button {
   padding: 0.75rem 0.82rem;
   animation: contact-input-fade-in 340ms ease-out forwards;
   animation-delay: calc(
-    var(--route-description-start-delay, 340ms) + 60ms +
+    var(--route-description-active-start-delay, 340ms) + 60ms +
       (var(--contact-field-index, 0) * 80ms)
   );
   transition:
@@ -2625,7 +2631,7 @@ button {
   transform: translateY(0.75rem);
   animation: contact-counter-slide-up 340ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
-  animation-delay: calc(var(--route-description-start-delay, 340ms) + 320ms);
+  animation-delay: calc(var(--route-description-active-start-delay, 340ms) + 320ms);
   will-change: opacity, transform;
 }
 
@@ -2644,7 +2650,7 @@ button {
   animation: contact-placeholder-slide-right 340ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
   animation-delay: calc(
-    var(--route-description-start-delay, 340ms) + 120ms +
+    var(--route-description-active-start-delay, 340ms) + 120ms +
       (var(--contact-field-index, 0) * 80ms)
   );
   will-change: opacity, transform;
@@ -2712,7 +2718,7 @@ button {
   transform-origin: center;
   animation: contact-submit-bg-scale-in 360ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
-  animation-delay: calc(var(--route-description-start-delay, 340ms) + 400ms);
+  animation-delay: calc(var(--route-description-active-start-delay, 340ms) + 400ms);
   will-change: opacity, transform;
 }
 
@@ -2726,7 +2732,7 @@ button {
   transform: translateX(-0.85rem);
   animation: contact-submit-icon-slide-right 320ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
-  animation-delay: calc(var(--route-description-start-delay, 340ms) + 620ms);
+  animation-delay: calc(var(--route-description-active-start-delay, 340ms) + 620ms);
   will-change: opacity, transform;
 }
 
@@ -2738,7 +2744,7 @@ button {
   transform: translateX(0.85rem);
   animation: contact-submit-text-slide-left 320ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
-  animation-delay: calc(var(--route-description-start-delay, 340ms) + 620ms);
+  animation-delay: calc(var(--route-description-active-start-delay, 340ms) + 620ms);
   will-change: opacity, transform;
 }
 
@@ -3006,7 +3012,7 @@ button {
   padding: clamp(0.72rem, 1.6vw, 1rem) clamp(1rem, 3vw, 1.8rem);
   animation: technology-card-fade-in 360ms ease-out forwards;
   animation-delay: calc(
-    var(--route-description-start-delay, 340ms) +
+    var(--route-description-active-start-delay, 340ms) +
       (var(--technology-card-index) * 120ms)
   );
   transition:
@@ -3037,7 +3043,7 @@ button {
   transform: translateY(0.38em);
   animation: letter-rise 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   animation-delay: calc(
-    var(--route-description-start-delay, 340ms) +
+    var(--route-description-active-start-delay, 340ms) +
       (var(--technology-card-index) * 120ms) +
       (var(--letter-index) * 10ms)
   );
@@ -3055,7 +3061,7 @@ button {
   animation: technology-divider-expand-y 360ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
   animation-delay: calc(
-    var(--route-description-start-delay, 340ms) +
+    var(--route-description-active-start-delay, 340ms) +
       (var(--technology-card-index) * 120ms) + 240ms
   );
   transition: background-color var(--theme-transition);
@@ -3086,7 +3092,7 @@ button {
   transform-origin: center;
   animation: profile-link-scale-in 380ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   animation-delay: calc(
-    var(--route-description-start-delay, 340ms) +
+    var(--route-description-active-start-delay, 340ms) +
       (var(--technology-card-index) * 140ms) + 360ms +
       (var(--technology-icon-index) * 110ms)
   );
@@ -3107,15 +3113,12 @@ button {
   background: currentColor;
   mask: var(--technology-icon-url) center / contain no-repeat;
   -webkit-mask: var(--technology-icon-url) center / contain no-repeat;
-  transition:
-    background-color var(--theme-transition),
-    transform var(--motion-standard);
-  will-change: transform;
+  transition: background-color var(--theme-transition);
 }
 
 .technology-category-item:hover .technology-category-icon,
 .technology-category-item:focus-visible .technology-category-icon {
-  transform: scale(1.12);
+  transform: none;
 }
 
 .technology-category-item:focus-visible {
@@ -3169,7 +3172,7 @@ button {
   opacity: 0;
   padding: clamp(0.78rem, 1.7vw, 1rem);
   animation: activity-card-fade-in 360ms ease-out forwards;
-  animation-delay: var(--route-description-start-delay, 340ms);
+  animation-delay: var(--route-description-active-start-delay, 340ms);
   will-change: opacity;
 }
 
@@ -3201,7 +3204,7 @@ button {
   transform: translateY(-0.42rem);
   animation: activity-month-slide-in 260ms ease-out forwards;
   animation-delay: calc(
-    var(--route-description-start-delay, 340ms) + 300ms +
+    var(--route-description-active-start-delay, 340ms) + 300ms +
       (var(--github-month-index) * 45ms)
   );
   will-change: opacity, transform;
@@ -3232,7 +3235,7 @@ button {
   animation: activity-calendar-day-scale-in 520ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
   animation-delay: calc(
-    var(--route-description-start-delay, 340ms) + 420ms +
+    var(--route-description-active-start-delay, 340ms) + 420ms +
       (var(--github-day-column-index) * 11ms)
   );
   will-change: opacity, transform;
@@ -3247,7 +3250,7 @@ button {
   transform: translateX(-0.78rem);
   animation: activity-footer-slide-from-left 280ms cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
-  animation-delay: calc(var(--route-description-start-delay, 340ms) + 620ms);
+  animation-delay: calc(var(--route-description-active-start-delay, 340ms) + 620ms);
   will-change: opacity, transform;
 }
 
@@ -3256,17 +3259,17 @@ button {
   transform: translateX(0.78rem);
   animation: activity-footer-slide-from-right 280ms
     cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: calc(var(--route-description-start-delay, 340ms) + 660ms);
+  animation-delay: calc(var(--route-description-active-start-delay, 340ms) + 660ms);
   will-change: opacity, transform;
 }
 
 .route-github-activity + .github-profile-card {
   --github-profile-animation-start: calc(
-    var(--route-description-start-delay, 340ms) + 300ms
+    var(--route-description-active-start-delay, 340ms) + 300ms
   );
   opacity: 0;
   animation: activity-card-fade-in 360ms ease-out forwards;
-  animation-delay: calc(var(--route-description-start-delay, 340ms) + 120ms);
+  animation-delay: calc(var(--route-description-active-start-delay, 340ms) + 120ms);
   will-change: opacity;
 }
 
@@ -4084,6 +4087,11 @@ button {
 }
 
 @keyframes letter-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.38em);
+  }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -4427,23 +4435,25 @@ button {
 
 @keyframes home-route-shell-scale-in {
   from {
-    transform: translateX(-50%) scale(0.68);
+    opacity: 0;
+    transform: translateX(-50%);
   }
 
   to {
-    transform: translateX(-50%) scale(1);
+    opacity: 1;
+    transform: translateX(-50%);
   }
 }
 
 @keyframes home-route-link-slide-scale-in {
   from {
     opacity: 0;
-    transform: translateY(0.58rem) scale(0.68);
+    transform: translate3d(0, 0.38rem, 0);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -4709,6 +4719,13 @@ button {
   .technology-category-item {
     width: 1.42rem;
     height: 1.42rem;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+  }
+
+  .technology-category-icon {
+    transition: background-color var(--theme-transition);
   }
 
   .experience-card {
@@ -4749,18 +4766,23 @@ button {
   }
 
   .achievements-stack {
-    width: min(calc(100% - 2rem), 20rem);
-    min-height: 21.8rem;
+    width: min(calc(100% - 2rem), 22rem);
+    min-height: 0;
   }
 
   .achievement-card {
     border-radius: 1rem;
   }
 
+  .achievement-card[data-position="active"] {
+    position: relative;
+    inset: auto;
+  }
+
   .achievement-card-content {
     grid-template-rows: auto auto auto;
-    gap: 0.72rem;
-    padding: 0.9rem;
+    gap: 0.78rem;
+    padding: 1rem;
   }
 
   .achievement-card-topline {
@@ -4778,15 +4800,29 @@ button {
   }
 
   .achievement-card h2 {
-    font-size: 1.22rem;
+    font-size: clamp(1.18rem, 7vw, 1.58rem);
   }
 
-  .achievement-card p {
-    font-size: 0.98rem;
+  .achievement-card p,
+  .achievement-card .achievement-description {
+    font-size: clamp(0.92rem, 5.2vw, 1.08rem);
+    line-height: 1.42;
+    text-align: left;
+    text-align-last: left;
+  }
+
+  .achievement-tags {
+    gap: 0.44rem;
+    margin-top: 2.1rem;
   }
 
   .achievement-tag {
-    font-size: 0.88rem;
+    min-height: 2rem;
+    border-radius: 0.72rem;
+    font-size: clamp(0.78rem, 4.4vw, 0.94rem);
+    line-height: 1.1;
+    padding: 0.42rem 0.62rem;
+    white-space: normal;
   }
 
   .name-mark {
@@ -4885,6 +4921,47 @@ button {
       visibility 0s linear var(--motion-standard);
   }
 
+  .animated-title-letter {
+    transform: translateY(0.38em);
+    animation: letter-rise 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: calc(var(--letter-index) * 20ms);
+    will-change: opacity, transform;
+  }
+
+  .animated-description {
+    --description-active-start-delay: var(
+      --description-start-delay-mobile,
+      var(--description-start-delay)
+    );
+  }
+
+  .experience-shell {
+    --route-description-active-start-delay: var(
+      --route-description-start-delay-mobile,
+      var(--route-description-start-delay, 340ms)
+    );
+  }
+
+  .experience-list {
+    --experience-content-active-delay: var(
+      --experience-content-delay-mobile,
+      var(--experience-content-delay)
+    );
+  }
+
+  .route-breadcrumb-home,
+  .route-breadcrumb-separator,
+  .route-breadcrumb-current {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    will-change: auto;
+  }
+
+  .route-breadcrumb-current {
+    view-transition-name: none;
+  }
+
   .profile-drawer {
     transition:
       background-color var(--theme-transition),
@@ -4960,6 +5037,23 @@ button {
   .preferences-float {
     width: var(--floating-nav-link-size);
     height: var(--floating-nav-link-size);
+  }
+}
+
+@media (min-width: 721px) {
+  .achievement-card .achievement-tags {
+    gap: 0.38rem;
+  }
+
+  .achievement-card .achievement-tag {
+    height: 1.72rem;
+    min-height: 1.72rem;
+    max-height: 1.72rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    line-height: 1;
+    padding: 0 0.62rem;
+    white-space: nowrap;
   }
 }
 

@@ -1,5 +1,6 @@
 import { Home } from "lucide-react";
 import type { AnimationEvent, CSSProperties, MouseEvent } from "react";
+import { useEffect, useState } from "react";
 import RouteIcon from "./RouteIcon";
 import type { RouteItem } from "./types";
 
@@ -32,6 +33,7 @@ export default function FloatingNav({
   routeItems,
   routeLinksHidden,
 }: FloatingNavProps) {
+  const [optimisticPath, setOptimisticPath] = useState<string | null>(null);
   const navItems = [
     {
       href: "/",
@@ -39,6 +41,13 @@ export default function FloatingNav({
     },
     ...routeItems,
   ];
+  const activePath = optimisticPath ?? currentPath;
+
+  useEffect(() => {
+    if (optimisticPath === currentPath) {
+      setOptimisticPath(null);
+    }
+  }, [currentPath, optimisticPath]);
 
   return (
     <nav
@@ -51,14 +60,29 @@ export default function FloatingNav({
       data-entry-ready={entryReady}
     >
       {navItems.map((item, index) => {
-        const isActive = currentPath === item.href;
+        const isActive = activePath === item.href;
         const routeId = "id" in item ? item.id : undefined;
         const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
-          if (!disabled) {
+          if (disabled) {
+            event.preventDefault();
             return;
           }
 
-          event.preventDefault();
+          if (
+            event.button !== 0 ||
+            event.metaKey ||
+            event.ctrlKey ||
+            event.shiftKey ||
+            event.altKey
+          ) {
+            return;
+          }
+
+          setOptimisticPath(item.href);
+
+          if (event.detail > 0) {
+            event.currentTarget.blur();
+          }
         };
         const handleAnimationEnd = (
           event: AnimationEvent<HTMLAnchorElement>,

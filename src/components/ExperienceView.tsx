@@ -5,6 +5,7 @@ import { type Locale, workExperienceItems } from "../data/workExperience";
 import { useSyncedLocale } from "../hooks/useSyncedLocale";
 import AnimatedDescription, {
   getDescriptionStartDelay,
+  getMobileContentStartDelay,
 } from "./AnimatedDescription";
 import AnimatedTitle from "./AnimatedTitle";
 import RouteBreadcrumb from "./RouteBreadcrumb";
@@ -56,6 +57,10 @@ export default function ExperienceView() {
   const [openItem, setOpenItem] = useState("experience-0");
   const [introAnimationsEnabled, setIntroAnimationsEnabled] = useState(true);
   const experienceContentDelay = getDescriptionStartDelay(labels.title);
+  const mobileExperienceContentDelay = getMobileContentStartDelay(
+    labels.title,
+    labels.subtitle,
+  );
 
   useEffect(() => {
     if (
@@ -102,6 +107,7 @@ export default function ExperienceView() {
           style={
             {
               "--experience-content-delay": `${experienceContentDelay}ms`,
+              "--experience-content-delay-mobile": `${mobileExperienceContentDelay}ms`,
             } as CSSProperties
           }
         >

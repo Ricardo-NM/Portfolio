@@ -1,5 +1,8 @@
 import type { CSSProperties, ReactNode } from "react";
-import AnimatedDescription, { getDescriptionStartDelay } from "../AnimatedDescription";
+import AnimatedDescription, {
+  getDescriptionStartDelay,
+  getMobileContentStartDelay,
+} from "../AnimatedDescription";
 import AnimatedTitle from "../AnimatedTitle";
 import RouteBreadcrumb from "../RouteBreadcrumb";
 
@@ -27,6 +30,7 @@ export default function RoutePageShell({
       style={
         {
           "--route-description-start-delay": `${getDescriptionStartDelay(title)}ms`,
+          "--route-description-start-delay-mobile": `${getMobileContentStartDelay(title, subtitle)}ms`,
         } as CSSProperties
       }
     >
