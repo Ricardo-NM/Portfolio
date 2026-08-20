@@ -1,5 +1,6 @@
 import { Languages, Moon, Settings, Sun } from "lucide-react";
-import type { FocusEvent } from "react";
+import type { FocusEvent, PointerEvent } from "react";
+import { useRef } from "react";
 import type { PreferenceLabels } from "./copy";
 import type { Locale, Theme } from "./types";
 
@@ -42,6 +43,14 @@ export default function PreferencesFloat({
   themeLabel,
   themeText,
 }: PreferencesFloatProps) {
+  const ignoreTouchFocusOpenRef = useRef(false);
+
+  const handlePointerDownCapture = (
+    event: PointerEvent<HTMLDivElement>,
+  ) => {
+    ignoreTouchFocusOpenRef.current = event.pointerType !== "mouse";
+  };
+
   const handleBlur = (event: FocusEvent<HTMLDivElement>) => {
     const nextFocusedElement = event.relatedTarget;
 
@@ -53,13 +62,27 @@ export default function PreferencesFloat({
     }
   };
   const handleOpen = () => {
+    if (ignoreTouchFocusOpenRef.current) {
+      ignoreTouchFocusOpenRef.current = false;
+      return;
+    }
+
     if (disabled) {
       return;
     }
 
     onOpen();
   };
+  const handlePointerEnter = (
+    event: PointerEvent<HTMLButtonElement | HTMLDivElement>,
+  ) => {
+    if (event.pointerType === "mouse") {
+      onOpen();
+    }
+  };
   const handleToggle = () => {
+    ignoreTouchFocusOpenRef.current = false;
+
     if (disabled) {
       return;
     }
@@ -74,6 +97,7 @@ export default function PreferencesFloat({
       data-entry-disabled={disabled}
       data-entry-ready={entryReady}
       onMouseLeave={onMouseLeave}
+      onPointerDownCapture={handlePointerDownCapture}
       onFocus={handleOpen}
       onBlur={handleBlur}
     >
@@ -81,7 +105,7 @@ export default function PreferencesFloat({
         className="settings-button"
         type="button"
         disabled={disabled}
-        onMouseEnter={handleOpen}
+        onPointerEnter={handlePointerEnter}
         onClick={handleToggle}
         aria-controls="site-preferences"
         aria-expanded={isOpen}
@@ -97,7 +121,7 @@ export default function PreferencesFloat({
         aria-label={labels.preferencesLabel}
         aria-hidden={!isOpen}
         data-open={isOpen}
-        onMouseEnter={onOpen}
+        onPointerEnter={handlePointerEnter}
       >
         <button
           className="preference-button"
