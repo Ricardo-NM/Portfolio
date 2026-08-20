@@ -111,7 +111,7 @@ const PROJECT_GALLERY_IMAGES = [
       github: "https://github.com/Ricardo-NM/KUENTAS",
     },
     mediaAspectRatio: "4 / 3",
-    src: "/assets/projects/project1.svg",
+    src: "/assets/projects/project1.png",
     technologies: KUENTAS_TECHNOLOGIES,
     title: "KUENTAS",
   },
@@ -185,7 +185,7 @@ const PROJECT_GALLERY_IMAGES = [
       live: "https://ricardo-nm.github.io/totis-gdb-docs/",
     },
     mediaAspectRatio: "4 / 3",
-    src: "/assets/projects/project3.svg",
+    src: "/assets/projects/project3.png",
     technologies: TOTIS_TECHNOLOGIES,
     title: "Totis® | Gestión de bienes",
   },
@@ -524,17 +524,19 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
               </button>
 
               <div className="home-project-card-media">
-                <HomeProjectMedia
-                  alt={selectedProject.alt[locale]}
-                  imageSrc={selectedProject.src}
-                  isVideoEnabled={!prefersReducedMotion}
-                  loading="eager"
-                  videoSrc={
-                    "videoSrc" in selectedProject
-                      ? selectedProject.videoSrc
-                      : undefined
-                  }
-                />
+                <div className="home-project-card-media-frame">
+                  <HomeProjectMedia
+                    alt={selectedProject.alt[locale]}
+                    imageSrc={selectedProject.src}
+                    isVideoEnabled={!prefersReducedMotion}
+                    loading="eager"
+                    videoSrc={
+                      "videoSrc" in selectedProject
+                        ? selectedProject.videoSrc
+                        : undefined
+                    }
+                  />
+                </div>
               </div>
 
               <div className="home-project-card-body">

@@ -1109,6 +1109,7 @@ button {
   --project-card-surface-end: #101014;
   --project-card-text: #ffffff;
   --project-card-muted: rgba(255, 255, 255, 0.76);
+  --project-card-media-radius: 1.18rem;
   --project-card-badge-bg: color-mix(
     in srgb,
     rgb(var(--project-accent)) 38%,
@@ -1186,8 +1187,6 @@ button {
 .home-project-card-media {
   position: relative;
   width: 100%;
-  aspect-ratio: var(--project-media-aspect-ratio, 4 / 3);
-  overflow: hidden;
   background: var(--project-card-surface);
   padding: 0.6rem 0.6rem 0;
 }
@@ -1196,12 +1195,28 @@ button {
   content: none;
 }
 
-.home-project-card-media img,
-.home-project-card-media video {
+.home-project-card-media-frame {
+  display: block;
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--project-card-media-radius);
+  background: var(--project-card-surface-end);
+  clip-path: inset(0 round var(--project-card-media-radius));
+  isolation: isolate;
+  line-height: 0;
+  mask-image: linear-gradient(#ffffff, #ffffff);
+  transform: translateZ(0);
+  -webkit-mask-image: linear-gradient(#ffffff, #ffffff);
+}
+
+.home-project-card-media-frame img,
+.home-project-card-media-frame video {
   display: block;
   width: 100%;
-  height: 100%;
-  border-radius: 1.18rem;
+  max-width: 100%;
+  height: auto;
+  border-radius: 0;
   mask-image: none;
   object-fit: contain;
   -webkit-mask-image: none;
