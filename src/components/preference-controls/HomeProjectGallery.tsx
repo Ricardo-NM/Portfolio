@@ -285,6 +285,54 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
     }, [isRevealReady, revealDelay]);
 
     useEffect(() => {
+      if (
+        !isRevealReady ||
+        !isSmallViewport ||
+        hasNotifiedFirstProjectEntryStartRef.current
+      ) {
+        return;
+      }
+
+      const prefersReducedMotionQuery = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      );
+
+      if (prefersReducedMotionQuery.matches) {
+        return;
+      }
+
+      const timer = window.setTimeout(() => {
+        hasNotifiedFirstProjectEntryStartRef.current = true;
+        onFirstProjectEntryStart?.();
+        setVisibleItems((current) => {
+          const next = new Set(current);
+
+          next.add(0);
+
+          return next;
+        });
+
+        const interactionTimer = window.setTimeout(() => {
+          setInteractiveItems((current) => {
+            const next = new Set(current);
+
+            next.add(0);
+
+            return next;
+          });
+        }, PROJECT_GALLERY_ITEM_ENTRY_MS + PROJECT_GALLERY_INTERACTION_BUFFER_MS);
+
+        interactionTimersRef.current.push(interactionTimer);
+      }, 0);
+
+      revealTimersRef.current.push(timer);
+
+      return () => {
+        window.clearTimeout(timer);
+      };
+    }, [isRevealReady, isSmallViewport, onFirstProjectEntryStart]);
+
+    useEffect(() => {
       if (!isRevealReady) {
         return;
       }
