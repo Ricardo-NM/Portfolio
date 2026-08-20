@@ -7,7 +7,7 @@ import type {
 } from "react";
 import { useEffect, useRef, useState } from "react";
 import { navigate } from "astro:transitions/client";
-import bannerUrl from "../assets/banner.webp";
+import bannerUrl from "../assets/banner.jpg";
 import { LOCALE_FLIP_CAPTURE_EVENT } from "../hooks/useLocaleFlip";
 import ContactForm from "./preference-controls/ContactForm";
 import ContactLeaveModal from "./preference-controls/ContactLeaveModal";
@@ -62,6 +62,8 @@ const LOCALE_TEXT_FADE_OUT_MS = 55;
 const HOME_CHROME_ENTRY_START_EVENT = "rn-home-chrome-entry-start";
 const HOME_CHROME_ENTRY_INTERACTION_DELAY_MS = 860;
 const PROFILE_PICTURE_ENTRY_INTERACTION_DELAY_MS = 880;
+const PROFILE_PICTURE_SRC = "/assets/profilePicture.webp";
+const MOBILE_PROFILE_DRAWER_QUERY = "(max-width: 720px)";
 
 export default function PreferenceControls({
   mode = "home",
@@ -222,6 +224,26 @@ export default function PreferenceControls({
     window.localStorage.setItem(STORAGE_KEYS.locale, locale);
     window.dispatchEvent(new Event("rn-preferences-change"));
   }, [locale]);
+
+  useEffect(() => {
+    if (mode !== "home") {
+      return;
+    }
+
+    const imageCache = [PROFILE_PICTURE_SRC, bannerUrl.src].map((src) => {
+      const image = new Image();
+      image.decoding = "async";
+      image.src = src;
+      return image;
+    });
+
+    return () => {
+      imageCache.forEach((image) => {
+        image.onload = null;
+        image.onerror = null;
+      });
+    };
+  }, [mode]);
 
   useEffect(() => {
     const syncPreferences = () => {
@@ -1220,9 +1242,20 @@ export default function PreferenceControls({
       return;
     }
 
+    const isMobileProfileDrawer = window.matchMedia(
+      MOBILE_PROFILE_DRAWER_QUERY,
+    ).matches;
+
     if (flipTimerRef.current) {
       window.clearTimeout(flipTimerRef.current);
       flipTimerRef.current = undefined;
+    }
+
+    if (isMobileProfileDrawer) {
+      setFlipAvatar(null);
+      setFlipProfileLinks([]);
+      setFlipRouteLinks([]);
+      setFlipIntroCopy(null);
     }
 
     setIsInitialEntry(false);
@@ -1250,7 +1283,12 @@ export default function PreferenceControls({
       }),
     );
 
-    if (!sourceRect || !targetRect || prefersReducedMotion) {
+    if (
+      isMobileProfileDrawer ||
+      !sourceRect ||
+      !targetRect ||
+      prefersReducedMotion
+    ) {
       return;
     }
 
@@ -1275,6 +1313,10 @@ export default function PreferenceControls({
     profilePictureRef.current?.focus({ preventScroll: true });
   };
   const closeProfileMenu = () => {
+    const isMobileProfileDrawer = window.matchMedia(
+      MOBILE_PROFILE_DRAWER_QUERY,
+    ).matches;
+
     if (flipTimerRef.current) {
       window.clearTimeout(flipTimerRef.current);
       flipTimerRef.current = undefined;
@@ -1302,7 +1344,10 @@ export default function PreferenceControls({
       "(prefers-reduced-motion: reduce)",
     ).matches;
     const shouldAnimateClose = Boolean(
-      sourceRect && targetRect && !prefersReducedMotion,
+      sourceRect &&
+      targetRect &&
+      !prefersReducedMotion &&
+      !isMobileProfileDrawer,
     );
 
     if (shouldAnimateClose && sourceRect && targetRect) {
@@ -1345,6 +1390,32 @@ export default function PreferenceControls({
       }),
     );
   };
+  useEffect(() => {
+    if (mode !== "home" || !isProfileMenuOpen) {
+      return;
+    }
+
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyOverscrollBehavior =
+      document.body.style.overscrollBehavior;
+    const previousHtmlOverscrollBehavior =
+      document.documentElement.style.overscrollBehavior;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overscrollBehavior = "none";
+    document.documentElement.style.overscrollBehavior = "none";
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overscrollBehavior = previousBodyOverscrollBehavior;
+      document.documentElement.style.overscrollBehavior =
+        previousHtmlOverscrollBehavior;
+    };
+  }, [isProfileMenuOpen, mode]);
+
   useEffect(() => {
     if (!isProfileMenuOpen) {
       return;
@@ -1680,10 +1751,12 @@ export default function PreferenceControls({
             }}
           >
             <img
-              src="/assets/profilePicture.webp"
+              src={PROFILE_PICTURE_SRC}
               alt={labels.profileAlt}
               className="profile-picture"
               loading="eager"
+              decoding="async"
+              fetchPriority="high"
             />
           </button>
 
@@ -1723,15 +1796,25 @@ export default function PreferenceControls({
           <span className="profile-drawer-close" />
         </div>
         <div className="profile-drawer-cover">
-          <img src={bannerUrl.src} alt="" aria-hidden="true" />
+          <img
+            src={bannerUrl.src}
+            alt=""
+            aria-hidden="true"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+          />
         </div>
         <div className="profile-drawer-cover-row">
           <div className="profile-drawer-identity">
             <div className="profile-drawer-avatar" ref={drawerAvatarMeasureRef}>
               <img
-                src="/assets/profilePicture.webp"
+                src={PROFILE_PICTURE_SRC}
                 alt=""
                 className="profile-picture"
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
               />
             </div>
           </div>
@@ -1779,9 +1862,12 @@ export default function PreferenceControls({
           ref={flipAvatarOverlayRef}
         >
           <img
-            src="/assets/profilePicture.webp"
+            src={PROFILE_PICTURE_SRC}
             alt=""
             className="profile-picture"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
           />
         </div>
       )}
@@ -1866,7 +1952,14 @@ export default function PreferenceControls({
           </div>
 
           <div className="profile-drawer-cover">
-            <img src={bannerUrl.src} alt="" aria-hidden="true" />
+            <img
+              src={bannerUrl.src}
+              alt=""
+              aria-hidden="true"
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+            />
           </div>
 
           <div className="profile-drawer-cover-row">
@@ -1885,9 +1978,12 @@ export default function PreferenceControls({
                 data-flip-active={Boolean(flipAvatar)}
               >
                 <img
-                  src="/assets/profilePicture.webp"
+                  src={PROFILE_PICTURE_SRC}
                   alt={labels.profileAlt}
                   className="profile-picture"
+                  loading="eager"
+                  decoding="async"
+                  fetchPriority="high"
                 />
               </div>
               <span className="profile-drawer-check" aria-hidden="true">

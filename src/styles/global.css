@@ -4813,6 +4813,83 @@ button {
     --floating-nav-padding: 0.18rem;
   }
 
+  /* The home drawer uses a simple mobile spatial transition. The desktop
+     drawer keeps the shared-element FLIP treatment defined above. */
+  .profile-picture-button,
+  .profile-link,
+  .intro-copy,
+  .profile-hint {
+    transition:
+      color var(--theme-transition),
+      background-color var(--theme-transition),
+      border-color var(--theme-transition),
+      transform var(--motion-standard),
+      opacity var(--motion-standard),
+      visibility 0s linear;
+  }
+
+  .profile-picture-button[data-hidden="true"],
+  .profile-link[data-hidden="true"],
+  .profile-hint[data-hidden="true"] {
+    visibility: hidden;
+    transition:
+      color var(--theme-transition),
+      background-color var(--theme-transition),
+      border-color var(--theme-transition),
+      transform var(--motion-standard),
+      opacity var(--motion-standard),
+      visibility 0s linear var(--motion-standard);
+  }
+
+  .intro-copy {
+    visibility: visible;
+  }
+
+  .intro-copy[data-hidden="true"] {
+    visibility: hidden;
+    transition:
+      color var(--theme-transition),
+      opacity var(--motion-standard),
+      visibility 0s linear var(--motion-standard);
+  }
+
+  .home-route-links,
+  .home-route-links[data-instant-hidden="true"] {
+    transition:
+      background-color var(--theme-transition),
+      border-color var(--theme-transition),
+      opacity var(--motion-standard),
+      visibility 0s linear;
+  }
+
+  .home-route-links[data-hidden="true"] {
+    transition:
+      background-color var(--theme-transition),
+      border-color var(--theme-transition),
+      opacity var(--motion-standard),
+      visibility 0s linear var(--motion-standard);
+  }
+
+  .profile-drawer {
+    transition:
+      background-color var(--theme-transition),
+      border-color var(--theme-transition),
+      color var(--theme-transition),
+      transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+
+  .profile-drawer-backdrop {
+    transition: opacity var(--motion-standard);
+  }
+
+  .flip-avatar,
+  .flip-profile-link,
+  .flip-route-link,
+  .flip-intro-copy {
+    display: none;
+  }
+
   .route-github-activity {
     --github-cell-size: 12px;
     --github-gap: 4px;
