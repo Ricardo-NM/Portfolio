@@ -29,7 +29,7 @@ export const preferenceCopy = {
       "Tecnologías, lenguajes y herramientas que utilizo para desarrollar soluciones web y aplicaciones completas.",
     activitySubtitle:
       "Resumen visual de mis contribuciones en GitHub durante el último año.",
-    contactSubtitle: "Enviame un mensaje directo.",
+    contactSubtitle: "Envíame un mensaje directo.",
     contactFullNameLabel: "Nombre completo",
     contactFullNamePlaceholder: "Ingresa tu nombre",
     contactEmailLabel: "Correo electrónico",
@@ -38,12 +38,12 @@ export const preferenceCopy = {
     contactMessagePlaceholder: "Escribe tu mensaje...",
     contactMessageCounterLabel: "caracteres",
     contactUnsafeMessage:
-      "El mensaje contiene contenido no permitido. Retiralo para continuar.",
+      "El mensaje contiene contenido no permitido. Retíralo para continuar.",
     contactSendLabel: "Enviar",
     contactSendingLabel: "Enviando...",
     contactSuccessTitle: "Mensaje enviado",
-    contactSuccessDescription: "Tu mensaje se ha enviado con exito.",
-    contactErrorMessage: "No se pudo enviar el mensaje. Intentalo de nuevo.",
+    contactSuccessDescription: "Tu mensaje se ha enviado con éxito.",
+    contactErrorMessage: "No se pudo enviar el mensaje. Inténtalo de nuevo.",
     contactLeaveTitle: "¿Deseas salir y borrar el contenido?",
     contactLeaveDescription:
       "Tienes información escrita en el formulario. Si sales ahora, se perderá.",
@@ -51,7 +51,7 @@ export const preferenceCopy = {
     contactLeaveLabel: "Salir",
     aboutTitle: "Acerca de mí",
     resumeLabel: "Descargar CV",
-    breadcrumbLabel: "Ruta de navegacion",
+    breadcrumbLabel: "Ruta de navegación",
     homeNavLabel: "Navegación principal",
     homeRouteLabel: "Ir al inicio",
     drawerNavigationTitle: "Navegación",

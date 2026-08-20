@@ -20,7 +20,7 @@ const copy = {
     title: "Logros destacados",
     subtitle:
       "Selección de resultados, mejoras e hitos alcanzados a lo largo de mi experiencia profesional.",
-    breadcrumbLabel: "Ruta de navegacion",
+    breadcrumbLabel: "Ruta de navegación",
     homeRouteLabel: "Ir al inicio",
     previousLabel: "Ver logro anterior",
     nextLabel: "Ver siguiente logro",

@@ -14,7 +14,7 @@ const copy = {
     title: "Experiencia laboral",
     subtitle:
       "Experiencia profesional, responsabilidades y proyectos desarrollados a lo largo de mi trayectoria laboral.",
-    breadcrumbLabel: "Ruta de navegacion",
+    breadcrumbLabel: "Ruta de navegación",
     homeRouteLabel: "Ir al inicio",
   },
   en: {

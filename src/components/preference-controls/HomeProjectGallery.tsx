@@ -18,7 +18,7 @@ const PROJECT_TECHNOLOGIES = TECHNOLOGY_CATEGORIES.flatMap(
 
 const PROJECT_GALLERY_TITLE: Record<Locale, string> = {
   en: "My work",
-  es: "Mí trabajo",
+  es: "Mi trabajo",
 };
 
 const PROJECT_GALLERY_HINT: Record<Locale, string> = {
@@ -98,7 +98,7 @@ const PROJECT_GALLERY_IMAGES = [
     },
     description: {
       en: "Web application in development for managing personal financial information from a private dashboard. Includes custom authentication, secure sessions, password recovery, multilingual support, and initial views for payments, calendar, statistics, and settings.",
-      es: "Aplicacion web en desarrollo para administrar informacion financiera personal desde un panel privado. Incluye autenticacion propia, sesiones seguras, recuperacion de contrasena, soporte multilenguaje y vistas iniciales para pagos, calendario, estadisticas y configuracion.",
+      es: "Aplicación web en desarrollo para administrar información financiera personal desde un panel privado. Incluye autenticación propia, sesiones seguras, recuperación de contraseña, soporte multilenguaje y vistas iniciales para pagos, calendario, estadísticas y configuración.",
     },
     dominantColor: "52 58 62",
     cardWidth: "34rem",
@@ -121,7 +121,7 @@ const PROJECT_GALLERY_IMAGES = [
     },
     description: {
       en: "Private system focused on centralizing operational, administrative, and document processes related to logistics management, reference tracking, document control, invoicing, reports, internal communication, and human resources activities.",
-      es: "Sistema privado orientado a centralizar procesos operativos, administrativos y documentales relacionados con gestion logistica, seguimiento de referencias, control de documentos, facturacion, reportes, comunicacion interna y actividades de recursos humanos.",
+      es: "Sistema privado orientado a centralizar procesos operativos, administrativos y documentales relacionados con gestión logística, seguimiento de referencias, control de documentos, facturación, reportes, comunicación interna y actividades de recursos humanos.",
     },
     dominantColor: "56 145 213",
     cardWidth: "30rem",
@@ -145,7 +145,7 @@ const PROJECT_GALLERY_IMAGES = [
     },
     description: {
       en: "Web tool created for the gaming community that lets you sync your Xbox profile and manually customize a player card with a premium aesthetic. Designed in a 9:16 format with dynamic gradients, custom badges, game metrics, and real statistics, crafted especially for sharing on social media.",
-      es: "Herramienta web creada para la comunidad gamer que permite sincronizar tu perfil de Xbox y personalizar manualmente una tarjeta de jugador con estetica premium. Disenada con formato 9:16, degradados dinamicos, insignias personalizadas, metricas de juegos y estadisticas reales, disenadas especialmente para compartir en redes sociales.",
+      es: "Herramienta web creada para la comunidad gamer que permite sincronizar tu perfil de Xbox y personalizar manualmente una tarjeta de jugador con estética premium. Diseñada con formato 9:16, degradados dinámicos, insignias personalizadas, métricas de juegos y estadísticas reales, diseñadas especialmente para compartir en redes sociales.",
     },
     dominantColor: "13 28 54",
     cardWidth: "30rem",
@@ -170,7 +170,7 @@ const PROJECT_GALLERY_IMAGES = [
     },
     description: {
       en: "Web system focused on the management and operational control of accounting fixed assets. Its purpose is to centralize information, facilitate internal requests, maintain movement traceability, and support the generation of documents related to assignments, retirements, returns, and transfers.",
-      es: "Sistema web orientado a la gestion y control operativo de activos fijos contables. Su proposito es centralizar informacion, facilitar solicitudes internas, mantener trazabilidad de movimientos y apoyar la generacion de documentos relacionados con asignaciones, bajas, devoluciones y traspasos.",
+      es: "Sistema web orientado a la gestión y control operativo de activos fijos contables. Su propósito es centralizar información, facilitar solicitudes internas, mantener trazabilidad de movimientos y apoyar la generación de documentos relacionados con asignaciones, bajas, devoluciones y traspasos.",
     },
     dominantColor: "135 169 19",
     cardWidth: "30rem",
@@ -368,7 +368,7 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
             className="home-project-gallery"
             aria-labelledby="home-project-gallery-title"
             aria-label={
-              locale === "es" ? "Galeria de proyectos" : "Project gallery"
+              locale === "es" ? "Galería de proyectos" : "Project gallery"
             }
             data-reveal-ready={isRevealReady}
           >
@@ -404,7 +404,9 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
                       visibleItems.has(index) && !prefersReducedMotion
                     }
                     loading={index === 0 ? "eager" : "lazy"}
-                    videoSrc={"videoSrc" in project ? project.videoSrc : undefined}
+                    videoSrc={
+                      "videoSrc" in project ? project.videoSrc : undefined
+                    }
                   />
                 </button>
               </figure>
@@ -517,7 +519,7 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
                 <HomeProjectTechnologies
                   label={
                     locale === "es"
-                      ? `Tecnologias utilizadas en ${selectedProject.title}`
+                      ? `Tecnologías utilizadas en ${selectedProject.title}`
                       : `Technologies used in ${selectedProject.title}`
                   }
                   technologies={selectedProject.technologies}
