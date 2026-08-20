@@ -59,7 +59,7 @@ import {
 
 const LOCALE_TEXT_FADE_IN_MS = 120;
 const LOCALE_TEXT_FADE_OUT_MS = 55;
-const HOME_CHROME_ENTRY_READY_EVENT = "rn-home-chrome-entry-ready";
+const HOME_CHROME_ENTRY_START_EVENT = "rn-home-chrome-entry-start";
 const HOME_CHROME_ENTRY_INTERACTION_DELAY_MS = 860;
 const PROFILE_PICTURE_ENTRY_INTERACTION_DELAY_MS = 880;
 
@@ -416,13 +416,13 @@ export default function PreferenceControls({
     };
 
     window.addEventListener(
-      HOME_CHROME_ENTRY_READY_EVENT,
+      HOME_CHROME_ENTRY_START_EVENT,
       handleHomeChromeEntryReady,
     );
 
     return () => {
       window.removeEventListener(
-        HOME_CHROME_ENTRY_READY_EVENT,
+        HOME_CHROME_ENTRY_START_EVENT,
         handleHomeChromeEntryReady,
       );
     };
@@ -1032,8 +1032,8 @@ export default function PreferenceControls({
 
     setIsHomeChromeInteractive(true);
   };
-  const notifyHomeChromeEntryReady = () => {
-    window.dispatchEvent(new Event(HOME_CHROME_ENTRY_READY_EVENT));
+  const startHomeChromeEntry = () => {
+    window.dispatchEvent(new Event(HOME_CHROME_ENTRY_START_EVENT));
   };
   const openPreferences = () => {
     if (isHomeChromeEntryDisabled) {
@@ -1712,7 +1712,7 @@ export default function PreferenceControls({
 
         <HomeProjectGallery
           locale={locale}
-          onFirstProjectRowInteractive={notifyHomeChromeEntryReady}
+          onFirstProjectEntryStart={startHomeChromeEntry}
           ref={introToolingRef}
           revealDelay={isInitialEntry ? 1520 : 0}
         />
