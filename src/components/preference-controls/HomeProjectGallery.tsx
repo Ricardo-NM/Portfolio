@@ -9,6 +9,7 @@ import type { Locale } from "./types";
 
 type HomeProjectGalleryProps = {
   locale: Locale;
+  onFirstProjectRowInteractive?: () => void;
   revealDelay: number;
 };
 
@@ -214,7 +215,7 @@ const PROJECT_GALLERY_IMAGES = [
 ] as const;
 
 const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
-  ({ locale, revealDelay }, ref) => {
+  ({ locale, onFirstProjectRowInteractive, revealDelay }, ref) => {
     const [isRevealReady, setIsRevealReady] = useState(revealDelay === 0);
     const [selectedProjectIndex, setSelectedProjectIndex] = useState<
       number | null
@@ -226,6 +227,7 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
     );
     const itemRefs = useRef<Array<HTMLElement | null>>([]);
     const closeButtonRef = useRef<HTMLButtonElement>(null);
+    const hasNotifiedFirstProjectRowInteractiveRef = useRef(false);
     const revealTimersRef = useRef<number[]>([]);
     const interactionTimersRef = useRef<number[]>([]);
     const selectedProject =
@@ -237,6 +239,10 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
       0,
       firstProjectRowSize,
     ).every((_, index) => visibleItems.has(index));
+    const isFirstProjectRowInteractive = PROJECT_GALLERY_IMAGES.slice(
+      0,
+      firstProjectRowSize,
+    ).every((_, index) => interactiveItems.has(index));
 
     useEffect(() => {
       const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -356,6 +362,18 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
         interactionTimersRef.current = [];
       };
     }, [isRevealReady]);
+
+    useEffect(() => {
+      if (
+        !isFirstProjectRowInteractive ||
+        hasNotifiedFirstProjectRowInteractiveRef.current
+      ) {
+        return;
+      }
+
+      hasNotifiedFirstProjectRowInteractiveRef.current = true;
+      onFirstProjectRowInteractive?.();
+    }, [isFirstProjectRowInteractive, onFirstProjectRowInteractive]);
 
     useEffect(() => {
       if (!selectedProject) {

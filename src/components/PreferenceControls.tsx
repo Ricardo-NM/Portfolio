@@ -59,6 +59,8 @@ import {
 
 const LOCALE_TEXT_FADE_IN_MS = 120;
 const LOCALE_TEXT_FADE_OUT_MS = 55;
+const HOME_CHROME_ENTRY_READY_EVENT = "rn-home-chrome-entry-ready";
+const HOME_CHROME_ENTRY_INTERACTION_DELAY_MS = 860;
 const PROFILE_PICTURE_ENTRY_INTERACTION_DELAY_MS = 880;
 
 export default function PreferenceControls({
@@ -111,8 +113,23 @@ export default function PreferenceControls({
   });
   const [isProfilePictureInteractive, setIsProfilePictureInteractive] =
     useState(() => !isInitialEntry);
+  const [isHomeChromeEntryReady, setIsHomeChromeEntryReady] = useState(() => {
+    if (typeof window === "undefined" || mode !== "chrome") {
+      return true;
+    }
+
+    return getCurrentPath() !== "/";
+  });
+  const [isHomeChromeInteractive, setIsHomeChromeInteractive] = useState(() => {
+    if (typeof window === "undefined" || mode !== "chrome") {
+      return true;
+    }
+
+    return getCurrentPath() !== "/";
+  });
   const closeTimerRef = useRef<number | undefined>(undefined);
   const flipTimerRef = useRef<number | undefined>(undefined);
+  const homeChromeInteractionTimerRef = useRef<number | undefined>(undefined);
   const profilePictureInteractionTimerRef = useRef<number | undefined>(
     undefined,
   );
@@ -313,6 +330,10 @@ export default function PreferenceControls({
         window.clearTimeout(profilePictureInteractionTimerRef.current);
       }
 
+      if (homeChromeInteractionTimerRef.current) {
+        window.clearTimeout(homeChromeInteractionTimerRef.current);
+      }
+
       if (contactLeaveCloseTimerRef.current) {
         window.clearTimeout(contactLeaveCloseTimerRef.current);
       }
@@ -360,6 +381,84 @@ export default function PreferenceControls({
       }
     };
   }, [isInitialEntry, mode]);
+
+  useEffect(() => {
+    if (mode !== "chrome") {
+      return;
+    }
+
+    const root = document.documentElement;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const shouldWaitForHomeEntry =
+      currentPath === "/" &&
+      root.dataset.suppressEntryAnimations !== "locale" &&
+      !prefersReducedMotion;
+
+    if (!shouldWaitForHomeEntry) {
+      setIsHomeChromeEntryReady(true);
+      setIsHomeChromeInteractive(true);
+      return;
+    }
+
+    setIsHomeChromeEntryReady(false);
+    setIsHomeChromeInteractive(false);
+    setIsPreferencesOpen(false);
+
+    if (homeChromeInteractionTimerRef.current) {
+      window.clearTimeout(homeChromeInteractionTimerRef.current);
+      homeChromeInteractionTimerRef.current = undefined;
+    }
+
+    const handleHomeChromeEntryReady = () => {
+      setIsHomeChromeEntryReady(true);
+    };
+
+    window.addEventListener(
+      HOME_CHROME_ENTRY_READY_EVENT,
+      handleHomeChromeEntryReady,
+    );
+
+    return () => {
+      window.removeEventListener(
+        HOME_CHROME_ENTRY_READY_EVENT,
+        handleHomeChromeEntryReady,
+      );
+    };
+  }, [currentPath, mode]);
+
+  useEffect(() => {
+    if (
+      mode !== "chrome" ||
+      currentPath !== "/" ||
+      !isHomeChromeEntryReady ||
+      isHomeChromeInteractive
+    ) {
+      return;
+    }
+
+    if (homeChromeInteractionTimerRef.current) {
+      window.clearTimeout(homeChromeInteractionTimerRef.current);
+    }
+
+    homeChromeInteractionTimerRef.current = window.setTimeout(() => {
+      setIsHomeChromeInteractive(true);
+      homeChromeInteractionTimerRef.current = undefined;
+    }, HOME_CHROME_ENTRY_INTERACTION_DELAY_MS);
+
+    return () => {
+      if (homeChromeInteractionTimerRef.current) {
+        window.clearTimeout(homeChromeInteractionTimerRef.current);
+        homeChromeInteractionTimerRef.current = undefined;
+      }
+    };
+  }, [
+    currentPath,
+    isHomeChromeEntryReady,
+    isHomeChromeInteractive,
+    mode,
+  ]);
 
   useEffect(() => {
     if (mode !== "activity") {
@@ -918,7 +1017,29 @@ export default function PreferenceControls({
       title: labels.contactRouteTitle,
     },
   ] satisfies RouteItem[];
+  const isHomeChromeEntry = mode === "chrome" && currentPath === "/";
+  const isHomeChromeEntryDisabled =
+    isHomeChromeEntry && !isHomeChromeInteractive;
+  const completeHomeChromeEntry = () => {
+    if (!isHomeChromeEntryDisabled) {
+      return;
+    }
+
+    if (homeChromeInteractionTimerRef.current) {
+      window.clearTimeout(homeChromeInteractionTimerRef.current);
+      homeChromeInteractionTimerRef.current = undefined;
+    }
+
+    setIsHomeChromeInteractive(true);
+  };
+  const notifyHomeChromeEntryReady = () => {
+    window.dispatchEvent(new Event(HOME_CHROME_ENTRY_READY_EVENT));
+  };
   const openPreferences = () => {
+    if (isHomeChromeEntryDisabled) {
+      return;
+    }
+
     if (closeTimerRef.current) {
       window.clearTimeout(closeTimerRef.current);
       closeTimerRef.current = undefined;
@@ -937,6 +1058,10 @@ export default function PreferenceControls({
     }, 140);
   };
   const togglePreferences = () => {
+    if (isHomeChromeEntryDisabled) {
+      return;
+    }
+
     if (window.matchMedia("(hover: hover)").matches) {
       openPreferences();
       return;
@@ -1363,16 +1488,23 @@ export default function PreferenceControls({
   const floatingNav = (hidden = false) => (
     <FloatingNav
       currentPath={currentPath}
+      disabled={isHomeChromeEntryDisabled}
+      entryAnimated={isHomeChromeEntry}
+      entryReady={!isHomeChromeEntry || isHomeChromeEntryReady}
       hidden={hidden}
       hideRouteNavItems={hideRouteNavItems}
       homeLabel={labels.homeRouteLabel}
       label={labels.homeNavLabel}
+      onEntryComplete={completeHomeChromeEntry}
       routeItems={routeItems}
       routeLinksHidden={flipRouteLinks.length > 0}
     />
   );
   const preferencesFloat = (
     <PreferencesFloat
+      disabled={isHomeChromeEntryDisabled}
+      entryAnimated={isHomeChromeEntry}
+      entryReady={!isHomeChromeEntry || isHomeChromeEntryReady}
       isOpen={isPreferencesOpen}
       labels={labels}
       nextLocale={nextLocale}
@@ -1580,6 +1712,7 @@ export default function PreferenceControls({
 
         <HomeProjectGallery
           locale={locale}
+          onFirstProjectRowInteractive={notifyHomeChromeEntryReady}
           ref={introToolingRef}
           revealDelay={isInitialEntry ? 1520 : 0}
         />

@@ -4,6 +4,9 @@ import type { PreferenceLabels } from "./copy";
 import type { Locale, Theme } from "./types";
 
 type PreferencesFloatProps = {
+  disabled?: boolean;
+  entryAnimated?: boolean;
+  entryReady?: boolean;
   isOpen: boolean;
   labels: PreferenceLabels;
   nextLocale: Locale;
@@ -21,6 +24,9 @@ type PreferencesFloatProps = {
 };
 
 export default function PreferencesFloat({
+  disabled = false,
+  entryAnimated = false,
+  entryReady = true,
   isOpen,
   labels,
   nextLocale,
@@ -46,19 +52,37 @@ export default function PreferencesFloat({
       onClose();
     }
   };
+  const handleOpen = () => {
+    if (disabled) {
+      return;
+    }
+
+    onOpen();
+  };
+  const handleToggle = () => {
+    if (disabled) {
+      return;
+    }
+
+    onToggle();
+  };
 
   return (
     <div
       className="preferences-float"
+      data-entry-animated={entryAnimated}
+      data-entry-disabled={disabled}
+      data-entry-ready={entryReady}
       onMouseLeave={onMouseLeave}
-      onFocus={onOpen}
+      onFocus={handleOpen}
       onBlur={handleBlur}
     >
       <button
         className="settings-button"
         type="button"
-        onMouseEnter={onOpen}
-        onClick={onToggle}
+        disabled={disabled}
+        onMouseEnter={handleOpen}
+        onClick={handleToggle}
         aria-controls="site-preferences"
         aria-expanded={isOpen}
         aria-label={settingsLabel}
