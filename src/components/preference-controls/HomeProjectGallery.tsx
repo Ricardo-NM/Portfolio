@@ -222,6 +222,7 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
       number | null
     >(null);
     const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+    const [isSmallViewport, setIsSmallViewport] = useState(false);
     const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set());
     const [interactiveItems, setInteractiveItems] = useState<Set<number>>(
       new Set(),
@@ -256,6 +257,20 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
 
       return () => {
         mediaQuery.removeEventListener("change", updateMotionPreference);
+      };
+    }, []);
+
+    useEffect(() => {
+      const mediaQuery = window.matchMedia("(max-width: 820px)");
+      const updateViewportSize = () => {
+        setIsSmallViewport(mediaQuery.matches);
+      };
+
+      updateViewportSize();
+      mediaQuery.addEventListener("change", updateViewportSize);
+
+      return () => {
+        mediaQuery.removeEventListener("change", updateViewportSize);
       };
     }, []);
 
@@ -463,8 +478,14 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
                     <HomeProjectMedia
                       alt={project.alt[locale]}
                       imageSrc={project.src}
-                      isVideoEnabled={isProjectVisible && !prefersReducedMotion}
+                      isVideoEnabled={
+                        !selectedProject &&
+                        isProjectVisible &&
+                        !prefersReducedMotion &&
+                        !isSmallViewport
+                      }
                       loading={index === 0 ? "eager" : "lazy"}
+                      playback="hover"
                       videoSrc={
                         "videoSrc" in project ? project.videoSrc : undefined
                       }
