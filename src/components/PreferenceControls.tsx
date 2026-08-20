@@ -59,6 +59,7 @@ import {
 
 const LOCALE_TEXT_FADE_IN_MS = 120;
 const LOCALE_TEXT_FADE_OUT_MS = 55;
+const PROFILE_PICTURE_ENTRY_INTERACTION_DELAY_MS = 880;
 
 export default function PreferenceControls({
   mode = "home",
@@ -108,8 +109,13 @@ export default function PreferenceControls({
     }
     return true;
   });
+  const [isProfilePictureInteractive, setIsProfilePictureInteractive] =
+    useState(() => !isInitialEntry);
   const closeTimerRef = useRef<number | undefined>(undefined);
   const flipTimerRef = useRef<number | undefined>(undefined);
+  const profilePictureInteractionTimerRef = useRef<number | undefined>(
+    undefined,
+  );
   const routeNavRevealTimerRef = useRef<number | undefined>(undefined);
   const githubRequestInFlightRef = useRef(false);
   const allowContactNavigationRef = useRef(false);
@@ -303,6 +309,10 @@ export default function PreferenceControls({
         window.clearTimeout(flipTimerRef.current);
       }
 
+      if (profilePictureInteractionTimerRef.current) {
+        window.clearTimeout(profilePictureInteractionTimerRef.current);
+      }
+
       if (contactLeaveCloseTimerRef.current) {
         window.clearTimeout(contactLeaveCloseTimerRef.current);
       }
@@ -313,7 +323,43 @@ export default function PreferenceControls({
     };
   }, []);
 
+  useEffect(() => {
+    if (mode !== "home") {
+      return;
+    }
 
+    if (!isInitialEntry) {
+      setIsProfilePictureInteractive(true);
+      return;
+    }
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    if (prefersReducedMotion) {
+      setIsProfilePictureInteractive(true);
+      return;
+    }
+
+    setIsProfilePictureInteractive(false);
+
+    if (profilePictureInteractionTimerRef.current) {
+      window.clearTimeout(profilePictureInteractionTimerRef.current);
+    }
+
+    profilePictureInteractionTimerRef.current = window.setTimeout(() => {
+      setIsProfilePictureInteractive(true);
+      profilePictureInteractionTimerRef.current = undefined;
+    }, PROFILE_PICTURE_ENTRY_INTERACTION_DELAY_MS);
+
+    return () => {
+      if (profilePictureInteractionTimerRef.current) {
+        window.clearTimeout(profilePictureInteractionTimerRef.current);
+        profilePictureInteractionTimerRef.current = undefined;
+      }
+    };
+  }, [isInitialEntry, mode]);
 
   useEffect(() => {
     if (mode !== "activity") {
@@ -1046,6 +1092,10 @@ export default function PreferenceControls({
     queueFlipCleanup();
   };
   const openProfileMenu = () => {
+    if (!isProfilePictureInteractive) {
+      return;
+    }
+
     if (flipTimerRef.current) {
       window.clearTimeout(flipTimerRef.current);
       flipTimerRef.current = undefined;
@@ -1480,6 +1530,23 @@ export default function PreferenceControls({
             onClick={openProfileMenu}
             aria-label={labels.openProfileLabel}
             data-hidden={isProfileMenuOpen || Boolean(flipAvatar)}
+            data-interactive={isProfilePictureInteractive}
+            disabled={!isProfilePictureInteractive}
+            onAnimationEnd={(event) => {
+              if (
+                event.currentTarget !== event.target ||
+                event.animationName !== "profile-picture-scale-in"
+              ) {
+                return;
+              }
+
+              if (profilePictureInteractionTimerRef.current) {
+                window.clearTimeout(profilePictureInteractionTimerRef.current);
+                profilePictureInteractionTimerRef.current = undefined;
+              }
+
+              setIsProfilePictureInteractive(true);
+            }}
           >
             <img
               src="/assets/profilePicture.jpeg"

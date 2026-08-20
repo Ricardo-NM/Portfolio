@@ -277,7 +277,15 @@ button {
   padding: 0;
 }
 
-.profile-picture-button:hover {
+.profile-picture-button:disabled {
+  cursor: default;
+}
+
+.profile-picture-button[data-interactive="false"] {
+  pointer-events: none;
+}
+
+.profile-picture-button:not(:disabled):hover {
   border-color: color-mix(in srgb, var(--color-primary) 78%, var(--color-text));
 }
 
@@ -1010,6 +1018,14 @@ button {
   line-height: 0;
   padding: 0;
   touch-action: manipulation;
+}
+
+.home-project-gallery-trigger:disabled {
+  cursor: default;
+}
+
+.home-project-gallery-trigger[data-interactive="false"] {
+  pointer-events: none;
 }
 
 .home-project-gallery-trigger:focus-visible {

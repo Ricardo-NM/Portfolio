@@ -12,6 +12,10 @@ type HomeProjectGalleryProps = {
   revealDelay: number;
 };
 
+const PROJECT_GALLERY_ITEM_ENTRY_MS = 620;
+const PROJECT_GALLERY_ITEM_STAGGER_MS = 40;
+const PROJECT_GALLERY_INTERACTION_BUFFER_MS = 40;
+
 const PROJECT_TECHNOLOGIES = TECHNOLOGY_CATEGORIES.flatMap(
   (category) => category.items,
 );
@@ -217,9 +221,13 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
     >(null);
     const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
     const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set());
+    const [interactiveItems, setInteractiveItems] = useState<Set<number>>(
+      new Set(),
+    );
     const itemRefs = useRef<Array<HTMLElement | null>>([]);
     const closeButtonRef = useRef<HTMLButtonElement>(null);
     const revealTimersRef = useRef<number[]>([]);
+    const interactionTimersRef = useRef<number[]>([]);
     const selectedProject =
       selectedProjectIndex === null
         ? null
@@ -266,9 +274,12 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
       const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
       if (mediaQuery.matches) {
-        setVisibleItems(
-          new Set(PROJECT_GALLERY_IMAGES.map((_, index) => index)),
+        const allProjectIndexes = new Set(
+          PROJECT_GALLERY_IMAGES.map((_, index) => index),
         );
+
+        setVisibleItems(allProjectIndexes);
+        setInteractiveItems(allProjectIndexes);
         return;
       }
 
@@ -298,6 +309,23 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
 
                   return next;
                 });
+
+                const interactionDelay =
+                  PROJECT_GALLERY_ITEM_ENTRY_MS +
+                  index * PROJECT_GALLERY_ITEM_STAGGER_MS +
+                  PROJECT_GALLERY_INTERACTION_BUFFER_MS;
+
+                const interactionTimer = window.setTimeout(() => {
+                  setInteractiveItems((current) => {
+                    const next = new Set(current);
+
+                    next.add(index);
+
+                    return next;
+                  });
+                }, interactionDelay);
+
+                interactionTimersRef.current.push(interactionTimer);
               }, entryIndex * 120);
 
               revealTimersRef.current.push(timer);
@@ -321,7 +349,11 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
         revealTimersRef.current.forEach((timer) => {
           window.clearTimeout(timer);
         });
+        interactionTimersRef.current.forEach((timer) => {
+          window.clearTimeout(timer);
+        });
         revealTimersRef.current = [];
+        interactionTimersRef.current = [];
       };
     }, [isRevealReady]);
 
@@ -372,45 +404,56 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
             }
             data-reveal-ready={isRevealReady}
           >
-            {PROJECT_GALLERY_IMAGES.map((project, index) => (
-              <figure
-                className="home-project-gallery-item"
-                data-project-index={index}
-                data-visible={visibleItems.has(index)}
-                key={project.src}
-                ref={(element) => {
-                  itemRefs.current[index] = element;
-                }}
-                style={
-                  {
-                    "--project-index": index,
-                  } as CSSProperties
-                }
-              >
-                <button
-                  className="home-project-gallery-trigger"
-                  type="button"
-                  onClick={() => setSelectedProjectIndex(index)}
-                  aria-label={
-                    locale === "es"
-                      ? `Ver detalle de ${project.title}`
-                      : `View ${project.title} details`
+            {PROJECT_GALLERY_IMAGES.map((project, index) => {
+              const isProjectVisible = visibleItems.has(index);
+              const isProjectInteractive = interactiveItems.has(index);
+
+              return (
+                <figure
+                  className="home-project-gallery-item"
+                  data-project-index={index}
+                  data-visible={isProjectVisible}
+                  key={project.src}
+                  ref={(element) => {
+                    itemRefs.current[index] = element;
+                  }}
+                  style={
+                    {
+                      "--project-index": index,
+                    } as CSSProperties
                   }
                 >
-                  <HomeProjectMedia
-                    alt={project.alt[locale]}
-                    imageSrc={project.src}
-                    isVideoEnabled={
-                      visibleItems.has(index) && !prefersReducedMotion
+                  <button
+                    className="home-project-gallery-trigger"
+                    type="button"
+                    onClick={() => {
+                      if (!isProjectInteractive) {
+                        return;
+                      }
+
+                      setSelectedProjectIndex(index);
+                    }}
+                    aria-label={
+                      locale === "es"
+                        ? `Ver detalle de ${project.title}`
+                        : `View ${project.title} details`
                     }
-                    loading={index === 0 ? "eager" : "lazy"}
-                    videoSrc={
-                      "videoSrc" in project ? project.videoSrc : undefined
-                    }
-                  />
-                </button>
-              </figure>
-            ))}
+                    data-interactive={isProjectInteractive}
+                    disabled={!isProjectInteractive}
+                  >
+                    <HomeProjectMedia
+                      alt={project.alt[locale]}
+                      imageSrc={project.src}
+                      isVideoEnabled={isProjectVisible && !prefersReducedMotion}
+                      loading={index === 0 ? "eager" : "lazy"}
+                      videoSrc={
+                        "videoSrc" in project ? project.videoSrc : undefined
+                      }
+                    />
+                  </button>
+                </figure>
+              );
+            })}
           </div>
         </div>
 
