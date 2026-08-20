@@ -4494,6 +4494,7 @@ button {
 
 :root[data-suppress-entry-animations="locale"] .animated-title-letter,
 :root[data-suppress-entry-animations="locale"] .animated-description-letter,
+:root[data-suppress-entry-animations="locale"] .intro-copy-line,
 :root[data-suppress-entry-animations="locale"] .experience-card,
 :root[data-suppress-entry-animations="locale"] .experience-logo,
 :root[data-suppress-entry-animations="locale"] .experience-role,
