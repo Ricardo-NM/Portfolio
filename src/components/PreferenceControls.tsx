@@ -453,12 +453,7 @@ export default function PreferenceControls({
         homeChromeInteractionTimerRef.current = undefined;
       }
     };
-  }, [
-    currentPath,
-    isHomeChromeEntryReady,
-    isHomeChromeInteractive,
-    mode,
-  ]);
+  }, [currentPath, isHomeChromeEntryReady, isHomeChromeInteractive, mode]);
 
   useEffect(() => {
     if (mode !== "activity") {
@@ -1681,7 +1676,7 @@ export default function PreferenceControls({
             }}
           >
             <img
-              src="/assets/profilePicture.jpeg"
+              src="/assets/profilePicture.webp"
               alt={labels.profileAlt}
               className="profile-picture"
               loading="eager"
@@ -1730,7 +1725,7 @@ export default function PreferenceControls({
           <div className="profile-drawer-identity">
             <div className="profile-drawer-avatar" ref={drawerAvatarMeasureRef}>
               <img
-                src="/assets/profilePicture.jpeg"
+                src="/assets/profilePicture.webp"
                 alt=""
                 className="profile-picture"
               />
@@ -1780,7 +1775,7 @@ export default function PreferenceControls({
           ref={flipAvatarOverlayRef}
         >
           <img
-            src="/assets/profilePicture.jpeg"
+            src="/assets/profilePicture.webp"
             alt=""
             className="profile-picture"
           />
@@ -1886,7 +1881,7 @@ export default function PreferenceControls({
                 data-flip-active={Boolean(flipAvatar)}
               >
                 <img
-                  src="/assets/profilePicture.jpeg"
+                  src="/assets/profilePicture.webp"
                   alt={labels.profileAlt}
                   className="profile-picture"
                 />
