@@ -1104,6 +1104,10 @@ export default function PreferenceControls({
 
     queueFlipCleanup();
   };
+  const getProfileLinkIconRect = (element: HTMLElement | null) =>
+    element
+      ?.querySelector<HTMLElement>(".profile-link-icon, .profile-link-svg")
+      ?.getBoundingClientRect() ?? element?.getBoundingClientRect();
   const playProfileLinkFlips = (
     sourceRefs: Record<ProfileLinkId, HTMLAnchorElement | null>,
     targetRefs: Record<ProfileLinkId, HTMLAnchorElement | null>,
@@ -1113,8 +1117,8 @@ export default function PreferenceControls({
         const activeOverlayRect =
           flipProfileLinkOverlayRefs.current[id]?.getBoundingClientRect();
         const sourceRect =
-          activeOverlayRect ?? sourceRefs[id]?.getBoundingClientRect();
-        const targetRect = targetRefs[id]?.getBoundingClientRect();
+          activeOverlayRect ?? getProfileLinkIconRect(sourceRefs[id]);
+        const targetRect = getProfileLinkIconRect(targetRefs[id]);
 
         if (!sourceRect || !targetRect) {
           return [];

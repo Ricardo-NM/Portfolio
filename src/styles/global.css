@@ -306,20 +306,25 @@ button {
 }
 
 .profile-links {
+  --profile-link-icon-size: 1.25rem;
+  --profile-link-size: 2.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.65rem;
+  gap: 0.45rem;
+  overflow: visible;
 }
 
 .profile-link {
+  flex: 0 0 var(--profile-link-size, 2.75rem);
   display: inline-flex;
-  width: 2rem;
-  height: 2rem;
+  width: var(--profile-link-size, 2.75rem);
+  height: var(--profile-link-size, 2.75rem);
   align-items: center;
   justify-content: center;
   color: var(--color-settings);
   text-decoration: none;
+  touch-action: manipulation;
   transition:
     color var(--theme-transition),
     transform var(--motion-standard);
@@ -341,16 +346,16 @@ button {
 
 .profile-link-icon {
   display: block;
-  width: 1.2rem;
-  height: 1.2rem;
+  width: var(--profile-link-icon-size, 1.25rem);
+  height: var(--profile-link-icon-size, 1.25rem);
   background: currentColor;
   transition: background-color var(--theme-transition);
 }
 
 .profile-link-svg {
   display: block;
-  width: 1.2rem;
-  height: 1.2rem;
+  width: var(--profile-link-icon-size, 1.25rem);
+  height: var(--profile-link-icon-size, 1.25rem);
   color: currentColor;
   transition: color var(--theme-transition);
 }
@@ -3826,6 +3831,7 @@ button {
 }
 
 .flip-profile-link {
+  --profile-link-icon-size: var(--flip-target-width);
   position: fixed;
   top: var(--flip-target-top);
   left: var(--flip-target-left);
