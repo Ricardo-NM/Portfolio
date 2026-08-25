@@ -4682,6 +4682,28 @@ button {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .home-project-card-backdrop {
+    align-items: center;
+    overflow-y: auto;
+    padding:
+      max(0.75rem, env(safe-area-inset-top))
+      max(0.75rem, env(safe-area-inset-right))
+      max(0.75rem, env(safe-area-inset-bottom))
+      max(0.75rem, env(safe-area-inset-left));
+  }
+
+  .home-project-card {
+    max-height: calc(100dvh - 1.5rem);
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .home-project-card::-webkit-scrollbar {
+    display: none;
+  }
+
   .home-project-card[data-media-orientation="portrait"] {
     display: block;
     width: min(100%, var(--project-card-width, 24rem));
@@ -4691,6 +4713,24 @@ button {
     .home-project-card-media {
     display: block;
     padding: 0.6rem 0.6rem 0;
+  }
+
+  .home-project-card[data-media-orientation="portrait"]
+    .home-project-card-media-frame {
+    width: auto;
+    max-width: 100%;
+    height: min(42dvh, 23rem);
+    margin-inline: auto;
+  }
+
+  .home-project-card[data-media-orientation="portrait"]
+    .home-project-card-media-frame
+    img,
+  .home-project-card[data-media-orientation="portrait"]
+    .home-project-card-media-frame
+    video {
+    width: 100%;
+    height: 100%;
   }
 
   .home-project-card[data-media-orientation="portrait"]
@@ -5018,6 +5058,7 @@ button {
 
   .route-github-activity .github-calendar-scroll {
     overflow-x: auto;
+    padding-bottom: 0.72rem;
     scrollbar-color: var(--color-scrollbar-thumb) transparent;
     scrollbar-width: thin;
   }
