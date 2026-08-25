@@ -1795,7 +1795,6 @@ export default function PreferenceControls({
             <IntroCopyContent
               introHighlight={labels.introHighlight}
               introRest={labels.introRest}
-              locale={locale}
             />
           </p>
         </div>
@@ -1804,7 +1803,7 @@ export default function PreferenceControls({
           locale={locale}
           onFirstProjectEntryStart={startHomeChromeEntry}
           ref={introToolingRef}
-          revealDelay={isInitialEntry ? 1520 : 0}
+          revealDelay={isInitialEntry ? 900 : 0}
         />
       </div>
 

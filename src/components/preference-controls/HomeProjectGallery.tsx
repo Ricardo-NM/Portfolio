@@ -5,7 +5,7 @@ import HomeProjectTechnologies from "./HomeProjectTechnologies";
 import HomeProjectGalleryTitle from "./HomeProjectGalleryTitle";
 import HomeProjectMedia from "./HomeProjectMedia";
 import { TECHNOLOGY_CATEGORIES } from "./technologies";
-import type { Locale } from "./types";
+import type { Locale, TechnologyItem } from "./types";
 
 type HomeProjectGalleryProps = {
   locale: Locale;
@@ -91,6 +91,35 @@ const SPOTIFY_WEB_PLAYER_TECHNOLOGIES = [
   "TypeScript",
   "Node.js",
 ].map(getProjectTechnology);
+
+const REALTIME_CHAT_PROJECT_TECHNOLOGIES = [
+  {
+    color: "#010101",
+    darkColor: "#ffffff",
+    icon: "socketdotio.svg",
+    label: "Socket.IO",
+  },
+  {
+    color: "#000000",
+    darkColor: "#ffffff",
+    icon: "jsonwebtokens.svg",
+    label: "JWT",
+  },
+] satisfies TechnologyItem[];
+
+const REALTIME_CHAT_TECHNOLOGIES = [
+  getProjectTechnology("Node.js"),
+  getProjectTechnology("TypeScript"),
+  getProjectTechnology("NestJS"),
+  REALTIME_CHAT_PROJECT_TECHNOLOGIES[0],
+  getProjectTechnology("Prisma ORM"),
+  REALTIME_CHAT_PROJECT_TECHNOLOGIES[1],
+  getProjectTechnology("Next.js"),
+  getProjectTechnology("React"),
+  getProjectTechnology("Docker"),
+  getProjectTechnology("PostgreSQL"),
+  getProjectTechnology("Redis"),
+];
 
 const PROJECT_GALLERY_IMAGES = [
   {
@@ -213,6 +242,30 @@ const PROJECT_GALLERY_IMAGES = [
     technologies: SPOTIFY_WEB_PLAYER_TECHNOLOGIES,
     title: "Spotify Web Player",
     videoSrc: "/assets/projects/SpotifyWebPlayer/Demo.webm",
+  },
+  {
+    alt: {
+      en: "Realtime Chat preview",
+      es: "Vista previa de Realtime Chat",
+    },
+    badge: {
+      en: "Chat",
+      es: "Chat",
+    },
+    description: {
+      en: "Modern real-time messaging application designed for secure, fast, persistent 1-to-1 chats. It supports registration and login, user search, conversation creation, instant message sending and receiving, typing indicators, online/offline presence, delivered/read states, and editing or deleting your own messages.",
+      es: "Aplicación moderna de mensajería en tiempo real, pensada para chats 1 a 1 seguros, rápidos y persistentes. Permite registro e inicio de sesión, búsqueda de usuarios, creación de conversaciones, envío y recepción instantánea de mensajes, indicadores de escritura, presencia online/offline, estados de entregado/leído, y edición o eliminación de mensajes propios.",
+    },
+    dominantColor: "59 130 246",
+    cardWidth: "24rem",
+    links: {
+      github: "https://github.com/Ricardo-NM/realtime-chat",
+    },
+    mediaAspectRatio: "9 / 16",
+    src: "/assets/projects/RealtimeChat/Banner.png",
+    technologies: REALTIME_CHAT_TECHNOLOGIES,
+    title: "Realtime Chat",
+    videoSrc: "/assets/projects/RealtimeChat/Demo.webm",
   },
 ] as const;
 
@@ -565,6 +618,11 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
           >
             <article
               className="home-project-card"
+              data-media-orientation={
+                selectedProject.mediaAspectRatio === "9 / 16"
+                  ? "portrait"
+                  : "landscape"
+              }
               role="dialog"
               aria-modal="true"
               aria-labelledby="home-project-card-title"

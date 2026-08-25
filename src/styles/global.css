@@ -1134,6 +1134,12 @@ button {
   animation: home-project-card-in 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+.home-project-card[data-media-orientation="portrait"] {
+  display: grid;
+  width: min(100%, 44rem);
+  grid-template-columns: minmax(0, 18rem) minmax(0, 1fr);
+}
+
 :root[data-theme="light"] .home-project-card {
   --project-card-surface: #f7f7f7;
   --project-card-surface-end: #ffffff;
@@ -1191,6 +1197,12 @@ button {
   padding: 0.6rem 0.6rem 0;
 }
 
+.home-project-card[data-media-orientation="portrait"] .home-project-card-media {
+  display: flex;
+  align-items: stretch;
+  padding: 0.6rem 0 0.6rem 0.6rem;
+}
+
 .home-project-card-media::after {
   content: none;
 }
@@ -1208,6 +1220,11 @@ button {
   mask-image: linear-gradient(#ffffff, #ffffff);
   transform: translateZ(0);
   -webkit-mask-image: linear-gradient(#ffffff, #ffffff);
+}
+
+.home-project-card[data-media-orientation="portrait"]
+  .home-project-card-media-frame {
+  aspect-ratio: var(--project-media-aspect-ratio, 9 / 16);
 }
 
 .home-project-card-media-frame img,
@@ -1230,6 +1247,11 @@ button {
   margin-top: 0;
   padding: 0.92rem 1.1rem 1.18rem;
   background: var(--project-card-surface);
+}
+
+.home-project-card[data-media-orientation="portrait"] .home-project-card-body {
+  align-content: center;
+  padding: 1.2rem 1.18rem 1.2rem;
 }
 
 .home-project-card-heading {
@@ -4469,16 +4491,6 @@ button {
   }
 }
 
-.intro-copy-line {
-  display: block;
-  text-align: justify;
-  text-align-last: justify;
-}
-
-.intro-copy-line:last-child {
-  text-align-last: left;
-}
-
 .intro-layout[data-initial-entry="true"] .profile-picture-frame {
   opacity: 0;
   transform: scale(0.3);
@@ -4487,11 +4499,11 @@ button {
   will-change: opacity, transform;
 }
 
-.intro-layout[data-initial-entry="true"] .intro-copy-line {
+.intro-layout[data-initial-entry="true"] .intro-copy {
   opacity: 0;
   transform: translateY(-16px);
   animation: intro-line-slide-down 560ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: calc(480ms + var(--line-index) * 110ms);
+  animation-delay: 480ms;
   will-change: opacity, transform;
 }
 
@@ -4499,7 +4511,7 @@ button {
   opacity: 0;
   transform: translateY(-16px);
   animation: profile-hint-slide-down 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: 1150ms;
+  animation-delay: 760ms;
   will-change: opacity, transform;
 }
 
@@ -4512,20 +4524,20 @@ button {
 }
 
 .intro-layout[data-initial-entry="true"] .profile-links .profile-link:nth-child(1) {
-  animation-delay: 1300ms;
+  animation-delay: 860ms;
 }
 
 .intro-layout[data-initial-entry="true"] .profile-links .profile-link:nth-child(2) {
-  animation-delay: 1420ms;
+  animation-delay: 940ms;
 }
 
 .intro-layout[data-initial-entry="true"] .profile-links .profile-link:nth-child(3) {
-  animation-delay: 1540ms;
+  animation-delay: 1020ms;
 }
 
 :root[data-suppress-entry-animations="locale"] .animated-title-letter,
 :root[data-suppress-entry-animations="locale"] .animated-description-letter,
-:root[data-suppress-entry-animations="locale"] .intro-copy-line,
+:root[data-suppress-entry-animations="locale"] .intro-copy,
 :root[data-suppress-entry-animations="locale"] .experience-card,
 :root[data-suppress-entry-animations="locale"] .experience-logo,
 :root[data-suppress-entry-animations="locale"] .experience-role,
@@ -4668,6 +4680,23 @@ button {
 @media (max-width: 820px) {
   .intro-tooling {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .home-project-card[data-media-orientation="portrait"] {
+    display: block;
+    width: min(100%, var(--project-card-width, 24rem));
+  }
+
+  .home-project-card[data-media-orientation="portrait"]
+    .home-project-card-media {
+    display: block;
+    padding: 0.6rem 0.6rem 0;
+  }
+
+  .home-project-card[data-media-orientation="portrait"]
+    .home-project-card-body {
+    align-content: initial;
+    padding: 0.92rem 1.1rem 1.18rem;
   }
 
   .home-project-gallery {
