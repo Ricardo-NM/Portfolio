@@ -13,6 +13,11 @@ type HomeProjectGalleryProps = {
   revealDelay: number;
 };
 
+type ProjectLinks = {
+  github?: string;
+  live?: string;
+};
+
 const MOBILE_VIEWPORT_QUERY = "(max-width: 720px)";
 const PROJECT_GALLERY_ITEM_ENTRY_MS = 620;
 const PROJECT_GALLERY_ITEM_STAGGER_MS = 40;
@@ -121,6 +126,35 @@ const REALTIME_CHAT_TECHNOLOGIES = [
   getProjectTechnology("Redis"),
 ];
 
+const HACKATHON_PLATFORM_PROJECT_TECHNOLOGIES = [
+  {
+    color: "#3e67b1",
+    darkColor: "#ffffff",
+    icon: "zod.svg",
+    label: "Zod",
+  },
+  {
+    color: "#6e9f18",
+    darkColor: "#ffffff",
+    icon: "vitest.svg",
+    label: "Vitest",
+  },
+] satisfies TechnologyItem[];
+
+const HACKATHON_PLATFORM_TECHNOLOGIES = [
+  getProjectTechnology("Next.js"),
+  getProjectTechnology("React"),
+  getProjectTechnology("TypeScript"),
+  getProjectTechnology("PostgreSQL"),
+  getProjectTechnology("Prisma ORM"),
+  HACKATHON_PLATFORM_PROJECT_TECHNOLOGIES[0],
+  getProjectTechnology("Tailwind CSS"),
+  getProjectTechnology("Node.js"),
+  getProjectTechnology("Docker"),
+  HACKATHON_PLATFORM_PROJECT_TECHNOLOGIES[1],
+  getProjectTechnology("ESLint"),
+];
+
 const PROJECT_GALLERY_IMAGES = [
   {
     alt: {
@@ -144,6 +178,54 @@ const PROJECT_GALLERY_IMAGES = [
     src: "/assets/projects/project1.png",
     technologies: KUENTAS_TECHNOLOGIES,
     title: "KUENTAS",
+  },
+  {
+    alt: {
+      en: "Spotify Web Player preview",
+      es: "Vista previa de Spotify Web Player",
+    },
+    badge: {
+      en: "Music",
+      es: "Música",
+    },
+    description: {
+      en: "Web music player widget. The project recreates a player-style experience with a song carousel, playback queue, favorites, volume controls, shuffle, and animated transitions.\n\nThe app queries the Spotify Web API through a local proxy, automatically completes cover art, artists, title, album, and duration, and calculates dynamic colors from each song cover.",
+      es: "Widget web de reproductor musical. El proyecto recrea una experiencia tipo player con carrusel de canciones, cola de reproducción, favoritos, controles de volumen, shuffle y transiciones animadas.\n\nLa app consulta Spotify Web API desde un proxy local, completa automáticamente portada, artistas, título, álbum y duración, y calcula colores dinámicos desde la portada de cada canción.",
+    },
+    dominantColor: "30 215 96",
+    cardWidth: "34rem",
+    links: {
+      github: "https://github.com/Ricardo-NM/SpotifyWebPlayer",
+    },
+    mediaAspectRatio: "16 / 9",
+    src: "/assets/projects/SpotifyWebPlayer/Banner.png",
+    technologies: SPOTIFY_WEB_PLAYER_TECHNOLOGIES,
+    title: "Spotify Web Player",
+    videoSrc: "/assets/projects/SpotifyWebPlayer/Demo.webm",
+  },
+  {
+    alt: {
+      en: "Project 2 preview",
+      es: "Vista previa del proyecto 2",
+    },
+    badge: {
+      en: "Inventory",
+      es: "Inventario",
+    },
+    description: {
+      en: "Web system focused on the management and operational control of accounting fixed assets. Its purpose is to centralize information, facilitate internal requests, maintain movement traceability, and support the generation of documents related to assignments, retirements, returns, and transfers.",
+      es: "Sistema web orientado a la gestión y control operativo de activos fijos contables. Su propósito es centralizar información, facilitar solicitudes internas, mantener trazabilidad de movimientos y apoyar la generación de documentos relacionados con asignaciones, bajas, devoluciones y traspasos.",
+    },
+    dominantColor: "135 169 19",
+    cardWidth: "30rem",
+    links: {
+      github: "https://github.com/Ricardo-NM/totis-gdb-docs",
+      live: "https://ricardo-nm.github.io/totis-gdb-docs/",
+    },
+    mediaAspectRatio: "4 / 3",
+    src: "/assets/projects/project3.png",
+    technologies: TOTIS_TECHNOLOGIES,
+    title: "Totis® | Gestión de bienes",
   },
   {
     alt: {
@@ -197,51 +279,24 @@ const PROJECT_GALLERY_IMAGES = [
   },
   {
     alt: {
-      en: "Project 2 preview",
-      es: "Vista previa del proyecto 2",
+      en: "Hackathon Platform preview",
+      es: "Vista previa de Hackathon Platform",
     },
     badge: {
-      en: "Inventory",
-      es: "Inventario",
+      en: "Education",
+      es: "Educación",
     },
     description: {
-      en: "Web system focused on the management and operational control of accounting fixed assets. Its purpose is to centralize information, facilitate internal requests, maintain movement traceability, and support the generation of documents related to assignments, retirements, returns, and transfers.",
-      es: "Sistema web orientado a la gestión y control operativo de activos fijos contables. Su propósito es centralizar información, facilitar solicitudes internas, mantener trazabilidad de movimientos y apoyar la generación de documentos relacionados con asignaciones, bajas, devoluciones y traspasos.",
+      en: "Web platform for managing and automatically evaluating university programming challenges, developed as a thesis project for the Universidad Autónoma del Estado de Hidalgo. Its goal is to centralize student registration, authentication, team formation, challenge creation, GitHub submission intake, solution evaluation, result publication, and ranking views. It includes a functional application and a separate evaluation subsystem with a worker, job queue, and controlled execution of submissions.",
+      es: "Plataforma web para gestionar y evaluar automáticamente retos de programación universitarios, desarrollada como tesis para la Universidad Autónoma del Estado de Hidalgo. Su objetivo es centralizar el registro de alumnos, autenticación, formación de equipos, creación de retos, recepción de entregas por GitHub, evaluación de soluciones, publicación de resultados y consulta de rankings. Cuenta con una aplicación funcional y un subsistema de evaluación separado mediante worker, cola de trabajos y ejecución controlada de entregas.",
     },
-    dominantColor: "135 169 19",
-    cardWidth: "30rem",
-    links: {
-      github: "https://github.com/Ricardo-NM/totis-gdb-docs",
-      live: "https://ricardo-nm.github.io/totis-gdb-docs/",
-    },
-    mediaAspectRatio: "4 / 3",
-    src: "/assets/projects/project3.png",
-    technologies: TOTIS_TECHNOLOGIES,
-    title: "Totis® | Gestión de bienes",
-  },
-  {
-    alt: {
-      en: "Spotify Web Player preview",
-      es: "Vista previa de Spotify Web Player",
-    },
-    badge: {
-      en: "Music",
-      es: "Música",
-    },
-    description: {
-      en: "Web music player widget. The project recreates a player-style experience with a song carousel, playback queue, favorites, volume controls, shuffle, and animated transitions.\n\nThe app queries the Spotify Web API through a local proxy, automatically completes cover art, artists, title, album, and duration, and calculates dynamic colors from each song cover.",
-      es: "Widget web de reproductor musical. El proyecto recrea una experiencia tipo player con carrusel de canciones, cola de reproducción, favoritos, controles de volumen, shuffle y transiciones animadas.\n\nLa app consulta Spotify Web API desde un proxy local, completa automáticamente portada, artistas, título, álbum y duración, y calcula colores dinámicos desde la portada de cada canción.",
-    },
-    dominantColor: "30 215 96",
+    dominantColor: "34 112 197",
     cardWidth: "34rem",
-    links: {
-      github: "https://github.com/Ricardo-NM/SpotifyWebPlayer",
-    },
-    mediaAspectRatio: "16 / 9",
-    src: "/assets/projects/SpotifyWebPlayer/Banner.png",
-    technologies: SPOTIFY_WEB_PLAYER_TECHNOLOGIES,
-    title: "Spotify Web Player",
-    videoSrc: "/assets/projects/SpotifyWebPlayer/Demo.webm",
+    links: {},
+    mediaAspectRatio: "4 / 3",
+    src: "/assets/projects/project4.png",
+    technologies: HACKATHON_PLATFORM_TECHNOLOGIES,
+    title: "Hackathon Platform",
   },
   {
     alt: {
@@ -269,6 +324,12 @@ const PROJECT_GALLERY_IMAGES = [
   },
 ] as const;
 
+const PROJECT_GALLERY_DESKTOP_ORDER = PROJECT_GALLERY_IMAGES.map(
+  (_, index) => index,
+);
+
+const PROJECT_GALLERY_MOBILE_ORDER = [0, 4, 1, 2, 3, 6, 5] as const;
+
 const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
   ({ locale, onFirstProjectEntryStart, revealDelay }, ref) => {
     const [isRevealReady, setIsRevealReady] = useState(revealDelay === 0);
@@ -290,11 +351,23 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
       selectedProjectIndex === null
         ? null
         : PROJECT_GALLERY_IMAGES[selectedProjectIndex];
-    const firstProjectRowSize = Math.min(3, PROJECT_GALLERY_IMAGES.length);
-    const isFirstProjectRowVisible = PROJECT_GALLERY_IMAGES.slice(
+    const selectedProjectLinks = selectedProject?.links as ProjectLinks | null;
+    const hasSelectedProjectLinks = Boolean(
+      selectedProjectLinks?.github || selectedProjectLinks?.live,
+    );
+    const projectGalleryOrder = isSmallViewport
+      ? PROJECT_GALLERY_MOBILE_ORDER
+      : PROJECT_GALLERY_DESKTOP_ORDER;
+    const firstProjectRowSize = Math.min(
+      isSmallViewport ? 2 : 3,
+      projectGalleryOrder.length,
+    );
+    const isFirstProjectRowVisible = projectGalleryOrder
+      .slice(
       0,
       firstProjectRowSize,
-    ).every((_, index) => visibleItems.has(index));
+      )
+      .every((index) => visibleItems.has(index));
     useEffect(() => {
       const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
       const updateMotionPreference = () => {
@@ -408,10 +481,10 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
             .filter((entry) => entry.isIntersecting)
             .sort((a, b) => {
               const aIndex = Number(
-                (a.target as HTMLElement).dataset.projectIndex ?? 0,
+                (a.target as HTMLElement).dataset.projectOrderIndex ?? 0,
               );
               const bIndex = Number(
-                (b.target as HTMLElement).dataset.projectIndex ?? 0,
+                (b.target as HTMLElement).dataset.projectOrderIndex ?? 0,
               );
 
               return aIndex - bIndex;
@@ -419,6 +492,10 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
             .forEach((entry, entryIndex) => {
               const index = Number(
                 (entry.target as HTMLElement).dataset.projectIndex ?? 0,
+              );
+              const orderIndex = Number(
+                (entry.target as HTMLElement).dataset.projectOrderIndex ??
+                  index,
               );
               const timer = window.setTimeout(() => {
                 if (
@@ -439,7 +516,7 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
 
                 const interactionDelay =
                   PROJECT_GALLERY_ITEM_ENTRY_MS +
-                  index * PROJECT_GALLERY_ITEM_STAGGER_MS +
+                  orderIndex * PROJECT_GALLERY_ITEM_STAGGER_MS +
                   PROJECT_GALLERY_INTERACTION_BUFFER_MS;
 
                 const interactionTimer = window.setTimeout(() => {
@@ -540,22 +617,24 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
             }
             data-reveal-ready={isRevealReady}
           >
-            {PROJECT_GALLERY_IMAGES.map((project, index) => {
-              const isProjectVisible = visibleItems.has(index);
-              const isProjectInteractive = interactiveItems.has(index);
+            {projectGalleryOrder.map((projectIndex, orderIndex) => {
+              const project = PROJECT_GALLERY_IMAGES[projectIndex];
+              const isProjectVisible = visibleItems.has(projectIndex);
+              const isProjectInteractive = interactiveItems.has(projectIndex);
 
               return (
                 <figure
                   className="home-project-gallery-item"
-                  data-project-index={index}
+                  data-project-index={projectIndex}
+                  data-project-order-index={orderIndex}
                   data-visible={isProjectVisible}
                   key={project.src}
                   ref={(element) => {
-                    itemRefs.current[index] = element;
+                    itemRefs.current[projectIndex] = element;
                   }}
                   style={
                     {
-                      "--project-index": index,
+                      "--project-index": orderIndex,
                     } as CSSProperties
                   }
                 >
@@ -567,7 +646,7 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
                         return;
                       }
 
-                      setSelectedProjectIndex(index);
+                      setSelectedProjectIndex(projectIndex);
                     }}
                     aria-label={
                       locale === "es"
@@ -586,7 +665,7 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
                         !prefersReducedMotion &&
                         !isSmallViewport
                       }
-                      loading={index === 0 ? "eager" : "lazy"}
+                      loading={projectIndex === 0 ? "eager" : "lazy"}
                       playback="hover"
                       videoSrc={
                         "videoSrc" in project ? project.videoSrc : undefined
@@ -658,36 +737,41 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
               <div className="home-project-card-body">
                 <div className="home-project-card-heading">
                   <h2 id="home-project-card-title">{selectedProject.title}</h2>
-                  <div
-                    className="home-project-card-actions"
-                    aria-label={
-                      locale === "es" ? "Enlaces del proyecto" : "Project links"
-                    }
-                  >
-                    <a
-                      className="home-project-card-action"
-                      href={selectedProject.links.github}
-                      target="_blank"
-                      rel="noreferrer"
+                  {hasSelectedProjectLinks && (
+                    <div
+                      className="home-project-card-actions"
                       aria-label={
                         locale === "es"
-                          ? `Abrir GitHub de ${selectedProject.title}`
-                          : `Open ${selectedProject.title} GitHub`
+                          ? "Enlaces del proyecto"
+                          : "Project links"
                       }
                     >
-                      <span
-                        className="home-project-card-action-icon home-project-card-action-icon-github"
-                        aria-hidden="true"
-                      />
-                    </a>
-                    {"live" in selectedProject.links && (
-                      <a
-                        className="home-project-card-action"
-                        href={selectedProject.links.live}
-                        target="_blank"
-                        rel="noreferrer"
-                        aria-label={
-                          locale === "es"
+                      {selectedProjectLinks?.github && (
+                        <a
+                          className="home-project-card-action"
+                          href={selectedProjectLinks.github}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label={
+                            locale === "es"
+                              ? `Abrir GitHub de ${selectedProject.title}`
+                              : `Open ${selectedProject.title} GitHub`
+                          }
+                        >
+                          <span
+                            className="home-project-card-action-icon home-project-card-action-icon-github"
+                            aria-hidden="true"
+                          />
+                        </a>
+                      )}
+                      {selectedProjectLinks?.live && (
+                        <a
+                          className="home-project-card-action"
+                          href={selectedProjectLinks.live}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label={
+                            locale === "es"
                             ? `Abrir proyecto ${selectedProject.title}`
                             : `Open ${selectedProject.title} project`
                         }
@@ -695,11 +779,12 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
                         <ExternalLinkIcon
                           aria-hidden="true"
                           size={23}
-                          strokeWidth={1.9}
-                        />
-                      </a>
-                    )}
-                  </div>
+                            strokeWidth={1.9}
+                          />
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {selectedProject.description[locale]
