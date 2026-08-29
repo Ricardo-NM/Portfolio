@@ -324,11 +324,12 @@ const PROJECT_GALLERY_IMAGES = [
   },
 ] as const;
 
-const PROJECT_GALLERY_DESKTOP_ORDER = PROJECT_GALLERY_IMAGES.map(
-  (_, index) => index,
-);
+const PROJECT_GALLERY_DESKTOP_COLUMNS = [[0, 1, 2], [3, 4, 5], [6]] as const;
 
-const PROJECT_GALLERY_MOBILE_ORDER = [0, 4, 1, 2, 3, 6, 5] as const;
+const PROJECT_GALLERY_MOBILE_COLUMNS = [
+  [0, 4, 1, 2],
+  [3, 6, 5],
+] as const;
 
 const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
   ({ locale, onFirstProjectEntryStart, revealDelay }, ref) => {
@@ -355,19 +356,16 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
     const hasSelectedProjectLinks = Boolean(
       selectedProjectLinks?.github || selectedProjectLinks?.live,
     );
-    const projectGalleryOrder = isSmallViewport
-      ? PROJECT_GALLERY_MOBILE_ORDER
-      : PROJECT_GALLERY_DESKTOP_ORDER;
-    const firstProjectRowSize = Math.min(
-      isSmallViewport ? 2 : 3,
-      projectGalleryOrder.length,
+    const projectGalleryColumns = isSmallViewport
+      ? PROJECT_GALLERY_MOBILE_COLUMNS
+      : PROJECT_GALLERY_DESKTOP_COLUMNS;
+    const projectGalleryOrder = projectGalleryColumns.flat();
+    const firstProjectRowIndexes = projectGalleryColumns
+      .map((column) => column[0])
+      .filter((index) => index !== undefined);
+    const isFirstProjectRowVisible = firstProjectRowIndexes.every((index) =>
+      visibleItems.has(index),
     );
-    const isFirstProjectRowVisible = projectGalleryOrder
-      .slice(
-      0,
-      firstProjectRowSize,
-      )
-      .every((index) => visibleItems.has(index));
     useEffect(() => {
       const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
       const updateMotionPreference = () => {
@@ -559,7 +557,7 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
         revealTimersRef.current = [];
         interactionTimersRef.current = [];
       };
-    }, [isRevealReady]);
+    }, [isRevealReady, isSmallViewport]);
 
     useEffect(() => {
       if (!selectedProject) {
@@ -617,64 +615,75 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
             }
             data-reveal-ready={isRevealReady}
           >
-            {projectGalleryOrder.map((projectIndex, orderIndex) => {
-              const project = PROJECT_GALLERY_IMAGES[projectIndex];
-              const isProjectVisible = visibleItems.has(projectIndex);
-              const isProjectInteractive = interactiveItems.has(projectIndex);
+            {projectGalleryColumns.map((column, columnIndex) => (
+              <div
+                className="home-project-gallery-column"
+                key={`home-project-gallery-column-${columnIndex}`}
+              >
+                {column.map((projectIndex) => {
+                  const project = PROJECT_GALLERY_IMAGES[projectIndex];
+                  const orderIndex = projectGalleryOrder.indexOf(projectIndex);
+                  const isProjectVisible = visibleItems.has(projectIndex);
+                  const isProjectInteractive =
+                    interactiveItems.has(projectIndex);
 
-              return (
-                <figure
-                  className="home-project-gallery-item"
-                  data-project-index={projectIndex}
-                  data-project-order-index={orderIndex}
-                  data-visible={isProjectVisible}
-                  key={project.src}
-                  ref={(element) => {
-                    itemRefs.current[projectIndex] = element;
-                  }}
-                  style={
-                    {
-                      "--project-index": orderIndex,
-                    } as CSSProperties
-                  }
-                >
-                  <button
-                    className="home-project-gallery-trigger"
-                    type="button"
-                    onClick={() => {
-                      if (!isProjectInteractive) {
-                        return;
+                  return (
+                    <figure
+                      className="home-project-gallery-item"
+                      data-project-index={projectIndex}
+                      data-project-order-index={orderIndex}
+                      data-visible={isProjectVisible}
+                      key={project.src}
+                      ref={(element) => {
+                        itemRefs.current[projectIndex] = element;
+                      }}
+                      style={
+                        {
+                          "--project-index": orderIndex,
+                        } as CSSProperties
                       }
+                    >
+                      <button
+                        className="home-project-gallery-trigger"
+                        type="button"
+                        onClick={() => {
+                          if (!isProjectInteractive) {
+                            return;
+                          }
 
-                      setSelectedProjectIndex(projectIndex);
-                    }}
-                    aria-label={
-                      locale === "es"
-                        ? `Ver detalle de ${project.title}`
-                        : `View ${project.title} details`
-                    }
-                    data-interactive={isProjectInteractive}
-                    disabled={!isProjectInteractive}
-                  >
-                    <HomeProjectMedia
-                      alt={project.alt[locale]}
-                      imageSrc={project.src}
-                      isVideoEnabled={
-                        !selectedProject &&
-                        isProjectVisible &&
-                        !prefersReducedMotion &&
-                        !isSmallViewport
-                      }
-                      loading={projectIndex === 0 ? "eager" : "lazy"}
-                      playback="hover"
-                      videoSrc={
-                        "videoSrc" in project ? project.videoSrc : undefined
-                      }
-                    />
-                  </button>
-                </figure>
-              );
-            })}
+                          setSelectedProjectIndex(projectIndex);
+                        }}
+                        aria-label={
+                          locale === "es"
+                            ? `Ver detalle de ${project.title}`
+                            : `View ${project.title} details`
+                        }
+                        data-interactive={isProjectInteractive}
+                        disabled={!isProjectInteractive}
+                      >
+                        <HomeProjectMedia
+                          alt={project.alt[locale]}
+                          imageSrc={project.src}
+                          isVideoEnabled={
+                            !selectedProject &&
+                            isProjectVisible &&
+                            !prefersReducedMotion &&
+                            !isSmallViewport
+                          }
+                          loading={projectIndex === 0 ? "eager" : "lazy"}
+                          playback="hover"
+                          videoSrc={
+                            "videoSrc" in project
+                              ? project.videoSrc
+                              : undefined
+                          }
+                        />
+                      </button>
+                    </figure>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
 
