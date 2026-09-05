@@ -1093,6 +1093,18 @@ button {
   object-fit: cover;
 }
 
+@media (min-width: 821px) and (hover: hover) and (pointer: fine) {
+  .home-project-gallery-trigger {
+    transition: filter 280ms ease;
+  }
+
+  .home-project-gallery:has(.home-project-gallery-trigger:hover)
+    .home-project-gallery-item:not(:has(.home-project-gallery-trigger:hover))
+    .home-project-gallery-trigger {
+    filter: saturate(0);
+  }
+}
+
 .home-project-card-backdrop {
   position: fixed;
   inset: 0;
