@@ -155,6 +155,30 @@ const HACKATHON_PLATFORM_TECHNOLOGIES = [
   getProjectTechnology("ESLint"),
 ];
 
+const ALTURA_INMOBILIARIA_PROJECT_TECHNOLOGIES = [
+  {
+    color: "#ff0055",
+    darkColor: "#ffffff",
+    icon: "motion.svg",
+    label: "Motion",
+  },
+  {
+    color: "#111111",
+    darkColor: "#ffffff",
+    icon: "lucide.svg",
+    label: "Lucide icons",
+  },
+] satisfies TechnologyItem[];
+
+const ALTURA_INMOBILIARIA_TECHNOLOGIES = [
+  getProjectTechnology("TypeScript"),
+  getProjectTechnology("React"),
+  getProjectTechnology("Next.js"),
+  getProjectTechnology("Tailwind CSS"),
+  ALTURA_INMOBILIARIA_PROJECT_TECHNOLOGIES[0],
+  ALTURA_INMOBILIARIA_PROJECT_TECHNOLOGIES[1],
+];
+
 const PROJECT_GALLERY_IMAGES = [
   {
     alt: {
@@ -308,8 +332,8 @@ const PROJECT_GALLERY_IMAGES = [
       es: "Chat",
     },
     description: {
-      en: "Modern real-time messaging application designed for secure, fast, persistent 1-to-1 chats. It supports registration and login, user search, conversation creation, instant message sending and receiving, typing indicators, online/offline presence, delivered/read states, and editing or deleting your own messages.",
-      es: "Aplicación moderna de mensajería en tiempo real, pensada para chats 1 a 1 seguros, rápidos y persistentes. Permite registro e inicio de sesión, búsqueda de usuarios, creación de conversaciones, envío y recepción instantánea de mensajes, indicadores de escritura, presencia online/offline, estados de entregado/leído, y edición o eliminación de mensajes propios.",
+      en: "Real-time messaging application designed for secure, fast, persistent 1-to-1 chats. It supports registration and login, user search, conversation creation, instant message sending and receiving, typing indicators, online/offline presence, delivered/read states, and editing or deleting your own messages.",
+      es: "Aplicación de mensajería en tiempo real, pensada para chats 1 a 1 seguros, rápidos y persistentes. Permite registro e inicio de sesión, búsqueda de usuarios, creación de conversaciones, envío y recepción instantánea de mensajes, indicadores de escritura, presencia online/offline, estados de entregado/leído, y edición o eliminación de mensajes propios.",
     },
     dominantColor: "59 130 246",
     cardWidth: "24rem",
@@ -322,13 +346,41 @@ const PROJECT_GALLERY_IMAGES = [
     title: "Realtime Chat",
     videoSrc: "/assets/projects/RealtimeChat/Demo.webm",
   },
+  {
+    alt: {
+      en: "Altura Inmobiliaria preview",
+      es: "Vista previa de Altura Inmobiliaria",
+    },
+    badge: {
+      en: "Real estate",
+      es: "Inmobiliaria",
+    },
+    description: {
+      en: "Modern real estate landing page for showcasing and promoting properties. It lets visitors explore developments, view galleries, floor plans, location, amenities, comparisons, and details for each property, while making it easier to contact an advisor.\n\nIt also includes bilingual support, visual animations, responsive design, and forms focused on capturing interested leads.",
+      es: "Landing page inmobiliaria moderna para mostrar y promocionar propiedades. Permite explorar desarrollos, ver galerías, planos, ubicación, amenidades, comparativas y detalles de cada propiedad, además de facilitar el contacto con un asesor.\n\nTambién incluye soporte bilingüe, animaciones visuales, diseño responsive y formularios orientados a captar personas interesadas.",
+    },
+    dominantColor: "34 151 147",
+    cardWidth: "34rem",
+    links: {
+      live: "https://inmobiliaria.rnm.com.mx",
+    },
+    mediaAspectRatio: "16 / 9",
+    src: "/assets/projects/Altura Inmobiliaria/Banner.png",
+    technologies: ALTURA_INMOBILIARIA_TECHNOLOGIES,
+    title: "Altura Inmobiliaria",
+    videoSrc: "/assets/projects/Altura Inmobiliaria/Demo.webm",
+  },
 ] as const;
 
-const PROJECT_GALLERY_DESKTOP_COLUMNS = [[0, 1, 2], [3, 4, 5], [6]] as const;
+const PROJECT_GALLERY_DESKTOP_COLUMNS = [
+  [0, 1, 2],
+  [7, 3, 4, 5],
+  [6],
+] as const;
 
 const PROJECT_GALLERY_MOBILE_COLUMNS = [
-  [0, 4, 1, 2],
-  [3, 6, 5],
+  [0, 3, 4, 1, 2],
+  [7, 6, 5],
 ] as const;
 
 const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
@@ -673,9 +725,7 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
                           loading={projectIndex === 0 ? "eager" : "lazy"}
                           playback="hover"
                           videoSrc={
-                            "videoSrc" in project
-                              ? project.videoSrc
-                              : undefined
+                            "videoSrc" in project ? project.videoSrc : undefined
                           }
                         />
                       </button>
@@ -781,13 +831,13 @@ const HomeProjectGallery = forwardRef<HTMLDivElement, HomeProjectGalleryProps>(
                           rel="noreferrer"
                           aria-label={
                             locale === "es"
-                            ? `Abrir proyecto ${selectedProject.title}`
-                            : `Open ${selectedProject.title} project`
-                        }
-                      >
-                        <ExternalLinkIcon
-                          aria-hidden="true"
-                          size={23}
+                              ? `Abrir proyecto ${selectedProject.title}`
+                              : `Open ${selectedProject.title} project`
+                          }
+                        >
+                          <ExternalLinkIcon
+                            aria-hidden="true"
+                            size={23}
                             strokeWidth={1.9}
                           />
                         </a>

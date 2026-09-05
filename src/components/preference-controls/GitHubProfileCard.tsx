@@ -86,7 +86,7 @@ export default function GitHubProfileCard({ labels }: GitHubProfileCardProps) {
 
           <p>
             <BookMarked aria-hidden="true" size={15} strokeWidth={1.8} />
-            <strong>19</strong>{" "}
+            <strong>21</strong>{" "}
             <span className="github-profile-stats-label">
               {labels.githubRepositoriesLabel}
             </span>
